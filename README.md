@@ -16,6 +16,39 @@ This command optionally uses
 to format the expanded output. If `rustfmt` is not available, the expanded code
 is not formatted. Install `rustfmt` with `cargo install rustfmt`.
 
+## Example
+
+`$ cat src/main.rs`
+
+> ```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+`$ cargo expand`
+
+> ```rust
+#![feature(prelude_import)]
+#![no_std]
+#[prelude_import]
+use std::prelude::v1::*;
+#[macro_use]
+extern crate std as std;
+fn main() {
+    ::std::io::_print(::std::fmt::Arguments::new_v1({
+                                                        static __STATIC_FMTSTR:
+                                                               &'static [&'static str]
+                                                               =
+                                                            &["Hello, world!\n"];
+                                                        __STATIC_FMTSTR
+                                                    },
+                                                    &match () {
+                                                        () => [],
+                                                    }));
+}
+```
+
 ## License
 
 Licensed under either of
