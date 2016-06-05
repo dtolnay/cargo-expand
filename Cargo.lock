@@ -1,0 +1,4 @@
+[root]
+name = "cargo-expand"
+version = "0.1.0"
+
