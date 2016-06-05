@@ -2,6 +2,9 @@ use std::env;
 use std::io::{self, Write};
 use std::process::{self, Command, Stdio};
 
+extern crate isatty;
+use isatty::{stdout_isatty, stderr_isatty};
+
 fn main() {
     // Build cargo command
     let mut cargo = Command::new("cargo");
@@ -56,12 +59,20 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
           I: IntoIterator<Item=T>
 {
     let mut args = vec!["rustc".to_string()];
+    let mut has_color = false;
     let mut has_double_hyphen = false;
 
     for arg in it.into_iter().skip(2) {
         let arg = arg.as_ref().to_string();
-        has_double_hyphen |= &arg == "--";
+        has_color |= arg.starts_with("--color");
+        has_double_hyphen |= arg == "--";
         args.push(arg);
+    }
+
+    if !has_color {
+        let color = stdout_isatty() && stderr_isatty();
+        let setting = if color { "always" } else { "never" };
+        args.push(format!("--color={}", setting));
     }
 
     if !has_double_hyphen {
