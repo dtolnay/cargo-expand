@@ -9,4 +9,4 @@ documentation = "https://github.com/dtolnay/cargo-expand"
 keywords = ["cargo", "subcommand", "expanded"]
 
 [dependencies]
-isatty = "0.1"
+isatty = "0.1.1"
