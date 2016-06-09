@@ -3,7 +3,7 @@ name = "cargo-expand"
 version = "0.1.1"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
-description = "Wrapper around rustc --pretty=expanded"
+description = "Wrapper around rustc --pretty=expanded. Shows the result of macro expansion and #[derive] expansion."
 repository = "https://github.com/dtolnay/cargo-expand"
 documentation = "https://github.com/dtolnay/cargo-expand"
 keywords = ["cargo", "subcommand", "expanded"]
