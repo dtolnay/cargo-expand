@@ -4,8 +4,8 @@
 [![Latest Version](https://img.shields.io/crates/v/cargo-expand.svg)](https://crates.io/crates/cargo-expand)
 
 This is a wrapper around `cargo rustc -- --pretty=expanded`. Once installed, the
-command `cargo expand` prints out the result of macro expansion applied to the
-current crate.
+command `cargo expand` prints out the result of macro expansion and `#[derive]`
+expansion applied to the current crate.
 
 ## Installation
 
