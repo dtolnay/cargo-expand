@@ -1,13 +1,13 @@
 [root]
 name = "cargo-expand"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
- "isatty 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "isatty 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "isatty"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
