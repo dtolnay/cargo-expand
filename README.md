@@ -49,6 +49,10 @@ fn main() {
 }
 ```
 
+Or to expand a particular test target:
+
+`$ cargo expand --test test_something`
+
 ## License
 
 Licensed under either of
