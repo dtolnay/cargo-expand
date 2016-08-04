@@ -20,7 +20,7 @@ fn main() {
     }
 
     // Just print the expanded output if rustfmt is not available
-    if !have_rustfmt() {
+    if env::var("NO_RUSTFMT").is_ok() || !have_rustfmt() {
         io::stdout().write_all(&expanded.stdout).unwrap();
         return;
     }
