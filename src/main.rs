@@ -19,14 +19,16 @@ fn main() {
         process::exit(expanded.status.code().unwrap_or(1));
     }
 
+    let rustfmt = env::var("RUSTFMT").unwrap_or("rustfmt".to_string());
+
     // Just print the expanded output if rustfmt is not available
-    if env::var("NO_RUSTFMT").is_ok() || !have_rustfmt() {
+    if rustfmt == "" || !have_rustfmt() {
         io::stdout().write_all(&expanded.stdout).unwrap();
         return;
     }
 
     // Build rustfmt command and give it the expanded code
-    let mut rustfmt = Command::new("rustfmt")
+    let mut rustfmt = Command::new(rustfmt)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
