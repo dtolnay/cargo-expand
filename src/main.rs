@@ -97,4 +97,5 @@ fn have_rustfmt() -> bool {
 fn ignore_rustfmt_err(line: &str) -> bool {
     line.is_empty()
         || line.ends_with("line exceeded maximum length (sorry)")
+        || line.ends_with("left behind trailing whitespace (sorry)")
 }
