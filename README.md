@@ -49,9 +49,17 @@ fn main() {
 }
 ```
 
-Or to expand a particular test target:
+To expand a particular test target:
 
 `$ cargo expand --test test_something`
+
+To expand with `rustfmt` different from the one in `$PATH`:
+
+`$ RUSTFMT=/path/to/rustfmt cargo expand`
+
+To expand without `rustfmt` even though it is available in `$PATH`:
+
+`$ RUSTFMT= cargo expand`
 
 ## License
 
