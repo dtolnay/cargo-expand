@@ -9,6 +9,3 @@ rust:
 
 script:
   - cargo build --verbose
-
-notifications:
-  email: false
