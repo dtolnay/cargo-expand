@@ -14,7 +14,9 @@ Install with `cargo install cargo-expand`.
 This command optionally uses
 [`rustfmt`](https://github.com/rust-lang-nursery/rustfmt)
 to format the expanded output. If `rustfmt` is not available, the expanded code
-is not formatted. Install `rustfmt` with `cargo install rustfmt`.
+is not formatted. Install `rustfmt` with `cargo install rustfmt`. (Note:
+`rustfmt` is temporarily disabled due to
+[rust-lang/rust#38016](https://github.com/rust-lang/rust/issues/38016).)
 
 ## Example
 

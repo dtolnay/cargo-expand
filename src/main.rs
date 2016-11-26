@@ -88,12 +88,14 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
 }
 
 fn have_rustfmt() -> bool {
-    Command::new("rustfmt")
+    // FIXME https://github.com/rust-lang/rust/issues/38016
+    false
+    /*Command::new("rustfmt")
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
-        .is_ok()
+        .is_ok()*/
 }
 
 fn ignore_rustfmt_err(line: &str) -> bool {
