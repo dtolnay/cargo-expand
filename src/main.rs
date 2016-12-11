@@ -1,58 +1,129 @@
 use std::env;
 use std::io::{self, Write};
-use std::process::{self, Command, Stdio};
+use std::process::{self, Command};
+
+#[cfg(unix)]
+use std::process::{Child, Stdio};
 
 extern crate isatty;
 use isatty::{stdout_isatty, stderr_isatty};
 
 fn main() {
+    let result = cargo_expand();
+    process::exit(match result {
+        Ok(code) => code,
+        Err(err) => {
+            let _ = writeln!(&mut io::stderr(), "{}", err);
+            1
+        }
+    });
+}
+
+#[cfg(windows)]
+fn cargo_expand() -> io::Result<i32> {
     // Build cargo command
-    let mut cargo = Command::new("cargo");
-    cargo.args(&wrap_args(env::args()));
+    let mut cmd = Command::new("cargo");
+    cmd.args(&wrap_args(env::args()));
+    run(cmd)
+}
 
-    // Run cargo command, print errors, exit if failed
-    let expanded = cargo.output().unwrap();
-    for line in String::from_utf8_lossy(&expanded.stderr).lines() {
-        writeln!(io::stderr(), "{}", line).unwrap();
-    }
-    if !expanded.status.success() {
-        process::exit(expanded.status.code().unwrap_or(1));
-    }
-
-    let rustfmt = env::var("RUSTFMT").unwrap_or("rustfmt".to_string());
-
-    // Just print the expanded output if rustfmt is not available
-    if rustfmt == "" || !have_rustfmt() {
-        io::stdout().write_all(&expanded.stdout).unwrap();
-        return;
+#[cfg(unix)]
+fn cargo_expand() -> io::Result<i32> {
+    if env::args().last().unwrap() == "--filter-rustfmt" {
+        filter_rustfmt();
     }
 
-    // Build rustfmt command and give it the expanded code
-    let mut rustfmt = Command::new(rustfmt)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
-    rustfmt.stdin.as_mut().unwrap().write_all(&expanded.stdout).unwrap();
+    // Build cargo command
+    let mut cmd = Command::new("cargo");
+    cmd.args(&wrap_args(env::args()));
 
-    // Print rustfmt errors and exit if failed
-    let formatted = rustfmt.wait_with_output().unwrap();
-    for line in String::from_utf8_lossy(&formatted.stderr).lines() {
-        if !ignore_rustfmt_err(line) {
-            writeln!(io::stderr(), "{}", line).unwrap();
+    // Pipe to rustfmt
+    let _wait = match which_rustfmt() {
+        Some(ref fmt) => {
+            let args: Vec<_> = env::args().collect();
+            let mut filter_args = Vec::new();
+            for i in 0..args.len() {
+                filter_args.push(args[i].as_str());
+            }
+            filter_args.push("--filter-rustfmt");
+
+            Some((
+                // Work around $crate issue https://github.com/rust-lang/rust/issues/38016
+                try!(cmd.pipe_to(&["sed", "s/$crate/XCRATE/g"], None)),
+                try!(cmd.pipe_to(&[fmt], None)),
+                try!(cmd.pipe_to(&["sed", "s/XCRATE/$crate/g"], Some(&filter_args))),
+            ))
+        }
+        None => None,
+    };
+
+    // Pipe to pygmentize
+    let _wait = match which_pygmentize() {
+        Some(pyg) => Some(try!(cmd.pipe_to(&[&pyg, "-l", "rust"], None))),
+        None => None,
+    };
+
+    run(cmd)
+}
+
+fn run(mut cmd: Command) -> io::Result<i32> {
+    cmd.status().map(|status| status.code().unwrap_or(1))
+}
+
+#[cfg(unix)]
+struct Wait(Vec<Child>);
+
+#[cfg(unix)]
+impl Drop for Wait {
+    fn drop(&mut self) {
+        for child in &mut self.0 {
+            if let Err(err) = child.wait() {
+                let _ = writeln!(&mut io::stderr(), "{}", err);
+            }
         }
     }
-    if !formatted.status.success() {
-        let code = formatted.status.code().unwrap_or(1);
-        // Ignore code 3 which is formatting errors
-        if code != 3 {
-            process::exit(code);
+}
+
+#[cfg(unix)]
+trait PipeTo {
+    fn pipe_to(&mut self, out: &[&str], err: Option<&[&str]>) -> io::Result<Wait>;
+}
+
+#[cfg(unix)]
+impl PipeTo for Command {
+    fn pipe_to(&mut self, out: &[&str], err: Option<&[&str]>) -> io::Result<Wait> {
+        use std::os::unix::io::{AsRawFd, FromRawFd};
+
+        self.stdout(Stdio::piped());
+        if err.is_some() {
+            self.stderr(Stdio::piped());
+        }
+
+        let child = try!(self.spawn());
+
+        *self = Command::new(out[0]);
+        self.args(&out[1..]);
+        self.stdin(unsafe {
+            Stdio::from_raw_fd(child.stdout.as_ref().map(AsRawFd::as_raw_fd).unwrap())
+        });
+
+        match err {
+            None => {
+                Ok(Wait(vec![child]))
+            }
+            Some(err) => {
+                let mut errcmd = Command::new(err[0]);
+                errcmd.args(&err[1..]);
+                errcmd.stdin(unsafe {
+                    Stdio::from_raw_fd(child.stderr.as_ref().map(AsRawFd::as_raw_fd).unwrap())
+                });
+                errcmd.stdout(Stdio::null());
+                errcmd.stderr(Stdio::inherit());
+                let spawn = try!(errcmd.spawn());
+                Ok(Wait(vec![spawn, child]))
+            }
         }
     }
-
-    // Print formatted output
-    io::stdout().write_all(&formatted.stdout).unwrap();
 }
 
 // Based on https://github.com/rsolomo/cargo-check
@@ -87,19 +158,78 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
     args
 }
 
-fn have_rustfmt() -> bool {
-    // FIXME https://github.com/rust-lang/rust/issues/38016
-    false
-    /*Command::new("rustfmt")
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-        .is_ok()*/
+#[cfg(unix)]
+fn which_rustfmt() -> Option<String> {
+    match env::var("RUSTFMT") {
+        Ok(which) => {
+            if which.is_empty() {
+                None
+            } else {
+                Some(which)
+            }
+        }
+        Err(_) => {
+            let have_rustfmt = Command::new("rustfmt")
+                .stdin(Stdio::null())
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .spawn()
+                .is_ok();
+            if have_rustfmt {
+                Some("rustfmt".to_string())
+            } else {
+                None
+            }
+        }
+    }
 }
 
+#[cfg(unix)]
+fn which_pygmentize() -> Option<String> {
+    match env::var("PYGMENTIZE") {
+        Ok(which) => {
+            if which.is_empty() {
+                None
+            } else {
+                Some(which)
+            }
+        }
+        Err(_) => {
+            let have_pygmentize = Command::new("pygmentize")
+                .arg("-l")
+                .arg("rust")
+                .stdin(Stdio::null())
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .spawn()
+                .is_ok();
+            if have_pygmentize {
+                Some("pygmentize".to_string())
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[cfg(unix)]
+fn filter_rustfmt() -> ! {
+    let mut line = String::new();
+    while let Ok(n) = io::stdin().read_line(&mut line) {
+        if n == 0 {
+            break;
+        }
+        if !ignore_rustfmt_err(&line) {
+            let _ = write!(&mut io::stderr(), "{}", line);
+        }
+        line.clear();
+    }
+    process::exit(0);
+}
+
+#[cfg(unix)]
 fn ignore_rustfmt_err(line: &str) -> bool {
-    line.is_empty()
-        || line.ends_with("line exceeded maximum length (sorry)")
-        || line.ends_with("left behind trailing whitespace (sorry)")
+    line.trim().is_empty()
+        || line.trim_right().ends_with("line exceeded maximum length (sorry)")
+        || line.trim_right().ends_with("left behind trailing whitespace (sorry)")
 }

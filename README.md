@@ -14,9 +14,11 @@ Install with `cargo install cargo-expand`.
 This command optionally uses
 [`rustfmt`](https://github.com/rust-lang-nursery/rustfmt)
 to format the expanded output. If `rustfmt` is not available, the expanded code
-is not formatted. Install `rustfmt` with `cargo install rustfmt`. (Note:
-`rustfmt` is temporarily disabled due to
-[rust-lang/rust#38016](https://github.com/rust-lang/rust/issues/38016).)
+is not formatted. Install `rustfmt` with `cargo install rustfmt`.
+
+This command optionally uses [`Pygments`](http://pygments.org/) to colorize the
+expanded output. If `Pygments` is not available, the expanded code is not
+colorized. Install with `pip install Pygments`.
 
 ## Example
 
@@ -62,6 +64,14 @@ To expand with `rustfmt` different from the one in `$PATH`:
 To expand without `rustfmt` even though it is available in `$PATH`:
 
 `$ RUSTFMT= cargo expand`
+
+To color with `pygmentize` different from the one in `$PATH`:
+
+`$ PYGMENTIZE=/path/to/pygmentize cargo expand`
+
+To not color even though `pygmentize` is available in `$PATH`:
+
+`$ PYGMENTIZE= cargo expand`
 
 ## License
 
