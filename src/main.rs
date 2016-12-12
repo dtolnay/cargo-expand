@@ -38,7 +38,7 @@ fn cargo_expand() -> io::Result<i32> {
     cmd.args(&wrap_args(env::args()));
 
     // Pipe to rustfmt
-    let _wait = match which_rustfmt() {
+    let _wait = match which(&["rustfmt"]) {
         Some(ref fmt) => {
             let args: Vec<_> = env::args().collect();
             let mut filter_args = Vec::new();
@@ -58,7 +58,7 @@ fn cargo_expand() -> io::Result<i32> {
     };
 
     // Pipe to pygmentize
-    let _wait = match which_pygmentize() {
+    let _wait = match which(&["pygmentize", "-l", "rust"]) {
         Some(pyg) => Some(try!(cmd.pipe_to(&[&pyg, "-l", "rust"], None))),
         None => None,
     };
@@ -159,54 +159,31 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
 }
 
 #[cfg(unix)]
-fn which_rustfmt() -> Option<String> {
-    match env::var("RUSTFMT") {
-        Ok(which) => {
-            if which.is_empty() {
-                None
-            } else {
-                Some(which)
+fn which(cmd: &[&str]) -> Option<String> {
+    if env::args().find(|arg| arg == "--help").is_some() {
+        None
+    } else {
+        match env::var(&cmd[0].to_uppercase()) {
+            Ok(which) => {
+                if which.is_empty() {
+                    None
+                } else {
+                    Some(which)
+                }
             }
-        }
-        Err(_) => {
-            let have_rustfmt = Command::new("rustfmt")
-                .stdin(Stdio::null())
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .is_ok();
-            if have_rustfmt {
-                Some("rustfmt".to_string())
-            } else {
-                None
-            }
-        }
-    }
-}
-
-#[cfg(unix)]
-fn which_pygmentize() -> Option<String> {
-    match env::var("PYGMENTIZE") {
-        Ok(which) => {
-            if which.is_empty() {
-                None
-            } else {
-                Some(which)
-            }
-        }
-        Err(_) => {
-            let have_pygmentize = Command::new("pygmentize")
-                .arg("-l")
-                .arg("rust")
-                .stdin(Stdio::null())
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .is_ok();
-            if have_pygmentize {
-                Some("pygmentize".to_string())
-            } else {
-                None
+            Err(_) => {
+                let in_path = Command::new(cmd[0])
+                    .args(&cmd[1..])
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .spawn()
+                    .is_ok();
+                if in_path {
+                    Some(cmd[0].to_string())
+                } else {
+                    None
+                }
             }
         }
     }
