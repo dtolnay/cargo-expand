@@ -58,9 +58,13 @@ fn cargo_expand() -> io::Result<i32> {
     };
 
     // Pipe to pygmentize
-    let _wait = match which(&["pygmentize", "-l", "rust"]) {
-        Some(pyg) => Some(try!(cmd.pipe_to(&[&pyg, "-l", "rust"], None))),
-        None => None,
+    let _wait = if stdout_isatty() {
+        match which(&["pygmentize", "-l", "rust"]) {
+            Some(pyg) => Some(try!(cmd.pipe_to(&[&pyg, "-l", "rust"], None))),
+            None => None,
+        }
+    } else {
+        None
     };
 
     run(cmd)
