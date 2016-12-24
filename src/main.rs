@@ -139,18 +139,25 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
     let mut has_color = false;
     let mut has_double_hyphen = false;
     let mut ends_with_test = false;
+    let mut ends_with_example = false;
 
     for arg in it.into_iter().skip(2) {
         let arg = arg.as_ref().to_string();
         has_color |= arg.starts_with("--color");
         has_double_hyphen |= arg == "--";
         ends_with_test = arg == "--test";
+        ends_with_example = arg == "--example";
         args.push(arg);
     }
 
     if !has_double_hyphen && ends_with_test {
         // Expand the `test.rs` test by default.
         args.push("test".to_string());
+    }
+
+    if !has_double_hyphen && ends_with_example {
+        // Expand the `example.rs` example by default.
+        args.push("example".to_string());
     }
 
     if !has_color {
