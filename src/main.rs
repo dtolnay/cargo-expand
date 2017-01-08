@@ -136,26 +136,27 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
           I: IntoIterator<Item=T>
 {
     let mut args = vec!["rustc".to_string()];
-    let mut has_color = false;
-    let mut has_double_hyphen = false;
     let mut ends_with_test = false;
     let mut ends_with_example = false;
+    let mut has_color = false;
 
-    for arg in it.into_iter().skip(2) {
-        let arg = arg.as_ref().to_string();
-        has_color |= arg.starts_with("--color");
-        has_double_hyphen |= arg == "--";
+    let mut it = it.into_iter().skip(2).map(|arg| arg.as_ref().to_string());
+    for arg in &mut it {
+        if arg == "--" {
+            break;
+        }
         ends_with_test = arg == "--test";
         ends_with_example = arg == "--example";
+        has_color |= arg.starts_with("--color");
         args.push(arg);
     }
 
-    if !has_double_hyphen && ends_with_test {
+    if ends_with_test {
         // Expand the `test.rs` test by default.
         args.push("test".to_string());
     }
 
-    if !has_double_hyphen && ends_with_example {
+    if ends_with_example {
         // Expand the `example.rs` example by default.
         args.push("example".to_string());
     }
@@ -166,13 +167,10 @@ fn wrap_args<T, I>(it: I) -> Vec<String>
         args.push(format!("--color={}", setting));
     }
 
-    if !has_double_hyphen {
-        args.push("--".to_string());
-    }
-
+    args.push("--".to_string());
     args.push("-Zunstable-options".to_string());
     args.push("--pretty=expanded".to_string());
-
+    args.extend(it);
     args
 }
 
