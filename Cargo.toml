@@ -10,3 +10,4 @@ keywords = ["cargo", "subcommand", "expanded"]
 
 [dependencies]
 isatty = "0.1.1"
+tempdir = "0.3"

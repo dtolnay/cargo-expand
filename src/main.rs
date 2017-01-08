@@ -1,6 +1,7 @@
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
+use std::path::PathBuf;
 use std::process::{self, Command};
 
 #[cfg(unix)]
@@ -8,6 +9,11 @@ use std::process::{Child, Stdio};
 
 extern crate isatty;
 use isatty::{stdout_isatty, stderr_isatty};
+
+#[cfg(unix)]
+extern crate tempdir;
+#[cfg(unix)]
+use tempdir::TempDir;
 
 fn main() {
     let result = cargo_expand();
@@ -24,41 +30,59 @@ fn main() {
 fn cargo_expand() -> io::Result<i32> {
     // Build cargo command
     let mut cmd = Command::new("cargo");
-    cmd.args(&wrap_args(env::args_os()));
+    cmd.args(&wrap_args(env::args_os(), None));
     run(cmd)
 }
 
 #[cfg(unix)]
 fn cargo_expand() -> io::Result<i32> {
-    if env::args_os().last().unwrap() == *"--filter-rustfmt" {
-        filter_rustfmt();
+    match env::args_os().last().unwrap().to_str().unwrap_or("") {
+        "--filter-cargo" => filter_err(ignore_cargo_err),
+        "--filter-rustfmt" => filter_err(ignore_rustfmt_err),
+        _ => {}
     }
 
     macro_rules! shell {
-        ($($arg:expr),*) => {
+        ($($arg:expr)*) => {
             &[$(OsStr::new(&$arg)),*]
         };
     }
 
+    let which_rustfmt = which(&["rustfmt"]);
+    let outdir = match which_rustfmt {
+        Some(_) => Some(TempDir::new("cargo-expand").expect("failed to create tmp file")),
+        None => None,
+    };
+    let outfile = outdir.as_ref().map(|dir| dir.path().join("expanded"));
+
     // Build cargo command
     let mut cmd = Command::new("cargo");
-    cmd.args(&wrap_args(env::args_os()));
+    cmd.args(&wrap_args(env::args_os(), outfile.as_ref()));
 
     // Pipe to rustfmt
-    let _wait = match which(&["rustfmt"]) {
+    let _wait = match which_rustfmt {
         Some(ref fmt) => {
             let args: Vec<_> = env::args_os().collect();
-            let mut filter_args = Vec::new();
-            for i in 0..args.len() {
-                filter_args.push(args[i].as_os_str());
-            }
-            filter_args.push(OsStr::new("--filter-rustfmt"));
+            let mut filter_cargo = Vec::new();
+            filter_cargo.extend(args.iter().map(OsString::as_os_str));
+            filter_cargo.push(OsStr::new("--filter-cargo"));
+
+            let _wait = try!(cmd.pipe_to(shell!("cat"), Some(&filter_cargo)));
+            try!(run(cmd));
+            drop(_wait);
+
+            cmd = Command::new("sed");
+            cmd.arg("s/$crate/XCRATE/g");
+            cmd.arg(outfile.unwrap());
+
+            let mut filter_rustfmt = Vec::new();
+            filter_rustfmt.extend(args.iter().map(OsString::as_os_str));
+            filter_rustfmt.push(OsStr::new("--filter-rustfmt"));
 
             Some((
                 // Work around $crate issue https://github.com/rust-lang/rust/issues/38016
-                try!(cmd.pipe_to(shell!("sed", "s/$crate/XCRATE/g"), None)),
                 try!(cmd.pipe_to(shell!(fmt), None)),
-                try!(cmd.pipe_to(shell!("sed", "s/XCRATE/$crate/g"), Some(&filter_args))),
+                try!(cmd.pipe_to(shell!("sed" "s/XCRATE/$crate/g"), Some(&filter_rustfmt))),
             ))
         }
         None => None,
@@ -67,7 +91,7 @@ fn cargo_expand() -> io::Result<i32> {
     // Pipe to pygmentize
     let _wait = if stdout_isatty() {
         match which(&["pygmentize", "-l", "rust"]) {
-            Some(pyg) => Some(try!(cmd.pipe_to(shell!(pyg, "-l", "rust"), None))),
+            Some(pyg) => Some(try!(cmd.pipe_to(shell!(pyg "-l" "rust"), None))),
             None => None,
         }
     } else {
@@ -138,7 +162,7 @@ impl PipeTo for Command {
 }
 
 // Based on https://github.com/rsolomo/cargo-check
-fn wrap_args<I>(it: I) -> Vec<OsString>
+fn wrap_args<I>(it: I, outfile: Option<&PathBuf>) -> Vec<OsString>
     where I: IntoIterator<Item=OsString>
 {
     let mut args = vec!["rustc".into()];
@@ -174,6 +198,10 @@ fn wrap_args<I>(it: I) -> Vec<OsString>
     }
 
     args.push("--".into());
+    if let Some(path) = outfile {
+        args.push("-o".into());
+        args.push(path.into());
+    }
     args.push("-Zunstable-options".into());
     args.push("--pretty=expanded".into());
     args.extend(it);
@@ -212,13 +240,13 @@ fn which(cmd: &[&str]) -> Option<OsString> {
 }
 
 #[cfg(unix)]
-fn filter_rustfmt() -> ! {
+fn filter_err(ignore: fn(&str) -> bool) -> ! {
     let mut line = String::new();
     while let Ok(n) = io::stdin().read_line(&mut line) {
         if n == 0 {
             break;
         }
-        if !ignore_rustfmt_err(&line) {
+        if !ignore(&line) {
             let _ = write!(&mut io::stderr(), "{}", line);
         }
         line.clear();
@@ -231,4 +259,11 @@ fn ignore_rustfmt_err(line: &str) -> bool {
     line.trim().is_empty()
         || line.trim_right().ends_with("line exceeded maximum length (sorry)")
         || line.trim_right().ends_with("left behind trailing whitespace (sorry)")
+}
+
+#[cfg(unix)]
+fn ignore_cargo_err(line: &str) -> bool {
+    line.trim().is_empty()
+        || line.contains("ignoring specified output filename because multiple outputs were requested")
+        || line.contains("ignoring --out-dir flag due to -o flag.")
 }
