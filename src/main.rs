@@ -1,5 +1,5 @@
 use std::env;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
 use std::process::{self, Command};
 
@@ -30,8 +30,14 @@ fn cargo_expand() -> io::Result<i32> {
 
 #[cfg(unix)]
 fn cargo_expand() -> io::Result<i32> {
-    if env::args().last().unwrap() == "--filter-rustfmt" {
+    if env::args_os().last().unwrap() == *"--filter-rustfmt" {
         filter_rustfmt();
+    }
+
+    macro_rules! shell {
+        ($($arg:expr),*) => {
+            &[$(OsStr::new(&$arg)),*]
+        };
     }
 
     // Build cargo command
@@ -41,18 +47,18 @@ fn cargo_expand() -> io::Result<i32> {
     // Pipe to rustfmt
     let _wait = match which(&["rustfmt"]) {
         Some(ref fmt) => {
-            let args: Vec<_> = env::args().collect();
+            let args: Vec<_> = env::args_os().collect();
             let mut filter_args = Vec::new();
             for i in 0..args.len() {
-                filter_args.push(args[i].as_str());
+                filter_args.push(args[i].as_os_str());
             }
-            filter_args.push("--filter-rustfmt");
+            filter_args.push(OsStr::new("--filter-rustfmt"));
 
             Some((
                 // Work around $crate issue https://github.com/rust-lang/rust/issues/38016
-                try!(cmd.pipe_to(&["sed", "s/$crate/XCRATE/g"], None)),
-                try!(cmd.pipe_to(&[fmt], None)),
-                try!(cmd.pipe_to(&["sed", "s/XCRATE/$crate/g"], Some(&filter_args))),
+                try!(cmd.pipe_to(shell!("sed", "s/$crate/XCRATE/g"), None)),
+                try!(cmd.pipe_to(shell!(fmt), None)),
+                try!(cmd.pipe_to(shell!("sed", "s/XCRATE/$crate/g"), Some(&filter_args))),
             ))
         }
         None => None,
@@ -61,7 +67,7 @@ fn cargo_expand() -> io::Result<i32> {
     // Pipe to pygmentize
     let _wait = if stdout_isatty() {
         match which(&["pygmentize", "-l", "rust"]) {
-            Some(pyg) => Some(try!(cmd.pipe_to(&[&pyg, "-l", "rust"], None))),
+            Some(pyg) => Some(try!(cmd.pipe_to(shell!(pyg, "-l", "rust"), None))),
             None => None,
         }
     } else {
@@ -91,12 +97,12 @@ impl Drop for Wait {
 
 #[cfg(unix)]
 trait PipeTo {
-    fn pipe_to(&mut self, out: &[&str], err: Option<&[&str]>) -> io::Result<Wait>;
+    fn pipe_to(&mut self, out: &[&OsStr], err: Option<&[&OsStr]>) -> io::Result<Wait>;
 }
 
 #[cfg(unix)]
 impl PipeTo for Command {
-    fn pipe_to(&mut self, out: &[&str], err: Option<&[&str]>) -> io::Result<Wait> {
+    fn pipe_to(&mut self, out: &[&OsStr], err: Option<&[&OsStr]>) -> io::Result<Wait> {
         use std::os::unix::io::{AsRawFd, FromRawFd};
 
         self.stdout(Stdio::piped());
@@ -175,19 +181,19 @@ fn wrap_args<I>(it: I) -> Vec<OsString>
 }
 
 #[cfg(unix)]
-fn which(cmd: &[&str]) -> Option<String> {
-    if env::args().find(|arg| arg == "--help").is_some() {
+fn which(cmd: &[&str]) -> Option<OsString> {
+    if env::args_os().find(|arg| arg == "--help").is_some() {
         None
     } else {
-        match env::var(&cmd[0].to_uppercase()) {
-            Ok(which) => {
+        match env::var_os(&cmd[0].to_uppercase()) {
+            Some(which) => {
                 if which.is_empty() {
                     None
                 } else {
                     Some(which)
                 }
             }
-            Err(_) => {
+            None => {
                 let in_path = Command::new(cmd[0])
                     .args(&cmd[1..])
                     .stdin(Stdio::null())
@@ -196,7 +202,7 @@ fn which(cmd: &[&str]) -> Option<String> {
                     .spawn()
                     .is_ok();
                 if in_path {
-                    Some(cmd[0].to_string())
+                    Some(cmd[0].into())
                 } else {
                     None
                 }
