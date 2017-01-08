@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsString;
 use std::io::{self, Write};
 use std::process::{self, Command};
 
@@ -23,7 +24,7 @@ fn main() {
 fn cargo_expand() -> io::Result<i32> {
     // Build cargo command
     let mut cmd = Command::new("cargo");
-    cmd.args(&wrap_args(env::args()));
+    cmd.args(&wrap_args(env::args_os()));
     run(cmd)
 }
 
@@ -35,7 +36,7 @@ fn cargo_expand() -> io::Result<i32> {
 
     // Build cargo command
     let mut cmd = Command::new("cargo");
-    cmd.args(&wrap_args(env::args()));
+    cmd.args(&wrap_args(env::args_os()));
 
     // Pipe to rustfmt
     let _wait = match which(&["rustfmt"]) {
@@ -131,45 +132,44 @@ impl PipeTo for Command {
 }
 
 // Based on https://github.com/rsolomo/cargo-check
-fn wrap_args<T, I>(it: I) -> Vec<String>
-    where T: AsRef<str>,
-          I: IntoIterator<Item=T>
+fn wrap_args<I>(it: I) -> Vec<OsString>
+    where I: IntoIterator<Item=OsString>
 {
-    let mut args = vec!["rustc".to_string()];
+    let mut args = vec!["rustc".into()];
     let mut ends_with_test = false;
     let mut ends_with_example = false;
     let mut has_color = false;
 
-    let mut it = it.into_iter().skip(2).map(|arg| arg.as_ref().to_string());
+    let mut it = it.into_iter().skip(2);
     for arg in &mut it {
-        if arg == "--" {
+        if arg == *"--" {
             break;
         }
-        ends_with_test = arg == "--test";
-        ends_with_example = arg == "--example";
-        has_color |= arg.starts_with("--color");
-        args.push(arg);
+        ends_with_test = arg == *"--test";
+        ends_with_example = arg == *"--example";
+        has_color |= arg.to_str().unwrap_or("").starts_with("--color");
+        args.push(arg.into());
     }
 
     if ends_with_test {
         // Expand the `test.rs` test by default.
-        args.push("test".to_string());
+        args.push("test".into());
     }
 
     if ends_with_example {
         // Expand the `example.rs` example by default.
-        args.push("example".to_string());
+        args.push("example".into());
     }
 
     if !has_color {
         let color = stdout_isatty() && stderr_isatty();
         let setting = if color { "always" } else { "never" };
-        args.push(format!("--color={}", setting));
+        args.push(format!("--color={}", setting).into());
     }
 
-    args.push("--".to_string());
-    args.push("-Zunstable-options".to_string());
-    args.push("--pretty=expanded".to_string());
+    args.push("--".into());
+    args.push("-Zunstable-options".into());
+    args.push("--pretty=expanded".into());
     args.extend(it);
     args
 }
