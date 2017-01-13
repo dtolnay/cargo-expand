@@ -25,8 +25,11 @@ colorized. Install with `pip install Pygments`.
 `$ cat src/main.rs`
 
 > ```rust
+#[derive(Debug)]
+struct S;
+
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", S);
 }
 ```
 
@@ -39,17 +42,33 @@ fn main() {
 use std::prelude::v1::*;
 #[macro_use]
 extern crate std as std;
+struct S;
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::std::fmt::Debug for S {
+    fn fmt(&self, __arg_0: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match *self {
+            S => {
+                let mut builder = __arg_0.debug_tuple("S");
+                builder.finish()
+            }
+        }
+    }
+}
+
 fn main() {
-    ::std::io::_print(::std::fmt::Arguments::new_v1({
-                                                        static __STATIC_FMTSTR:
-                                                               &'static [&'static str]
-                                                               =
-                                                            &["Hello, world!\n"];
-                                                        __STATIC_FMTSTR
-                                                    },
-                                                    &match () {
-                                                        () => [],
-                                                    }));
+    ::io::_print(::std::fmt::Arguments::new_v1({
+                                                   static __STATIC_FMTSTR:
+                                                          &'static [&'static str]
+                                                          =
+                                                       &["", "\n"];
+                                                   __STATIC_FMTSTR
+                                               },
+                                               &match (&S,) {
+                                                   (__arg0,) =>
+                                                    [::std::fmt::ArgumentV1::new(__arg0,
+                                                                                 ::std::fmt::Debug::fmt)],
+                                               }));
 }
 ```
 
