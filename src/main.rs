@@ -36,7 +36,8 @@ fn cargo_expand() -> io::Result<i32> {
 
 #[cfg(unix)]
 fn cargo_expand() -> io::Result<i32> {
-    match env::args_os().last().unwrap().to_str().unwrap_or("") {
+    let args: Vec<_> = env::args_os().collect();
+    match args.last().unwrap().to_str().unwrap_or("") {
         "--filter-cargo" => filter_err(ignore_cargo_err),
         "--filter-rustfmt" => filter_err(ignore_rustfmt_err),
         _ => {}
@@ -49,38 +50,48 @@ fn cargo_expand() -> io::Result<i32> {
     }
 
     let which_rustfmt = which(&["rustfmt"]);
-    let outdir = match which_rustfmt {
-        Some(_) => Some(TempDir::new("cargo-expand").expect("failed to create tmp file")),
-        None => None,
+    let which_pygmentize = if stdout_isatty() {
+        which(&["pygmentize", "-l", "rust"])
+    } else {
+        None
+    };
+
+    let outdir = if which_rustfmt.is_some() || which_pygmentize.is_some() {
+        Some(TempDir::new("cargo-expand").expect("failed to create tmp file"))
+    } else {
+        None
     };
     let outfile = outdir.as_ref().map(|dir| dir.path().join("expanded"));
 
     // Build cargo command
     let mut cmd = Command::new("cargo");
-    cmd.args(&wrap_args(env::args_os(), outfile.as_ref()));
+    cmd.args(&wrap_args(args.clone(), outfile.as_ref()));
+
+    // Pipe to a tmp file to separate out any println output from build scripts
+    if let Some(outfile) = outfile {
+        let mut filter_cargo = Vec::new();
+        filter_cargo.extend(args.iter().map(OsString::as_os_str));
+        filter_cargo.push(OsStr::new("--filter-cargo"));
+
+        let _wait = try!(cmd.pipe_to(shell!("cat"), Some(&filter_cargo)));
+        try!(run(cmd));
+        drop(_wait);
+
+        cmd = Command::new("cat");
+        cmd.arg(outfile);
+    }
 
     // Pipe to rustfmt
     let _wait = match which_rustfmt {
         Some(ref fmt) => {
             let args: Vec<_> = env::args_os().collect();
-            let mut filter_cargo = Vec::new();
-            filter_cargo.extend(args.iter().map(OsString::as_os_str));
-            filter_cargo.push(OsStr::new("--filter-cargo"));
-
-            let _wait = try!(cmd.pipe_to(shell!("cat"), Some(&filter_cargo)));
-            try!(run(cmd));
-            drop(_wait);
-
-            cmd = Command::new("sed");
-            cmd.arg("s/$crate/XCRATE/g");
-            cmd.arg(outfile.unwrap());
-
             let mut filter_rustfmt = Vec::new();
             filter_rustfmt.extend(args.iter().map(OsString::as_os_str));
             filter_rustfmt.push(OsStr::new("--filter-rustfmt"));
 
             Some((
                 // Work around $crate issue https://github.com/rust-lang/rust/issues/38016
+                try!(cmd.pipe_to(shell!("sed" "s/$crate/XCRATE/g"), None)),
                 try!(cmd.pipe_to(shell!(fmt), None)),
                 try!(cmd.pipe_to(shell!("sed" "s/XCRATE/$crate/g"), Some(&filter_rustfmt))),
             ))
@@ -89,13 +100,9 @@ fn cargo_expand() -> io::Result<i32> {
     };
 
     // Pipe to pygmentize
-    let _wait = if stdout_isatty() {
-        match which(&["pygmentize", "-l", "rust"]) {
-            Some(pyg) => Some(try!(cmd.pipe_to(shell!(pyg "-l" "rust"), None))),
-            None => None,
-        }
-    } else {
-        None
+    let _wait = match which_pygmentize {
+        Some(pyg) => Some(try!(cmd.pipe_to(shell!(pyg "-l" "rust"), None))),
+        None => None,
     };
 
     run(cmd)
