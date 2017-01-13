@@ -199,7 +199,7 @@ fn wrap_args<I>(it: I, outfile: Option<&PathBuf>) -> Vec<OsString>
     }
 
     if !has_color {
-        let color = stdout_isatty() && stderr_isatty();
+        let color = stderr_isatty();
         let setting = if color { "always" } else { "never" };
         args.push(format!("--color={}", setting).into());
     }
