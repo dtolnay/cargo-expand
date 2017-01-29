@@ -264,7 +264,7 @@ fn filter_err(ignore: fn(&str) -> bool) -> ! {
 #[cfg(unix)]
 fn ignore_rustfmt_err(line: &str) -> bool {
     line.trim().is_empty()
-        || line.trim_right().ends_with("line exceeded maximum length (sorry)")
+        || line.contains(": line exceeded maximum length (")
         || line.trim_right().ends_with("left behind trailing whitespace (sorry)")
 }
 
@@ -272,5 +272,6 @@ fn ignore_rustfmt_err(line: &str) -> bool {
 fn ignore_cargo_err(line: &str) -> bool {
     line.trim().is_empty()
         || line.contains("ignoring specified output filename because multiple outputs were requested")
+        || line.contains("ignoring specified output filename for 'link' output because multiple outputs were requested")
         || line.contains("ignoring --out-dir flag due to -o flag.")
 }
