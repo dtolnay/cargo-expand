@@ -274,4 +274,5 @@ fn ignore_cargo_err(line: &str) -> bool {
         || line.contains("ignoring specified output filename because multiple outputs were requested")
         || line.contains("ignoring specified output filename for 'link' output because multiple outputs were requested")
         || line.contains("ignoring --out-dir flag due to -o flag.")
+        || line.contains("due to multiple output types requested, the explicitly specified output file name will be adapted for each output type")
 }
