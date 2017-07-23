@@ -73,6 +73,8 @@ colorized. Install with `pip install Pygments`.
 > }
 > ```
 
+## Options
+
 To expand a particular test target:
 
 `$ cargo expand --test test_something`
