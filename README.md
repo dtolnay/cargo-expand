@@ -95,6 +95,34 @@ To not color even though `pygmentize` is available in `$PATH`:
 
 `$ PYGMENTIZE= cargo expand`
 
+## Disclaimer
+
+Be aware that macro expansion to text is a lossy process. This is a debugging
+aid only. There should be no expectation that the expanded code can be compiled
+successfully, nor that if it compiles then it behaves the same as the original
+code.
+
+For instance the following function returns `3` when compiled ordinarily by Rust
+but the expanded code compiles and returns `4`.
+
+```rust
+fn f() -> i32 {
+    let x = 1;
+
+    macro_rules! first_x {
+        () => { x }
+    }
+
+    let x = 2;
+
+    x + first_x!()
+}
+```
+
+Refer to [The Book] for more on the considerations around macro hygiene.
+
+[The Book]: https://doc.rust-lang.org/book/first-edition/macros.html#hygiene
+
 ## License
 
 Licensed under either of
