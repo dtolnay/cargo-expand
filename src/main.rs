@@ -213,31 +213,41 @@ fn wrap_args<I>(it: I, outfile: Option<&PathBuf>) -> Vec<OsString>
 #[cfg(unix)]
 fn which(cmd: &[&str]) -> Option<OsString> {
     if env::args_os().find(|arg| arg == "--help").is_some() {
-        None
-    } else {
-        match env::var_os(&cmd[0].to_uppercase()) {
-            Some(which) => {
-                if which.is_empty() {
-                    None
-                } else {
-                    Some(which)
-                }
-            }
-            None => {
-                let in_path = Command::new(cmd[0])
-                    .args(&cmd[1..])
-                    .stdin(Stdio::null())
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .spawn()
-                    .is_ok();
-                if in_path {
-                    Some(cmd[0].into())
-                } else {
-                    None
-                }
-            }
+        return None;
+    }
+
+    if let Some(which) = env::var_os(&cmd[0].to_uppercase()) {
+        return if which.is_empty() {
+            None
+        } else {
+            Some(which)
+        };
+    }
+
+    let spawn = Command::new(cmd[0])
+        .args(&cmd[1..])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn();
+    let mut child = match spawn {
+        Ok(child) => child,
+        Err(_) => {
+            return None;
         }
+    };
+
+    let exit = match child.wait() {
+        Ok(exit) => exit,
+        Err(_) => {
+            return None;
+        }
+    };
+
+    if exit.success() {
+        Some(cmd[0].into())
+    } else {
+        None
     }
 }
 
