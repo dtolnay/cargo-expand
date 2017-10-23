@@ -8,7 +8,7 @@ use std::process::{self, Command};
 use std::process::{Child, Stdio};
 
 extern crate isatty;
-use isatty::{stdout_isatty, stderr_isatty};
+use isatty::{stderr_isatty, stdout_isatty};
 
 #[cfg(unix)]
 extern crate tempdir;
@@ -148,9 +148,7 @@ impl PipeTo for Command {
         });
 
         match err {
-            None => {
-                Ok(Wait(vec![child]))
-            }
+            None => Ok(Wait(vec![child])),
             Some(err) => {
                 let mut errcmd = Command::new(err[0]);
                 errcmd.args(&err[1..]);
@@ -168,7 +166,8 @@ impl PipeTo for Command {
 
 // Based on https://github.com/rsolomo/cargo-check
 fn wrap_args<I>(it: I, outfile: Option<&PathBuf>) -> Vec<OsString>
-    where I: IntoIterator<Item=OsString>
+where
+    I: IntoIterator<Item = OsString>,
 {
     let mut args = vec!["rustc".into()];
     let mut ends_with_test = false;
@@ -220,11 +219,7 @@ fn which(cmd: &[&str]) -> Option<OsString> {
     }
 
     if let Some(which) = env::var_os(&cmd[0].to_uppercase()) {
-        return if which.is_empty() {
-            None
-        } else {
-            Some(which)
-        };
+        return if which.is_empty() { None } else { Some(which) };
     }
 
     let spawn = Command::new(cmd[0])
