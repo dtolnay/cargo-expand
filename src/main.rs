@@ -89,7 +89,10 @@ fn cargo_expand() -> io::Result<i32> {
             filter_rustfmt.extend(args.iter().map(OsString::as_os_str));
             filter_rustfmt.push(OsStr::new("--filter-rustfmt"));
 
-            Some(cmd.pipe_to(shell!(fmt), Some(&filter_rustfmt))?)
+            Some((
+                cmd.pipe_to(shell!(fmt), None)?,
+                cmd.pipe_to(shell!("cat"), Some(&filter_rustfmt))?,
+            ))
         }
         None => None,
     };
@@ -267,10 +270,8 @@ fn filter_err(ignore: fn(&str) -> bool) -> ! {
 }
 
 #[cfg(unix)]
-fn ignore_rustfmt_err(line: &str) -> bool {
-    line.trim().is_empty()
-        || line.contains(": line exceeded maximum length (")
-        || line.trim_right().ends_with("left behind trailing whitespace (sorry)")
+fn ignore_rustfmt_err(_line: &str) -> bool {
+    true
 }
 
 #[cfg(unix)]
