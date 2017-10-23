@@ -276,9 +276,24 @@ fn ignore_rustfmt_err(_line: &str) -> bool {
 
 #[cfg(unix)]
 fn ignore_cargo_err(line: &str) -> bool {
-    line.trim().is_empty()
-        || line.contains("ignoring specified output filename because multiple outputs were requested")
-        || line.contains("ignoring specified output filename for 'link' output because multiple outputs were requested")
-        || line.contains("ignoring --out-dir flag due to -o flag.")
-        || line.contains("due to multiple output types requested, the explicitly specified output file name will be adapted for each output type")
+    if line.trim().is_empty() {
+        return true;
+    }
+
+    let blacklist = [
+        "ignoring specified output filename because multiple outputs were \
+         requested",
+        "ignoring specified output filename for 'link' output because multiple \
+         outputs were requested",
+        "ignoring --out-dir flag due to -o flag.",
+        "due to multiple output types requested, the explicitly specified \
+         output file name will be adapted for each output type",
+    ];
+    for s in &blacklist {
+        if line.contains(s) {
+            return true;
+        }
+    }
+
+    false
 }
