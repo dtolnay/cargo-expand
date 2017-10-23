@@ -89,12 +89,7 @@ fn cargo_expand() -> io::Result<i32> {
             filter_rustfmt.extend(args.iter().map(OsString::as_os_str));
             filter_rustfmt.push(OsStr::new("--filter-rustfmt"));
 
-            Some((
-                // Work around $crate issue https://github.com/rust-lang/rust/issues/38016
-                try!(cmd.pipe_to(shell!("sed" "s/$crate/XCRATE/g"), None)),
-                try!(cmd.pipe_to(shell!(fmt), None)),
-                try!(cmd.pipe_to(shell!("sed" "s/XCRATE/$crate/g"), Some(&filter_rustfmt))),
-            ))
+            Some(try!(cmd.pipe_to(shell!(fmt), Some(&filter_rustfmt))))
         }
         None => None,
     };
