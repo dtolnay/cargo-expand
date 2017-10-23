@@ -73,8 +73,8 @@ fn cargo_expand() -> io::Result<i32> {
         filter_cargo.extend(args.iter().map(OsString::as_os_str));
         filter_cargo.push(OsStr::new("--filter-cargo"));
 
-        let _wait = try!(cmd.pipe_to(shell!("cat"), Some(&filter_cargo)));
-        try!(run(cmd));
+        let _wait = cmd.pipe_to(shell!("cat"), Some(&filter_cargo))?;
+        run(cmd)?;
         drop(_wait);
 
         cmd = Command::new("cat");
@@ -89,14 +89,14 @@ fn cargo_expand() -> io::Result<i32> {
             filter_rustfmt.extend(args.iter().map(OsString::as_os_str));
             filter_rustfmt.push(OsStr::new("--filter-rustfmt"));
 
-            Some(try!(cmd.pipe_to(shell!(fmt), Some(&filter_rustfmt))))
+            Some(cmd.pipe_to(shell!(fmt), Some(&filter_rustfmt))?)
         }
         None => None,
     };
 
     // Pipe to pygmentize
     let _wait = match which_pygmentize {
-        Some(pyg) => Some(try!(cmd.pipe_to(shell!(pyg "-l" "rust"), None))),
+        Some(pyg) => Some(cmd.pipe_to(shell!(pyg "-l" "rust"), None)?),
         None => None,
     };
 
@@ -136,7 +136,7 @@ impl PipeTo for Command {
             self.stderr(Stdio::piped());
         }
 
-        let child = try!(self.spawn());
+        let child = self.spawn()?;
 
         *self = Command::new(out[0]);
         self.args(&out[1..]);
@@ -156,7 +156,7 @@ impl PipeTo for Command {
                 });
                 errcmd.stdout(Stdio::null());
                 errcmd.stderr(Stdio::inherit());
-                let spawn = try!(errcmd.spawn());
+                let spawn = errcmd.spawn()?;
                 Ok(Wait(vec![spawn, child]))
             }
         }
