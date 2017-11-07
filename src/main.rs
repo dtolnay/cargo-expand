@@ -50,7 +50,7 @@ fn cargo_expand() -> io::Result<i32> {
     }
 
     let which_rustfmt = which(&["rustfmt"]);
-    let which_pygmentize = if stdout_isatty() {
+    let which_pygmentize = if !color_never(&args) && stdout_isatty() {
         which(&["pygmentize", "-l", "rust"])
     } else {
         None
@@ -210,6 +210,11 @@ where
     args.push("--pretty=expanded".into());
     args.extend(it);
     args
+}
+
+fn color_never(args: &Vec<OsString>) -> bool {
+    args.windows(2).any(|pair| pair[0] == *"--color" && pair[1] == *"never")
+        || args.iter().any(|arg| *arg == *"--color=never")
 }
 
 #[cfg(unix)]
