@@ -99,7 +99,7 @@ fn cargo_expand() -> io::Result<i32> {
 
     // Pipe to pygmentize
     let _wait = match which_pygmentize {
-        Some(pyg) => Some(cmd.pipe_to(shell!(pyg "-l" "rust"), None)?),
+        Some(pyg) => Some(cmd.pipe_to(shell!(pyg "-l" "rust" "-O" "encoding=utf8"), None)?),
         None => None,
     };
 
