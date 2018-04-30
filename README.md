@@ -24,59 +24,59 @@ colorized. Install with `pip install Pygments`.
 
 ## Example
 
-`$ cat src/main.rs`
+#### `$ cat src/main.rs`
 
-> ```rust
-> #[derive(Debug)]
-> struct S;
->
-> fn main() {
->     println!("{:?}", S);
-> }
-> ```
+```rust
+#[derive(Debug)]
+struct S;
 
-`$ cargo expand`
+fn main() {
+    println!("{:?}", S);
+}
+```
 
-> ```rust
-> #![feature(prelude_import)]
-> #![no_std]
-> #[prelude_import]
-> use std::prelude::v1::*;
-> #[macro_use]
-> extern crate std;
-> struct S;
-> #[automatically_derived]
-> #[allow(unused_qualifications)]
-> impl ::std::fmt::Debug for S {
->     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
->         match *self {
->             S => {
->                 let mut debug_trait_builder = f.debug_tuple("S");
->                 debug_trait_builder.finish()
->             }
->         }
->     }
-> }
->
-> fn main() {
->     ::io::_print(::std::fmt::Arguments::new_v1_formatted(
->         &["", "\n"],
->         &match (&S,) {
->             (arg0,) => [::std::fmt::ArgumentV1::new(arg0, ::std::fmt::Debug::fmt)],
->         },
->         &[::std::fmt::rt::v1::Argument {
->             position: ::std::fmt::rt::v1::Position::At(0usize),
->             format: ::std::fmt::rt::v1::FormatSpec {
->                 fill: ' ',
->                 align: ::std::fmt::rt::v1::Alignment::Unknown,
->                 flags: 0u32,
->                 precision: ::std::fmt::rt::v1::Count::Implied,
->                 width: ::std::fmt::rt::v1::Count::Implied,
->             },
->         }],
->     ));
-> }
-> ```
+#### `$ cargo expand`
+
+```rust
+#![feature(prelude_import)]
+#![no_std]
+#[prelude_import]
+use std::prelude::v1::*;
+#[macro_use]
+extern crate std;
+struct S;
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::std::fmt::Debug for S {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match *self {
+            S => {
+                let mut debug_trait_builder = f.debug_tuple("S");
+                debug_trait_builder.finish()
+            }
+        }
+    }
+}
+
+fn main() {
+    ::io::_print(::std::fmt::Arguments::new_v1_formatted(
+        &["", "\n"],
+        &match (&S,) {
+            (arg0,) => [::std::fmt::ArgumentV1::new(arg0, ::std::fmt::Debug::fmt)],
+        },
+        &[::std::fmt::rt::v1::Argument {
+            position: ::std::fmt::rt::v1::Position::At(0usize),
+            format: ::std::fmt::rt::v1::FormatSpec {
+                fill: ' ',
+                align: ::std::fmt::rt::v1::Alignment::Unknown,
+                flags: 0u32,
+                precision: ::std::fmt::rt::v1::Count::Implied,
+                width: ::std::fmt::rt::v1::Count::Implied,
+            },
+        }],
+    ));
+}
+```
 
 ## Options
 
