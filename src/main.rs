@@ -14,7 +14,7 @@ use isatty::{stderr_isatty, stdout_isatty};
 extern crate tempfile;
 
 fn main() {
-    let result = cargo_expand();
+    let result = cargo_expand_or_run_nightly();
     process::exit(match result {
         Ok(code) => code,
         Err(err) => {
@@ -22,6 +22,47 @@ fn main() {
             1
         }
     });
+}
+
+fn cargo_expand_or_run_nightly() -> io::Result<i32> {
+    const NO_RUN_NIGHTLY: &str = "CARGO_EXPAND_NO_RUN_NIGHTLY";
+
+    let maybe_nightly = !definitely_not_nightly();
+    if maybe_nightly || env::var_os(NO_RUN_NIGHTLY).is_some() {
+        return cargo_expand();
+    }
+
+    let mut nightly = Command::new("cargo");
+    nightly.arg("+nightly");
+    nightly.arg("expand");
+    nightly.args(env::args_os().skip(1));
+
+    // Hopefully prevent infinite re-run loop.
+    nightly.env(NO_RUN_NIGHTLY, "");
+
+    let status = nightly.status()?;
+
+    Ok(match status.code() {
+        Some(code) => code,
+        None => if status.success() { 0 } else { 1 },
+    })
+}
+
+fn definitely_not_nightly() -> bool {
+    let mut cmd = Command::new(cargo_binary());
+    cmd.arg("--version");
+
+    let output = match cmd.output() {
+        Ok(output) => output,
+        Err(_) => return false,
+    };
+
+    let version = match String::from_utf8(output.stdout) {
+        Ok(version) => version,
+        Err(_) => return false,
+    };
+
+    version.starts_with("cargo 1") && !version.contains("nightly")
 }
 
 fn cargo_binary() -> OsString {
