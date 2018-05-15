@@ -24,10 +24,14 @@ fn main() {
     });
 }
 
+fn cargo_binary() -> OsString {
+    env::var_os("CARGO").unwrap_or_else(|| "cargo".to_owned().into())
+}
+
 #[cfg(windows)]
 fn cargo_expand() -> io::Result<i32> {
     // Build cargo command
-    let mut cmd = Command::new("cargo");
+    let mut cmd = Command::new(cargo_binary());
     cmd.args(&wrap_args(env::args_os(), None));
     run(cmd)
 }
@@ -64,7 +68,7 @@ fn cargo_expand() -> io::Result<i32> {
     let outfile = outdir.as_ref().map(|dir| dir.path().join("expanded"));
 
     // Build cargo command
-    let mut cmd = Command::new("cargo");
+    let mut cmd = Command::new(cargo_binary());
     cmd.args(&wrap_args(args.clone(), outfile.as_ref()));
 
     // Pipe to a tmp file to separate out any println output from build scripts
