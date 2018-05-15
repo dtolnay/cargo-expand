@@ -22,6 +22,10 @@ This command optionally uses [`Pygments`](http://pygments.org/) to colorize the
 expanded output. If `Pygments` is not available, the expanded code is not
 colorized. Install with `pip install Pygments`.
 
+Cargo expand requires a nightly toolchain because it relies on unstable compiler
+flags. If nightly is not your default toolchain, the `cargo expand` commands
+shown below will need to be run as `cargo +nightly expand`.
+
 ## Example
 
 #### `$ cat src/main.rs`
