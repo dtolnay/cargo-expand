@@ -5,7 +5,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cargo-expand"
-version = "0.3.13"
+version = "0.3.14"
 dependencies = [
  "isatty 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "tempfile 3.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
