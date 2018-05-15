@@ -11,9 +11,7 @@ extern crate isatty;
 use isatty::{stderr_isatty, stdout_isatty};
 
 #[cfg(unix)]
-extern crate tempdir;
-#[cfg(unix)]
-use tempdir::TempDir;
+extern crate tempfile;
 
 fn main() {
     let result = cargo_expand();
@@ -57,7 +55,9 @@ fn cargo_expand() -> io::Result<i32> {
     };
 
     let outdir = if which_rustfmt.is_some() || which_pygmentize.is_some() {
-        Some(TempDir::new("cargo-expand").expect("failed to create tmp file"))
+        let mut builder = tempfile::Builder::new();
+        builder.prefix("cargo-expand");
+        Some(builder.tempdir().expect("failed to create tmp file"))
     } else {
         None
     };
