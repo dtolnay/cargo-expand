@@ -22,9 +22,11 @@ This command optionally uses [`Pygments`](http://pygments.org/) to colorize the
 expanded output. If `Pygments` is not available, the expanded code is not
 colorized. Install with `pip install Pygments`.
 
-Cargo expand requires a nightly toolchain because it relies on unstable compiler
-flags. If nightly is not your default toolchain, the `cargo expand` commands
-shown below will need to be run as `cargo +nightly expand`.
+Cargo expand relies on unstable compiler flags so it requires a nightly
+toolchain to be installed, though does not require nightly to be the default
+toolchain or the one with which cargo expand itself is executed. If the default
+toolchain is one other than nightly, running `cargo expand` will find and use
+nightly anyway.
 
 ## Example
 
