@@ -12,6 +12,5 @@ readme = "README.md"
 
 [dependencies]
 isatty = "0.1.1"
-
-[target."cfg(unix)".dependencies]
+duct = "0.10"
 tempfile = "3.0"
