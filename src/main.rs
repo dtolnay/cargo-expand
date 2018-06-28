@@ -1,16 +1,13 @@
 use std::env;
-use std::ffi::{OsStr, OsString};
-use std::io::{self, Write};
+use std::ffi::OsString;
+use std::fs::File;
+use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
-use std::process::{self, Command};
-
-#[cfg(unix)]
-use std::process::{Child, Stdio};
+use std::process::{self, Command, Stdio};
 
 extern crate isatty;
 use isatty::{stderr_isatty, stdout_isatty};
 
-#[cfg(unix)]
 extern crate tempfile;
 
 fn main() {
@@ -69,28 +66,8 @@ fn cargo_binary() -> OsString {
     env::var_os("CARGO").unwrap_or_else(|| "cargo".to_owned().into())
 }
 
-#[cfg(windows)]
-fn cargo_expand() -> io::Result<i32> {
-    // Build cargo command
-    let mut cmd = Command::new(cargo_binary());
-    cmd.args(&wrap_args(env::args_os(), None));
-    run(cmd)
-}
-
-#[cfg(unix)]
 fn cargo_expand() -> io::Result<i32> {
     let args: Vec<_> = env::args_os().collect();
-    match args.last().unwrap().to_str().unwrap_or("") {
-        "--filter-cargo" => filter_err(ignore_cargo_err),
-        "--filter-rustfmt" => filter_err(ignore_rustfmt_err),
-        _ => {}
-    }
-
-    macro_rules! shell {
-        ($($arg:expr)*) => {
-            &[$(OsStr::new(&$arg)),*]
-        };
-    }
 
     let which_rustfmt = which(&["rustfmt"]);
     let which_pygmentize = if !color_never(&args) && stdout_isatty() {
@@ -108,105 +85,35 @@ fn cargo_expand() -> io::Result<i32> {
     };
     let outfile = outdir.as_ref().map(|dir| dir.path().join("expanded"));
 
-    // Build cargo command
+    // Run cargo
     let mut cmd = Command::new(cargo_binary());
     cmd.args(&wrap_args(args.clone(), outfile.as_ref()));
-
-    // Pipe to a tmp file to separate out any println output from build scripts
-    if let Some(outfile) = outfile {
-        let mut filter_cargo = Vec::new();
-        filter_cargo.extend(args.iter().map(OsString::as_os_str));
-        filter_cargo.push(OsStr::new("--filter-cargo"));
-
-        let _wait = cmd.pipe_to(shell!("cat"), Some(&filter_cargo))?;
-        run(cmd)?;
-        drop(_wait);
-
-        cmd = Command::new("cat");
-        cmd.arg(outfile);
+    let code = filter_err(&mut cmd, ignore_cargo_err)?;
+    if code != 0 {
+        return Ok(code);
     }
 
-    // Pipe to rustfmt
-    let _wait = match which_rustfmt {
-        Some(ref fmt) => {
-            let args: Vec<_> = env::args_os().collect();
-            let mut filter_rustfmt = Vec::new();
-            filter_rustfmt.extend(args.iter().map(OsString::as_os_str));
-            filter_rustfmt.push(OsStr::new("--filter-rustfmt"));
-
-            Some((
-                cmd.pipe_to(shell!(fmt), None)?,
-                cmd.pipe_to(shell!("cat"), Some(&filter_rustfmt))?,
-            ))
-        }
-        None => None,
-    };
-
-    // Pipe to pygmentize
-    let _wait = match which_pygmentize {
-        Some(pyg) => Some(cmd.pipe_to(shell!(pyg "-l" "rust" "-O" "encoding=utf8"), None)?),
-        None => None,
-    };
-
-    run(cmd)
-}
-
-fn run(mut cmd: Command) -> io::Result<i32> {
-    cmd.status().map(|status| status.code().unwrap_or(1))
-}
-
-#[cfg(unix)]
-struct Wait(Vec<Child>);
-
-#[cfg(unix)]
-impl Drop for Wait {
-    fn drop(&mut self) {
-        for child in &mut self.0 {
-            if let Err(err) = child.wait() {
-                let _ = writeln!(&mut io::stderr(), "{}", err);
-            }
-        }
+    // Run rustfmt
+    if let Some(fmt) = which_rustfmt {
+        // Ignore any errors.
+        let _status = Command::new(fmt)
+            .arg(outfile.as_ref().unwrap())
+            .stderr(Stdio::null())
+            .status();
     }
-}
 
-#[cfg(unix)]
-trait PipeTo {
-    fn pipe_to(&mut self, out: &[&OsStr], err: Option<&[&OsStr]>) -> io::Result<Wait>;
-}
-
-#[cfg(unix)]
-impl PipeTo for Command {
-    fn pipe_to(&mut self, out: &[&OsStr], err: Option<&[&OsStr]>) -> io::Result<Wait> {
-        use std::os::unix::io::{AsRawFd, FromRawFd};
-
-        self.stdout(Stdio::piped());
-        if err.is_some() {
-            self.stderr(Stdio::piped());
-        }
-
-        let child = self.spawn()?;
-
-        *self = Command::new(out[0]);
-        self.args(&out[1..]);
-        self.stdin(unsafe {
-            Stdio::from_raw_fd(child.stdout.as_ref().map(AsRawFd::as_raw_fd).unwrap())
-        });
-
-        match err {
-            None => Ok(Wait(vec![child])),
-            Some(err) => {
-                let mut errcmd = Command::new(err[0]);
-                errcmd.args(&err[1..]);
-                errcmd.stdin(unsafe {
-                    Stdio::from_raw_fd(child.stderr.as_ref().map(AsRawFd::as_raw_fd).unwrap())
-                });
-                errcmd.stdout(Stdio::null());
-                errcmd.stderr(Stdio::inherit());
-                let spawn = errcmd.spawn()?;
-                Ok(Wait(vec![spawn, child]))
-            }
-        }
+    // Run pygmentize
+    if let Some(pyg) = which_pygmentize {
+        let _status = Command::new(pyg)
+            .args(&["-l", "rust", "-O", "encoding=utf8"])
+            .arg(outfile.as_ref().unwrap())
+            .status();
+    } else if let Some(outfile) = outfile {
+        // Cat outfile if rustfmt was used.
+        let mut reader = File::open(outfile)?;
+        io::copy(&mut reader, &mut io::stdout())?;
     }
+    Ok(0)
 }
 
 // Based on https://github.com/rsolomo/cargo-check
@@ -262,7 +169,6 @@ fn color_never(args: &Vec<OsString>) -> bool {
         || args.iter().any(|arg| *arg == *"--color=never")
 }
 
-#[cfg(unix)]
 fn which(cmd: &[&str]) -> Option<OsString> {
     if env::args_os().find(|arg| arg == "--help").is_some() {
         return None;
@@ -299,10 +205,11 @@ fn which(cmd: &[&str]) -> Option<OsString> {
     }
 }
 
-#[cfg(unix)]
-fn filter_err(ignore: fn(&str) -> bool) -> ! {
+fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
+    let mut child = cmd.stderr(Stdio::piped()).spawn()?;
+    let mut stderr = io::BufReader::new(child.stderr.take().unwrap());
     let mut line = String::new();
-    while let Ok(n) = io::stdin().read_line(&mut line) {
+    while let Ok(n) = stderr.read_line(&mut line) {
         if n == 0 {
             break;
         }
@@ -311,15 +218,10 @@ fn filter_err(ignore: fn(&str) -> bool) -> ! {
         }
         line.clear();
     }
-    process::exit(0);
+    let code = child.wait()?.code().unwrap_or(1);
+    Ok(code)
 }
 
-#[cfg(unix)]
-fn ignore_rustfmt_err(_line: &str) -> bool {
-    true
-}
-
-#[cfg(unix)]
 fn ignore_cargo_err(line: &str) -> bool {
     if line.trim().is_empty() {
         return true;
@@ -330,7 +232,8 @@ fn ignore_cargo_err(line: &str) -> bool {
          requested",
         "ignoring specified output filename for 'link' output because multiple \
          outputs were requested",
-        "ignoring --out-dir flag due to -o flag.",
+        "ignoring --out-dir flag due to -o flag",
+        "ignoring -C extra-filename flag due to -o flag",
         "due to multiple output types requested, the explicitly specified \
          output file name will be adapted for each output type",
     ];
