@@ -3,9 +3,18 @@
 [![Build Status](https://travis-ci.org/dtolnay/cargo-expand.svg?branch=master)](https://travis-ci.org/dtolnay/cargo-expand)
 [![Latest Version](https://img.shields.io/crates/v/cargo-expand.svg)](https://crates.io/crates/cargo-expand)
 
-This is a wrapper around `cargo rustc -- --pretty=expanded`. Once installed, the
-command `cargo expand` prints out the result of macro expansion and `#[derive]`
-expansion applied to the current crate.
+Once installed, the following command prints out the result of macro expansion
+and `#[derive]` expansion applied to the current crate.
+
+```console
+$ cargo expand
+```
+
+This is a wrapper around the more verbose compiler command:
+
+```console
+$ cargo rustc --profile=check -- -Zunstable-options --pretty=expanded
+```
 
 ## Installation
 
