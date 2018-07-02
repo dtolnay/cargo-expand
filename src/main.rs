@@ -121,7 +121,7 @@ fn wrap_args<I>(it: I, outfile: Option<&PathBuf>) -> Vec<OsString>
 where
     I: IntoIterator<Item = OsString>,
 {
-    let mut args = vec!["rustc".into()];
+    let mut args = vec!["rustc".into(), "--profile=check".into()];
     let mut ends_with_test = false;
     let mut ends_with_example = false;
     let mut has_color = false;
