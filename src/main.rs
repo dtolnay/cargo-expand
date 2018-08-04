@@ -11,7 +11,7 @@ use isatty::{stderr_isatty, stdout_isatty};
 extern crate tempfile;
 
 fn main() {
-    if env::args_os().any(|arg| arg == "--version") {
+    if env::args_os().any(|arg| arg.to_str() == Some("--version")) {
         println!(concat!("cargo-expand ", env!("CARGO_PKG_VERSION")));
         return;
     }
