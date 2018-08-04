@@ -11,7 +11,7 @@ use isatty::{stderr_isatty, stdout_isatty};
 extern crate tempfile;
 
 fn main() {
-    if env::args_os().any(|arg| arg.to_str() == Some("--version")) {
+    if env::args_os().any(|arg| arg == *"--version") {
         println!(concat!("cargo-expand ", env!("CARGO_PKG_VERSION")));
         return;
     }
@@ -40,7 +40,7 @@ fn cargo_expand_or_run_nightly() -> io::Result<i32> {
 
     let mut args = env::args_os().peekable();
     args.next().unwrap(); // cargo
-    if args.peek().and_then(|arg| arg.to_str()) == Some("expand") {
+    if args.peek().map_or(false, |arg| arg == "expand") {
         args.next().unwrap(); // expand
     }
     nightly.args(args);
