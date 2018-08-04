@@ -32,7 +32,13 @@ fn cargo_expand_or_run_nightly() -> io::Result<i32> {
     let mut nightly = Command::new("cargo");
     nightly.arg("+nightly");
     nightly.arg("expand");
-    nightly.args(env::args_os().skip(1));
+
+    let mut args = env::args_os().peekable();
+    args.next().unwrap(); // cargo
+    if args.peek().and_then(|arg| arg.to_str()) == Some("expand") {
+        args.next().unwrap(); // expand
+    }
+    nightly.args(args);
 
     // Hopefully prevent infinite re-run loop.
     nightly.env(NO_RUN_NIGHTLY, "");
