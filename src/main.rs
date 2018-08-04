@@ -11,6 +11,11 @@ use isatty::{stderr_isatty, stdout_isatty};
 extern crate tempfile;
 
 fn main() {
+    if env::args_os().any(|arg| arg == "--version") {
+        println!(concat!("cargo-expand ", env!("CARGO_PKG_VERSION")));
+        return;
+    }
+
     let result = cargo_expand_or_run_nightly();
     process::exit(match result {
         Ok(code) => code,
