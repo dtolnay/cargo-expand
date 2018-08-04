@@ -52,7 +52,11 @@ fn cargo_expand_or_run_nightly() -> io::Result<i32> {
 
     Ok(match status.code() {
         Some(code) => code,
-        None => if status.success() { 0 } else { 1 },
+        None => if status.success() {
+            0
+        } else {
+            1
+        },
     })
 }
 
@@ -176,7 +180,8 @@ where
 }
 
 fn color_never(args: &[OsString]) -> bool {
-    args.windows(2).any(|pair| pair[0] == *"--color" && pair[1] == *"never")
+    args.windows(2)
+        .any(|pair| pair[0] == *"--color" && pair[1] == *"never")
         || args.iter().any(|arg| *arg == *"--color=never")
 }
 
