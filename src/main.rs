@@ -145,7 +145,7 @@ where
         ends_with_test = arg == *"--test";
         ends_with_example = arg == *"--example";
         has_color |= arg.to_str().unwrap_or("").starts_with("--color");
-        args.push(arg.into());
+        args.push(arg);
     }
 
     if ends_with_test {
@@ -175,13 +175,13 @@ where
     args
 }
 
-fn color_never(args: &Vec<OsString>) -> bool {
+fn color_never(args: &[OsString]) -> bool {
     args.windows(2).any(|pair| pair[0] == *"--color" && pair[1] == *"never")
         || args.iter().any(|arg| *arg == *"--color=never")
 }
 
 fn which(cmd: &[&str]) -> Option<OsString> {
-    if env::args_os().find(|arg| arg == "--help").is_some() {
+    if env::args_os().any(|arg| arg == *"--help") {
         return None;
     }
 
