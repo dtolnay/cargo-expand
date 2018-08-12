@@ -104,8 +104,13 @@ fn cargo_expand() -> io::Result<i32> {
     let mut cmd = Command::new(cargo_binary());
     cmd.args(&wrap_args(args.clone(), outfile.as_ref()));
     let code = filter_err(&mut cmd, ignore_cargo_err)?;
-    if code != 0 {
-        return Ok(code);
+
+    if let Some(ref outfile) = outfile {
+        // Ensure that outfile got written.
+        match File::open(outfile).and_then(|f| f.metadata()) {
+            Ok(ref metadata) if metadata.len() != 0 => {},
+            _ => return Ok(if code == 0 { 1 } else { code }),
+        }
     }
 
     // Run rustfmt
