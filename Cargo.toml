@@ -11,7 +11,7 @@ categories = ["development-tools::cargo-plugins", "development-tools::debugging"
 readme = "README.md"
 
 [dependencies]
-isatty = "0.1.1"
+atty = "0.2"
 tempfile = "3.0"
 
 [badges]

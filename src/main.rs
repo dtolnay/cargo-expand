@@ -1,3 +1,6 @@
+extern crate atty;
+extern crate tempfile;
+
 use std::env;
 use std::ffi::OsString;
 use std::fs::File;
@@ -5,10 +8,7 @@ use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
 use std::process::{self, Command, Stdio};
 
-extern crate isatty;
-use isatty::{stderr_isatty, stdout_isatty};
-
-extern crate tempfile;
+use atty::Stream::{Stdout, Stderr};
 
 fn main() {
     if env::args_os().any(|arg| arg == *"--version") {
@@ -85,7 +85,7 @@ fn cargo_expand() -> io::Result<i32> {
     let args: Vec<_> = env::args_os().collect();
 
     let which_rustfmt = which(&["rustfmt"]);
-    let which_pygmentize = if !color_never(&args) && stdout_isatty() {
+    let which_pygmentize = if !color_never(&args) && atty::is(Stdout) {
         which(&["pygmentize", "-l", "rust"])
     } else {
         None
@@ -168,7 +168,7 @@ where
     }
 
     if !has_color {
-        let color = stderr_isatty();
+        let color = atty::is(Stderr);
         let setting = if color { "always" } else { "never" };
         args.push(format!("--color={}", setting).into());
     }
