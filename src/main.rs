@@ -223,11 +223,17 @@ fn cargo_expand() -> Result<i32> {
         true => None,
     };
     if let Some(fmt) = which_rustfmt {
+        // Work around rustfmt not being able to parse paths containing $crate.
+        // This placeholder should be the same width as $crate to preserve
+        // alignments.
+        const DOLLAR_CRATE_PLACEHOLDER: &str = "Ξcrate";
+        content = content.replace("$crate", DOLLAR_CRATE_PLACEHOLDER);
+
         // Discard comments, which are misplaced by the compiler
         if let Ok(syntax_tree) = syn::parse_file(&content) {
             content = quote!(#syntax_tree).to_string();
-            fs::write(&outfile_path, content)?;
         }
+        fs::write(&outfile_path, content)?;
 
         // Ignore any errors.
         let _status = Command::new(fmt)
@@ -236,6 +242,7 @@ fn cargo_expand() -> Result<i32> {
             .status();
 
         content = fs::read_to_string(&outfile_path)?;
+        content = content.replace(DOLLAR_CRATE_PLACEHOLDER, "$crate");
     }
 
     // Run pretty printer
