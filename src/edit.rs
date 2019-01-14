@@ -1,5 +1,5 @@
 use syn::visit_mut::{self, VisitMut};
-use syn::{File, Item, ItemMod};
+use syn::{Block, File, Item, ItemMod, Stmt};
 
 struct RemoveMacroRules;
 
@@ -9,6 +9,14 @@ impl VisitMut for RemoveMacroRules {
             remove_macro_rules_from_vec_item(items);
         }
         visit_mut::visit_item_mod_mut(self, i);
+    }
+
+    fn visit_block_mut(&mut self, i: &mut Block) {
+        i.stmts.retain(|stmt| match stmt {
+            Stmt::Item(Item::Macro(_)) => false,
+            _ => true,
+        });
+        visit_mut::visit_block_mut(self, i);
     }
 }
 
