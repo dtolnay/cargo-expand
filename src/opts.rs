@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
+use crate::filter::Filter;
+
 #[derive(StructOpt)]
 #[structopt(bin_name = "cargo")]
 pub enum Opts {
@@ -88,4 +90,8 @@ pub struct Args {
     /// Do not attempt to run rustfmt
     #[structopt(long)]
     pub ugly: bool,
+
+    /// Local path to module or other named item to expand, e.g. os::unix::ffi
+    #[structopt(value_name = "ITEM")]
+    pub item: Option<Filter>,
 }

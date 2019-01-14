@@ -1,5 +1,6 @@
 mod edit;
 mod error;
+mod filter;
 mod opts;
 
 use std::env;
@@ -122,6 +123,9 @@ fn cargo_expand() -> Result<i32> {
         // Discard comments, which are misplaced by the compiler
         if let Ok(mut syntax_tree) = syn::parse_file(&content) {
             edit::remove_macro_rules(&mut syntax_tree);
+            if let Some(filter) = args.item {
+                filter::filter(&mut syntax_tree, filter);
+            }
             content = quote!(#syntax_tree).to_string();
         }
         fs::write(&outfile_path, content)?;
