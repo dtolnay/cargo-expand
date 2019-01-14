@@ -6,13 +6,93 @@ use std::path::PathBuf;
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
+use structopt::clap::AppSettings;
+use structopt::StructOpt;
+
+#[derive(StructOpt)]
+#[structopt(bin_name = "cargo")]
+enum Opts {
+    /// Show the result of macro expansion.
+    #[structopt(
+        name = "expand",
+        raw(
+            setting = "AppSettings::UnifiedHelpMessage",
+            setting = "AppSettings::DeriveDisplayOrder",
+            setting = "AppSettings::DontCollapseArgsInUsage"
+        )
+    )]
+    Expand(Args),
+}
+
+#[derive(StructOpt, Debug)]
+#[structopt(rename_all = "kebab-case")]
+struct Args {
+    /// Space-separated list of features to activate
+    #[structopt(long, value_name = "FEATURES")]
+    features: Option<String>,
+
+    /// Activate all available features
+    #[structopt(long)]
+    all_features: bool,
+
+    /// Do not activate the `default` feature
+    #[structopt(long)]
+    no_default_features: bool,
+
+    /// Build only this package's library
+    #[structopt(long)]
+    lib: bool,
+
+    /// Build only the specified binary
+    #[structopt(long, value_name = "NAME")]
+    bin: Option<String>,
+
+    /// Build only the specified example
+    #[structopt(long, value_name = "NAME")]
+    example: Option<String>,
+
+    /// Build only the specified test target
+    #[structopt(long, value_name = "NAME")]
+    test: Option<String>,
+
+    /// Build only the specified bench target
+    #[structopt(long, value_name = "NAME")]
+    bench: Option<String>,
+
+    /// Target triple which compiles will be for
+    #[structopt(long, value_name = "TARGET")]
+    target: Option<String>,
+
+    /// Directory for all generated artifacts
+    #[structopt(long, value_name = "DIRECTORY", parse(from_os_str))]
+    target_dir: Option<PathBuf>,
+
+    /// Path to Cargo.toml
+    #[structopt(long, value_name = "PATH", parse(from_os_str))]
+    manifest_path: Option<PathBuf>,
+
+    /// Number of parallel jobs, defaults to # of CPUs
+    #[structopt(short, long, value_name = "N")]
+    jobs: Option<u64>,
+
+    /// Coloring: auto, always, never
+    #[structopt(long, value_name = "WHEN")]
+    color: Option<String>,
+
+    /// Require Cargo.lock and cache are up to date
+    #[structopt(long)]
+    frozen: bool,
+
+    /// Require Cargo.lock is up to date
+    #[structopt(long)]
+    locked: bool,
+
+    /// Unstable (nightly-only) flags to Cargo
+    #[structopt(short = "Z", value_name = "FLAG")]
+    unstable_flags: Vec<String>,
+}
 
 fn main() {
-    if env::args_os().any(|arg| arg == *"--version") {
-        println!(concat!("cargo-expand ", env!("CARGO_PKG_VERSION")));
-        return;
-    }
-
     let result = cargo_expand_or_run_nightly();
     process::exit(match result {
         Ok(code) => code,
@@ -81,10 +161,12 @@ fn cargo_binary() -> OsString {
 }
 
 fn cargo_expand() -> io::Result<i32> {
-    let args: Vec<_> = env::args_os().collect();
+    let Opts::Expand(args) = Opts::from_args();
+
+    let allow_color = args.color.as_ref().map_or(true, |color| color != "never");
 
     let which_rustfmt = which(&["rustfmt"]);
-    let which_pygmentize = if !color_never(&args) && atty::is(Stdout) {
+    let which_pygmentize = if allow_color && atty::is(Stdout) {
         which(&["pygmentize", "-l", "rust"])
     } else {
         None
@@ -101,7 +183,7 @@ fn cargo_expand() -> io::Result<i32> {
 
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
-    cmd.args(&wrap_args(args.clone(), outfile.as_ref()));
+    apply_args(&mut cmd, &args, outfile.as_ref());
     let code = filter_err(&mut cmd, ignore_cargo_err)?;
 
     if let Some(ref outfile) = outfile {
@@ -136,57 +218,94 @@ fn cargo_expand() -> io::Result<i32> {
 }
 
 // Based on https://github.com/rsolomo/cargo-check
-fn wrap_args<I>(it: I, outfile: Option<&PathBuf>) -> Vec<OsString>
-where
-    I: IntoIterator<Item = OsString>,
-{
-    let mut args = vec!["rustc".into(), "--profile=check".into()];
-    let mut ends_with_test = false;
-    let mut ends_with_example = false;
-    let mut has_color = false;
+fn apply_args(cmd: &mut Command, args: &Args, outfile: Option<&PathBuf>) {
+    cmd.arg("rustc");
+    cmd.arg("--profile=check");
 
-    let mut it = it.into_iter().skip(2);
-    for arg in &mut it {
-        if arg == *"--" {
-            break;
-        }
-        ends_with_test = arg == *"--test";
-        ends_with_example = arg == *"--example";
-        has_color |= arg.to_str().unwrap_or("").starts_with("--color");
-        args.push(arg);
+    if let Some(features) = &args.features {
+        cmd.arg("--features");
+        cmd.arg(features);
     }
 
-    if ends_with_test {
-        // Expand the `test.rs` test by default.
-        args.push("test".into());
+    if args.all_features {
+        cmd.arg("--all-features");
     }
 
-    if ends_with_example {
-        // Expand the `example.rs` example by default.
-        args.push("example".into());
+    if args.no_default_features {
+        cmd.arg("--no-default-features");
     }
 
-    if !has_color {
-        let color = atty::is(Stderr);
-        let setting = if color { "always" } else { "never" };
-        args.push(format!("--color={}", setting).into());
+    if args.lib {
+        cmd.arg("--lib");
     }
 
-    args.push("--".into());
+    if let Some(bin) = &args.bin {
+        cmd.arg("--bin");
+        cmd.arg(bin);
+    }
+
+    if let Some(example) = &args.example {
+        cmd.arg("--example");
+        cmd.arg(example);
+    }
+
+    if let Some(test) = &args.test {
+        cmd.arg("--test");
+        cmd.arg(test);
+    }
+
+    if let Some(bench) = &args.bench {
+        cmd.arg("--bench");
+        cmd.arg(bench);
+    }
+
+    if let Some(target) = &args.target {
+        cmd.arg("--target");
+        cmd.arg(target);
+    }
+
+    if let Some(target_dir) = &args.target_dir {
+        cmd.arg("--target-dir");
+        cmd.arg(target_dir);
+    }
+
+    if let Some(manifest_path) = &args.manifest_path {
+        cmd.arg("--manifest-path");
+        cmd.arg(manifest_path);
+    }
+
+    if let Some(jobs) = args.jobs {
+        cmd.arg("--jobs");
+        cmd.arg(jobs.to_string());
+    }
+
+    cmd.arg("--color");
+    if let Some(color) = &args.color {
+        cmd.arg(color);
+    } else {
+        cmd.arg(if atty::is(Stderr) { "always" } else { "never" });
+    }
+
+    if args.frozen {
+        cmd.arg("--frozen");
+    }
+
+    if args.locked {
+        cmd.arg("--locked");
+    }
+
+    for unstable_flag in &args.unstable_flags {
+        cmd.arg("-Z");
+        cmd.arg(unstable_flag);
+    }
+
+    cmd.arg("--");
     if let Some(path) = outfile {
-        args.push("-o".into());
-        args.push(path.into());
+        cmd.arg("-o");
+        cmd.arg(path);
     }
-    args.push("-Zunstable-options".into());
-    args.push("--pretty=expanded".into());
-    args.extend(it);
-    args
-}
-
-fn color_never(args: &[OsString]) -> bool {
-    args.windows(2)
-        .any(|pair| pair[0] == *"--color" && pair[1] == *"never")
-        || args.iter().any(|arg| *arg == *"--color=never")
+    cmd.arg("-Zunstable-options");
+    cmd.arg("--pretty=expanded");
 }
 
 fn which(cmd: &[&str]) -> Option<OsString> {

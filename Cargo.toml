@@ -13,6 +13,7 @@ readme = "README.md"
 
 [dependencies]
 atty = "0.2"
+structopt = "0.2"
 tempfile = "3.0"
 
 [badges]
