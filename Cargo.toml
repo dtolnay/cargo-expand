@@ -8,6 +8,7 @@ repository = "https://github.com/dtolnay/cargo-expand"
 documentation = "https://github.com/dtolnay/cargo-expand"
 keywords = ["cargo", "subcommand", "expanded"]
 categories = ["development-tools::cargo-plugins", "development-tools::debugging"]
+edition = "2018"
 readme = "README.md"
 
 [dependencies]

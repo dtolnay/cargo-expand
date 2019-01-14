@@ -1,6 +1,3 @@
-extern crate atty;
-extern crate tempfile;
-
 use std::env;
 use std::ffi::OsString;
 use std::fs::File;
