@@ -89,11 +89,22 @@ fn cargo_binary() -> OsString {
 fn cargo_expand() -> Result<i32> {
     let Opts::Expand(args) = Opts::from_args();
 
-    if let Some(item) = &args.item {
-        if args.ugly {
+    let which_rustfmt;
+    match (&args.item, args.ugly) {
+        (Some(item), true) => {
             eprintln!("ERROR: cannot expand single item ({}) in ugly mode.", item);
             return Ok(1);
         }
+        (Some(item), false) => {
+            which_rustfmt = which("rustfmt");
+            if which_rustfmt.is_none() {
+                eprintln!("ERROR: cannot expand single item ({}) without rustfmt.", item);
+                eprintln!("Install rustfmt by running `rustup component add rustfmt`.");
+                return Ok(1);
+            }
+        }
+        (None, true) => which_rustfmt = None,
+        (None, false) => which_rustfmt = which("rustfmt"),
     }
 
     let mut builder = tempfile::Builder::new();
@@ -116,10 +127,6 @@ fn cargo_expand() -> Result<i32> {
     }
 
     // Run rustfmt
-    let which_rustfmt = match args.ugly {
-        false => which("rustfmt"),
-        true => None,
-    };
     if let Some(fmt) = which_rustfmt {
         // Work around rustfmt not being able to parse paths containing $crate.
         // This placeholder should be the same width as $crate to preserve
