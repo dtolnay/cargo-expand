@@ -8,7 +8,7 @@ use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
 use std::process::{self, Command, Stdio};
 
-use atty::Stream::{Stdout, Stderr};
+use atty::Stream::{Stderr, Stdout};
 
 fn main() {
     if env::args_os().any(|arg| arg == *"--version") {
@@ -52,11 +52,13 @@ fn cargo_expand_or_run_nightly() -> io::Result<i32> {
 
     Ok(match status.code() {
         Some(code) => code,
-        None => if status.success() {
-            0
-        } else {
-            1
-        },
+        None => {
+            if status.success() {
+                0
+            } else {
+                1
+            }
+        }
     })
 }
 
