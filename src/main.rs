@@ -89,6 +89,13 @@ fn cargo_binary() -> OsString {
 fn cargo_expand() -> Result<i32> {
     let Opts::Expand(args) = Opts::from_args();
 
+    if let Some(item) = &args.item {
+        if args.ugly {
+            eprintln!("ERROR: cannot expand single item ({}) in ugly mode.", item);
+            return Ok(1);
+        }
+    }
+
     let mut builder = tempfile::Builder::new();
     builder.prefix("cargo-expand");
     let outdir = builder.tempdir().expect("failed to create tmp file");

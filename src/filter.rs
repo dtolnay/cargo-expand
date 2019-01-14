@@ -1,3 +1,4 @@
+use std::fmt::{self, Display};
 use std::mem;
 use std::str::FromStr;
 
@@ -24,6 +25,18 @@ impl FromStr for Filter {
             return Err("empty path".to_owned());
         }
         Ok(Filter { segments })
+    }
+}
+
+impl Display for Filter {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        for (i, segment) in self.segments.iter().enumerate() {
+            if i > 0 {
+                formatter.write_str("::")?;
+            }
+            Display::fmt(segment, formatter)?;
+        }
+        Ok(())
     }
 }
 
