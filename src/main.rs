@@ -1,11 +1,12 @@
 use std::env;
 use std::ffi::OsString;
-use std::fs::File;
-use std::io::{self, BufRead, Write};
-use std::path::PathBuf;
+use std::fs::{self, File};
+use std::io::{self, BufRead, Read, Write};
+use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
+use quote::quote;
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
@@ -172,33 +173,45 @@ fn cargo_expand() -> io::Result<i32> {
         None
     };
 
-    let outdir = if which_rustfmt.is_some() || which_pygmentize.is_some() {
-        let mut builder = tempfile::Builder::new();
-        builder.prefix("cargo-expand");
-        Some(builder.tempdir().expect("failed to create tmp file"))
-    } else {
-        None
-    };
-    let outfile = outdir.as_ref().map(|dir| dir.path().join("expanded"));
+    let mut builder = tempfile::Builder::new();
+    builder.prefix("cargo-expand");
+    let outdir = builder.tempdir().expect("failed to create tmp file");
+    let outfile_path = outdir.path().join("expanded");
 
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
-    apply_args(&mut cmd, &args, outfile.as_ref());
+    apply_args(&mut cmd, &args, &outfile_path);
     let code = filter_err(&mut cmd, ignore_cargo_err)?;
 
-    if let Some(ref outfile) = outfile {
-        // Ensure that outfile got written.
-        match File::open(outfile).and_then(|f| f.metadata()) {
-            Ok(ref metadata) if metadata.len() != 0 => {}
-            _ => return Ok(if code == 0 { 1 } else { code }),
-        }
+    let mut outfile = File::open(&outfile_path)?;
+    if outfile.metadata()?.len() == 0 {
+        let _ = writeln!(
+            &mut io::stderr(),
+            "ERROR: rustc produced no expanded output"
+        );
+        return Ok(if code == 0 { 1 } else { code });
     }
 
     // Run rustfmt
     if let Some(fmt) = which_rustfmt {
+        // Discard comments, which are misplaced by the compiler
+        let mut content = Vec::new();
+        outfile.read_to_end(&mut content)?;
+        match String::from_utf8(content) {
+            Ok(content) => {
+                if let Ok(syntax_tree) = syn::parse_file(&content) {
+                    let content = quote!(#syntax_tree).to_string();
+                    fs::write(&outfile_path, content)?;
+                }
+            }
+            Err(_) => {
+                let _ = writeln!(&mut io::stderr(), "WARNING: non-UTF8 content");
+            }
+        }
+
         // Ignore any errors.
         let _status = Command::new(fmt)
-            .arg(outfile.as_ref().unwrap())
+            .arg(&outfile_path)
             .stderr(Stdio::null())
             .status();
     }
@@ -207,18 +220,18 @@ fn cargo_expand() -> io::Result<i32> {
     if let Some(pyg) = which_pygmentize {
         let _status = Command::new(pyg)
             .args(&["-l", "rust", "-O", "encoding=utf8"])
-            .arg(outfile.as_ref().unwrap())
+            .arg(&outfile_path)
             .status();
-    } else if let Some(outfile) = outfile {
+    } else {
         // Cat outfile if rustfmt was used.
-        let mut reader = File::open(outfile)?;
+        let mut reader = File::open(&outfile_path)?;
         io::copy(&mut reader, &mut io::stdout())?;
     }
     Ok(0)
 }
 
 // Based on https://github.com/rsolomo/cargo-check
-fn apply_args(cmd: &mut Command, args: &Args, outfile: Option<&PathBuf>) {
+fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     cmd.arg("rustc");
     cmd.arg("--profile=check");
 
@@ -300,10 +313,8 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: Option<&PathBuf>) {
     }
 
     cmd.arg("--");
-    if let Some(path) = outfile {
-        cmd.arg("-o");
-        cmd.arg(path);
-    }
+    cmd.arg("-o");
+    cmd.arg(outfile);
     cmd.arg("-Zunstable-options");
     cmd.arg("--pretty=expanded");
 }
