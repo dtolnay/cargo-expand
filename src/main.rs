@@ -138,7 +138,11 @@ fn cargo_expand() -> Result<i32> {
         if let Ok(mut syntax_tree) = syn::parse_file(&content) {
             edit::remove_macro_rules(&mut syntax_tree);
             if let Some(filter) = args.item {
-                filter::filter(&mut syntax_tree, filter);
+                filter::filter(&mut syntax_tree, &filter);
+                if syntax_tree.items.is_empty() {
+                    eprintln!("WARNING: no such item: {}", filter);
+                    return Ok(1);
+                }
             }
             content = quote!(#syntax_tree).to_string();
         }

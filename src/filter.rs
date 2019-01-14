@@ -40,7 +40,7 @@ impl Display for Filter {
     }
 }
 
-pub fn filter(syntax_tree: &mut File, filter: Filter) {
+pub fn filter(syntax_tree: &mut File, filter: &Filter) {
     syntax_tree.shebang = None;
     syntax_tree.attrs.clear();
 
@@ -55,11 +55,11 @@ pub fn filter(syntax_tree: &mut File, filter: Filter) {
     };
     let mut items = vec![Item::Mod(root_mod)];
 
-    for segment in filter.segments {
+    for segment in &filter.segments {
         items = items
             .into_iter()
             .flat_map(enter_item)
-            .filter(|item| name_of_item(item) == Some(&segment))
+            .filter(|item| name_of_item(item) == Some(segment))
             .collect();
     }
 
