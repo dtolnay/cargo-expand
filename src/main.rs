@@ -1,3 +1,4 @@
+mod edit;
 mod error;
 mod opts;
 
@@ -119,7 +120,8 @@ fn cargo_expand() -> Result<i32> {
         content = content.replace("$crate", DOLLAR_CRATE_PLACEHOLDER);
 
         // Discard comments, which are misplaced by the compiler
-        if let Ok(syntax_tree) = syn::parse_file(&content) {
+        if let Ok(mut syntax_tree) = syn::parse_file(&content) {
+            edit::remove_macro_rules(&mut syntax_tree);
             content = quote!(#syntax_tree).to_string();
         }
         fs::write(&outfile_path, content)?;
