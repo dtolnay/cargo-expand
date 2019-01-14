@@ -1,103 +1,19 @@
+mod opts;
+
 use std::env;
 use std::ffi::OsString;
 use std::fmt::{self, Display};
 use std::fs;
 use std::io::{self, BufRead, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
 use prettyprint::{PagingMode, PrettyPrinter, PrettyPrintError};
 use quote::quote;
-use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
-#[derive(StructOpt)]
-#[structopt(bin_name = "cargo")]
-enum Opts {
-    /// Show the result of macro expansion.
-    #[structopt(
-        name = "expand",
-        raw(
-            setting = "AppSettings::UnifiedHelpMessage",
-            setting = "AppSettings::DeriveDisplayOrder",
-            setting = "AppSettings::DontCollapseArgsInUsage"
-        )
-    )]
-    Expand(Args),
-}
-
-#[derive(StructOpt, Debug)]
-#[structopt(rename_all = "kebab-case")]
-struct Args {
-    /// Space-separated list of features to activate
-    #[structopt(long, value_name = "FEATURES")]
-    features: Option<String>,
-
-    /// Activate all available features
-    #[structopt(long)]
-    all_features: bool,
-
-    /// Do not activate the `default` feature
-    #[structopt(long)]
-    no_default_features: bool,
-
-    /// Build only this package's library
-    #[structopt(long)]
-    lib: bool,
-
-    /// Build only the specified binary
-    #[structopt(long, value_name = "NAME")]
-    bin: Option<String>,
-
-    /// Build only the specified example
-    #[structopt(long, value_name = "NAME")]
-    example: Option<String>,
-
-    /// Build only the specified test target
-    #[structopt(long, value_name = "NAME")]
-    test: Option<String>,
-
-    /// Build only the specified bench target
-    #[structopt(long, value_name = "NAME")]
-    bench: Option<String>,
-
-    /// Target triple which compiles will be for
-    #[structopt(long, value_name = "TARGET")]
-    target: Option<String>,
-
-    /// Directory for all generated artifacts
-    #[structopt(long, value_name = "DIRECTORY", parse(from_os_str))]
-    target_dir: Option<PathBuf>,
-
-    /// Path to Cargo.toml
-    #[structopt(long, value_name = "PATH", parse(from_os_str))]
-    manifest_path: Option<PathBuf>,
-
-    /// Number of parallel jobs, defaults to # of CPUs
-    #[structopt(short, long, value_name = "N")]
-    jobs: Option<u64>,
-
-    /// Coloring: auto, always, never
-    #[structopt(long, value_name = "WHEN")]
-    color: Option<String>,
-
-    /// Require Cargo.lock and cache are up to date
-    #[structopt(long)]
-    frozen: bool,
-
-    /// Require Cargo.lock is up to date
-    #[structopt(long)]
-    locked: bool,
-
-    /// Unstable (nightly-only) flags to Cargo
-    #[structopt(short = "Z", value_name = "FLAG")]
-    unstable_flags: Vec<String>,
-
-    /// Do not attempt to run rustfmt
-    #[structopt(long)]
-    ugly: bool,
-}
+use crate::opts::{Args, Opts};
 
 fn main() {
     let result = cargo_expand_or_run_nightly();
