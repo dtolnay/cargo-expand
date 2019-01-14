@@ -258,7 +258,9 @@ fn cargo_expand() -> Result<i32> {
             .paging_mode(PagingMode::Never)
             .build()
             .unwrap();
-        printer.string(content)?;
+
+        // Ignore any errors.
+        let _ = printer.string(content);
     } else {
         let mut reader = File::open(&outfile_path)?;
         io::copy(&mut reader, &mut io::stdout())?;
