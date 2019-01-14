@@ -18,18 +18,14 @@ $ cargo rustc --profile=check -- -Zunstable-options --pretty=expanded
 
 ## Installation
 
-Install with `cargo install cargo-expand`.
+Install with **`cargo install cargo-expand`**.
 
 This command optionally uses
 [`rustfmt`](https://github.com/rust-lang-nursery/rustfmt)
 to format the expanded output. The resulting code is typically much more
 readable than what you get from the compiler. If `rustfmt` is not available, the
-expanded code is not formatted. Install `rustfmt` with `rustup component add
-rustfmt-preview`.
-
-This command optionally uses [`Pygments`](http://pygments.org/) to colorize the
-expanded output. If `Pygments` is not available, the expanded code is not
-colorized. Install with `pip install Pygments`.
+expanded code is not formatted. Install `rustfmt` with **`rustup component add
+rustfmt`**.
 
 Cargo expand relies on unstable compiler flags so it requires a nightly
 toolchain to be installed, though does not require nightly to be the default
@@ -58,12 +54,12 @@ fn main() {
 #[prelude_import]
 use std::prelude::v1::*;
 #[macro_use]
-extern crate std;
+extern crate std as std;
 struct S;
 #[automatically_derived]
 #[allow(unused_qualifications)]
-impl ::std::fmt::Debug for S {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+impl $crate::fmt::Debug for S {
+    fn fmt(&self, f: &mut $crate::fmt::Formatter) -> $crate::fmt::Result {
         match *self {
             S => {
                 let mut debug_trait_builder = f.debug_tuple("S");
@@ -72,48 +68,48 @@ impl ::std::fmt::Debug for S {
         }
     }
 }
-
 fn main() {
-    ::io::_print(::std::fmt::Arguments::new_v1_formatted(
-        &["", "\n"],
-        &match (&S,) {
-            (arg0,) => [::std::fmt::ArgumentV1::new(arg0, ::std::fmt::Debug::fmt)],
-        },
-        &[::std::fmt::rt::v1::Argument {
-            position: ::std::fmt::rt::v1::Position::At(0usize),
-            format: ::std::fmt::rt::v1::FormatSpec {
-                fill: ' ',
-                align: ::std::fmt::rt::v1::Alignment::Unknown,
-                flags: 0u32,
-                precision: ::std::fmt::rt::v1::Count::Implied,
-                width: ::std::fmt::rt::v1::Count::Implied,
+    {
+        $crate::io::_print($crate::fmt::Arguments::new_v1_formatted(
+            &["", "\n"],
+            &match (&S,) {
+                (arg0,) => [$crate::fmt::ArgumentV1::new(
+                    arg0,
+                    $crate::fmt::Debug::fmt,
+                )],
             },
-        }],
-    ));
+            &[$crate::fmt::rt::v1::Argument {
+                position: $crate::fmt::rt::v1::Position::At(0usize),
+                format: $crate::fmt::rt::v1::FormatSpec {
+                    fill: ' ',
+                    align: $crate::fmt::rt::v1::Alignment::Unknown,
+                    flags: 0u32,
+                    precision: $crate::fmt::rt::v1::Count::Implied,
+                    width: $crate::fmt::rt::v1::Count::Implied,
+                },
+            }],
+        ));
+    };
 }
 ```
 
 ## Options
 
+*See `cargo expand --help` for a complete list of options, most of which are
+consistent with other Cargo subcommands. Here are a few that are common in the
+context of cargo expand.*
+
 To expand a particular test target:
 
 `$ cargo expand --test test_something`
 
-To expand with `rustfmt` different from the one in `$PATH`:
+To expand without `rustfmt`:
 
-`$ RUSTFMT=/path/to/rustfmt cargo expand`
+`$ cargo expand --ugly`
 
-To expand without `rustfmt` even though it is available in `$PATH`:
+To expand a specific module only:
 
-`$ RUSTFMT= cargo expand`
-
-To color with `pygmentize` different from the one in `$PATH`:
-
-`$ PYGMENTIZE=/path/to/pygmentize cargo expand`
-
-To not color even though `pygmentize` is available in `$PATH`:
-
-`$ PYGMENTIZE= cargo expand`
+`$ cargo expand path::to::module`
 
 ## Disclaimer
 
@@ -143,17 +139,19 @@ Refer to [The Book] for more on the considerations around macro hygiene.
 
 [The Book]: https://doc.rust-lang.org/book/first-edition/macros.html#hygiene
 
-## License
+<br>
 
-Licensed under either of
+#### License
 
- * Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
 
-at your option.
+<br>
 
-### Contribution
-
+<sub>
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in cargo-expand by you, as defined in the Apache-2.0 license,
-shall be dual licensed as above, without any additional terms or conditions.
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
+</sub>
