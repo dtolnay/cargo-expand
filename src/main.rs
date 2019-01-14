@@ -148,6 +148,9 @@ fn cargo_expand() -> Result<i32> {
         }
         fs::write(&outfile_path, content)?;
 
+        let rustfmt_config_path = outdir.path().join("rustfmt.toml");
+        fs::write(rustfmt_config_path, "normalize_doc_attributes = true\n")?;
+
         // Ignore any errors.
         let _status = Command::new(fmt)
             .arg(&outfile_path)
