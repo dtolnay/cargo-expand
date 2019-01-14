@@ -1,8 +1,8 @@
 use std::env;
 use std::ffi::OsString;
 use std::fmt::{self, Display};
-use std::fs::{self, File};
-use std::io::{self, BufRead, Read, Write};
+use std::fs;
+use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 
@@ -208,8 +208,8 @@ fn cargo_expand() -> Result<i32> {
     apply_args(&mut cmd, &args, &outfile_path);
     let code = filter_err(&mut cmd, ignore_cargo_err)?;
 
-    let mut outfile = File::open(&outfile_path)?;
-    if outfile.metadata()?.len() == 0 {
+    let mut content = fs::read_to_string(&outfile_path)?;
+    if content.is_empty() {
         let _ = writeln!(
             &mut io::stderr(),
             "ERROR: rustc produced no expanded output"
@@ -224,18 +224,9 @@ fn cargo_expand() -> Result<i32> {
     };
     if let Some(fmt) = which_rustfmt {
         // Discard comments, which are misplaced by the compiler
-        let mut content = Vec::new();
-        outfile.read_to_end(&mut content)?;
-        match String::from_utf8(content) {
-            Ok(content) => {
-                if let Ok(syntax_tree) = syn::parse_file(&content) {
-                    let content = quote!(#syntax_tree).to_string();
-                    fs::write(&outfile_path, content)?;
-                }
-            }
-            Err(_) => {
-                let _ = writeln!(&mut io::stderr(), "WARNING: non-UTF8 content");
-            }
+        if let Ok(syntax_tree) = syn::parse_file(&content) {
+            content = quote!(#syntax_tree).to_string();
+            fs::write(&outfile_path, content)?;
         }
 
         // Ignore any errors.
@@ -243,6 +234,8 @@ fn cargo_expand() -> Result<i32> {
             .arg(&outfile_path)
             .stderr(Stdio::null())
             .status();
+
+        content = fs::read_to_string(&outfile_path)?;
     }
 
     // Run pretty printer
@@ -252,7 +245,6 @@ fn cargo_expand() -> Result<i32> {
         None | Some("auto") | Some(_) => atty::is(Stdout),
     };
     if do_color {
-        let mut content = fs::read_to_string(&outfile_path)?;
         if content.ends_with('\n') {
             // Pretty printer seems to print an extra trailing newline.
             content.truncate(content.len() - 1);
@@ -269,8 +261,7 @@ fn cargo_expand() -> Result<i32> {
         // Ignore any errors.
         let _ = printer.string(content);
     } else {
-        let mut reader = File::open(&outfile_path)?;
-        io::copy(&mut reader, &mut io::stdout())?;
+        let _ = write!(&mut io::stdout(), "{}", content);
     }
 
     Ok(0)
