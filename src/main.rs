@@ -242,7 +242,11 @@ fn cargo_expand() -> Result<i32> {
     let allow_color = args.color.as_ref().map_or(true, |color| color != "never");
     let do_color = allow_color && atty::is(Stdout);
     if do_color {
-        let content = fs::read_to_string(&outfile_path)?;
+        let mut content = fs::read_to_string(&outfile_path)?;
+        if content.ends_with('\n') {
+            // Pretty printer seems to print an extra trailing newline.
+            content.truncate(content.len() - 1);
+        }
         let printer = PrettyPrinter::default()
             .header(false)
             .grid(false)
