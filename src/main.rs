@@ -219,7 +219,7 @@ fn cargo_expand() -> Result<i32> {
 
     // Run rustfmt
     let which_rustfmt = match args.ugly {
-        false => which(&["rustfmt"]),
+        false => which("rustfmt"),
         true => None,
     };
     if let Some(fmt) = which_rustfmt {
@@ -365,17 +365,16 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     cmd.arg("--pretty=expanded");
 }
 
-fn which(cmd: &[&str]) -> Option<OsString> {
+fn which(cmd: &str) -> Option<OsString> {
     if env::args_os().any(|arg| arg == *"--help") {
         return None;
     }
 
-    if let Some(which) = env::var_os(&cmd[0].to_uppercase()) {
+    if let Some(which) = env::var_os(&cmd.to_uppercase()) {
         return if which.is_empty() { None } else { Some(which) };
     }
 
-    let spawn = Command::new(cmd[0])
-        .args(&cmd[1..])
+    let spawn = Command::new(cmd)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -395,7 +394,7 @@ fn which(cmd: &[&str]) -> Option<OsString> {
     };
 
     if exit.success() {
-        Some(cmd[0].into())
+        Some(cmd.into())
     } else {
         None
     }
