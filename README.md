@@ -107,7 +107,7 @@ To expand without `rustfmt`:
 
 `$ cargo expand --ugly`
 
-To expand a specific module only:
+To expand a specific module or type or function only:
 
 `$ cargo expand path::to::module`
 
