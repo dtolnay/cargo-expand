@@ -93,6 +93,10 @@ struct Args {
     /// Unstable (nightly-only) flags to Cargo
     #[structopt(short = "Z", value_name = "FLAG")]
     unstable_flags: Vec<String>,
+
+    /// Do not attempt to run rustfmt
+    #[structopt(long)]
+    ugly: bool,
 }
 
 fn main() {
@@ -214,7 +218,10 @@ fn cargo_expand() -> Result<i32> {
     }
 
     // Run rustfmt
-    let which_rustfmt = which(&["rustfmt"]);
+    let which_rustfmt = match args.ugly {
+        false => which(&["rustfmt"]),
+        true => None,
+    };
     if let Some(fmt) = which_rustfmt {
         // Discard comments, which are misplaced by the compiler
         let mut content = Vec::new();
