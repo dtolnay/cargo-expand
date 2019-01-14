@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
-use prettyprint::{PrettyPrinter, PrettyPrintError};
+use prettyprint::{PagingMode, PrettyPrinter, PrettyPrintError};
 use quote::quote;
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
@@ -252,6 +252,7 @@ fn cargo_expand() -> Result<i32> {
             .grid(false)
             .line_numbers(false)
             .language("rust")
+            .paging_mode(PagingMode::Never)
             .build()
             .unwrap();
         printer.string(content)?;
