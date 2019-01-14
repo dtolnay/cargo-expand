@@ -98,7 +98,10 @@ fn cargo_expand() -> Result<i32> {
         (Some(item), false) => {
             which_rustfmt = which("rustfmt");
             if which_rustfmt.is_none() {
-                eprintln!("ERROR: cannot expand single item ({}) without rustfmt.", item);
+                eprintln!(
+                    "ERROR: cannot expand single item ({}) without rustfmt.",
+                    item
+                );
                 eprintln!("Install rustfmt by running `rustup component add rustfmt`.");
                 return Ok(1);
             }
