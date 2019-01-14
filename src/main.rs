@@ -1,11 +1,13 @@
 use std::env;
 use std::ffi::OsString;
+use std::fmt::{self, Display};
 use std::fs::{self, File};
 use std::io::{self, BufRead, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
+use prettyprint::{PrettyPrinter, PrettyPrintError};
 use quote::quote;
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
@@ -104,7 +106,35 @@ fn main() {
     });
 }
 
-fn cargo_expand_or_run_nightly() -> io::Result<i32> {
+enum Error {
+    Io(io::Error),
+    Print(PrettyPrintError),
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::Io(error)
+    }
+}
+
+impl From<PrettyPrintError> for Error {
+    fn from(error: PrettyPrintError) -> Self {
+        Error::Print(error)
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::Io(error) => Display::fmt(error, formatter),
+            Error::Print(error) => Display::fmt(error, formatter),
+        }
+    }
+}
+
+type Result<T> = std::result::Result<T, Error>;
+
+fn cargo_expand_or_run_nightly() -> Result<i32> {
     const NO_RUN_NIGHTLY: &str = "CARGO_EXPAND_NO_RUN_NIGHTLY";
 
     let maybe_nightly = !definitely_not_nightly();
@@ -161,17 +191,8 @@ fn cargo_binary() -> OsString {
     env::var_os("CARGO").unwrap_or_else(|| "cargo".to_owned().into())
 }
 
-fn cargo_expand() -> io::Result<i32> {
+fn cargo_expand() -> Result<i32> {
     let Opts::Expand(args) = Opts::from_args();
-
-    let allow_color = args.color.as_ref().map_or(true, |color| color != "never");
-
-    let which_rustfmt = which(&["rustfmt"]);
-    let which_pygmentize = if allow_color && atty::is(Stdout) {
-        which(&["pygmentize", "-l", "rust"])
-    } else {
-        None
-    };
 
     let mut builder = tempfile::Builder::new();
     builder.prefix("cargo-expand");
@@ -193,6 +214,7 @@ fn cargo_expand() -> io::Result<i32> {
     }
 
     // Run rustfmt
+    let which_rustfmt = which(&["rustfmt"]);
     if let Some(fmt) = which_rustfmt {
         // Discard comments, which are misplaced by the compiler
         let mut content = Vec::new();
@@ -216,17 +238,24 @@ fn cargo_expand() -> io::Result<i32> {
             .status();
     }
 
-    // Run pygmentize
-    if let Some(pyg) = which_pygmentize {
-        let _status = Command::new(pyg)
-            .args(&["-l", "rust", "-O", "encoding=utf8"])
-            .arg(&outfile_path)
-            .status();
+    // Run pretty printer
+    let allow_color = args.color.as_ref().map_or(true, |color| color != "never");
+    let do_color = allow_color && atty::is(Stdout);
+    if do_color {
+        let content = fs::read_to_string(&outfile_path)?;
+        let printer = PrettyPrinter::default()
+            .header(false)
+            .grid(false)
+            .line_numbers(false)
+            .language("rust")
+            .build()
+            .unwrap();
+        printer.string(content)?;
     } else {
-        // Cat outfile if rustfmt was used.
         let mut reader = File::open(&outfile_path)?;
         io::copy(&mut reader, &mut io::stdout())?;
     }
+
     Ok(0)
 }
 

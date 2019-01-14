@@ -13,6 +13,7 @@ readme = "README.md"
 
 [dependencies]
 atty = "0.2"
+prettyprint = "0.2"
 quote = { version = "0.6", default-features = false }
 structopt = "0.2"
 syn = { version = "0.15", default-features = false, features = ["full", "parsing", "printing"] }
