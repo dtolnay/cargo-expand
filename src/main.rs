@@ -167,6 +167,7 @@ fn cargo_expand() -> Result<i32> {
         Some("never") => false,
         None | Some("auto") | Some(_) => atty::is(Stdout),
     };
+    let _ = writeln!(&mut io::stderr());
     if do_color {
         if content.ends_with('\n') {
             // Pretty printer seems to print an extra trailing newline.
