@@ -1,18 +1,19 @@
+mod error;
 mod opts;
 
 use std::env;
 use std::ffi::OsString;
-use std::fmt::{self, Display};
 use std::fs;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
-use prettyprint::{PagingMode, PrettyPrinter, PrettyPrintError};
+use prettyprint::{PagingMode, PrettyPrinter};
 use quote::quote;
 use structopt::StructOpt;
 
+use crate::error::Result;
 use crate::opts::{Args, Opts};
 
 fn main() {
@@ -25,34 +26,6 @@ fn main() {
         }
     });
 }
-
-enum Error {
-    Io(io::Error),
-    Print(PrettyPrintError),
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self {
-        Error::Io(error)
-    }
-}
-
-impl From<PrettyPrintError> for Error {
-    fn from(error: PrettyPrintError) -> Self {
-        Error::Print(error)
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::Io(error) => Display::fmt(error, formatter),
-            Error::Print(error) => Display::fmt(error, formatter),
-        }
-    }
-}
-
-type Result<T> = std::result::Result<T, Error>;
 
 fn cargo_expand_or_run_nightly() -> Result<i32> {
     const NO_RUN_NIGHTLY: &str = "CARGO_EXPAND_NO_RUN_NIGHTLY";
