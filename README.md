@@ -111,6 +111,13 @@ To expand a specific module only:
 
 `$ cargo expand path::to::module`
 
+[![cargo expand punctuated::printing][punctuated.png]][syn]
+[![cargo expand token::FatArrow][fatarrow.png]][syn]
+
+[punctuated.png]: https://raw.githubusercontent.com/dtolnay/cargo-expand/screenshots/punctuated.png
+[fatarrow.png]: https://raw.githubusercontent.com/dtolnay/cargo-expand/screenshots/fatarrow.png
+[syn]: https://github.com/dtolnay/syn
+
 ## Disclaimer
 
 Be aware that macro expansion to text is a lossy process. This is a debugging
