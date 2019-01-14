@@ -239,8 +239,11 @@ fn cargo_expand() -> Result<i32> {
     }
 
     // Run pretty printer
-    let allow_color = args.color.as_ref().map_or(true, |color| color != "never");
-    let do_color = allow_color && atty::is(Stdout);
+    let do_color = match args.color.as_ref().map(String::as_str) {
+        Some("always") => true,
+        Some("never") => false,
+        None | Some("auto") | Some(_) => atty::is(Stdout),
+    };
     if do_color {
         let mut content = fs::read_to_string(&outfile_path)?;
         if content.ends_with('\n') {
