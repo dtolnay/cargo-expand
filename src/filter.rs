@@ -58,7 +58,7 @@ pub fn filter(syntax_tree: &mut File, filter: &Filter) {
     for segment in &filter.segments {
         items = items
             .into_iter()
-            .flat_map(enter_item)
+            .flat_map(contents_of_item)
             .filter(|item| name_of_item(item) == Some(segment))
             .collect();
     }
@@ -76,7 +76,7 @@ pub fn filter(syntax_tree: &mut File, filter: &Filter) {
     syntax_tree.items = items;
 }
 
-fn enter_item(item: Item) -> Vec<Item> {
+fn contents_of_item(item: Item) -> Vec<Item> {
     match item {
         Item::ExternCrate(_) => Vec::new(),
         Item::Use(_) => Vec::new(),
