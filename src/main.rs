@@ -102,7 +102,7 @@ fn cargo_expand() -> Result<i32> {
                     "ERROR: cannot expand single item ({}) without rustfmt.",
                     item
                 );
-                eprintln!("Install rustfmt by running `rustup component add rustfmt`.");
+                eprintln!("Install rustfmt by running `rustup component add rustfmt --toolchain nightly`.");
                 return Ok(1);
             }
         }
