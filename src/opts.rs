@@ -51,10 +51,6 @@ pub struct Args {
     #[structopt(long, value_name = "NAME")]
     pub test: Option<String>,
 
-    /// Include tests when expanding the lib or bin
-    #[structopt(long)]
-    pub tests: bool,
-
     /// Expand only the specified bench target
     #[structopt(long, value_name = "NAME")]
     pub bench: Option<String>,

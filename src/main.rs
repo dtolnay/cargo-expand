@@ -231,15 +231,6 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
         cmd.arg(test);
     }
 
-    if args.tests {
-        let mut rustflags = OsString::from("--cfg test");
-        if let Some(env_rustflags) = env::var_os("RUSTFLAGS") {
-            rustflags.push(" ");
-            rustflags.push(env_rustflags);
-        }
-        cmd.env("RUSTFLAGS", rustflags);
-    }
-
     if let Some(bench) = &args.bench {
         cmd.arg("--bench");
         cmd.arg(bench);
