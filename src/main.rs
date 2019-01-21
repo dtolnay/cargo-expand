@@ -277,6 +277,11 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     }
 
     cmd.arg("--");
+
+    if args.tests && args.test.is_none() {
+        cmd.arg("--test");
+    }
+
     cmd.arg("-o");
     cmd.arg(outfile);
     cmd.arg("-Zunstable-options");
