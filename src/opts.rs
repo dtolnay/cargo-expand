@@ -35,19 +35,19 @@ pub struct Args {
     #[structopt(long)]
     pub no_default_features: bool,
 
-    /// Build only this package's library
+    /// Expand only this package's library
     #[structopt(long)]
     pub lib: bool,
 
-    /// Build only the specified binary
+    /// Expand only the specified binary
     #[structopt(long, value_name = "NAME")]
     pub bin: Option<String>,
 
-    /// Build only the specified example
+    /// Expand only the specified example
     #[structopt(long, value_name = "NAME")]
     pub example: Option<String>,
 
-    /// Build only the specified test target
+    /// Expand only the specified test target
     #[structopt(long, value_name = "NAME")]
     pub test: Option<String>,
 
@@ -55,7 +55,7 @@ pub struct Args {
     #[structopt(long)]
     pub tests: bool,
 
-    /// Build only the specified bench target
+    /// Expand only the specified bench target
     #[structopt(long, value_name = "NAME")]
     pub bench: Option<String>,
 
