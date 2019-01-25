@@ -7,7 +7,7 @@ use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, BufRead, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
@@ -89,15 +89,15 @@ fn cargo_binary() -> OsString {
 fn cargo_expand() -> Result<i32> {
     let Opts::Expand(args) = Opts::from_args();
 
-    let which_rustfmt;
+    let rustfmt;
     match (&args.item, args.ugly) {
         (Some(item), true) => {
             eprintln!("ERROR: cannot expand single item ({}) in ugly mode.", item);
             return Ok(1);
         }
         (Some(item), false) => {
-            which_rustfmt = toolchain_find::find_installed_component("rustfmt");
-            if which_rustfmt.is_none() {
+            rustfmt = which_rustfmt();
+            if rustfmt.is_none() {
                 eprintln!(
                     "ERROR: cannot expand single item ({}) without rustfmt.",
                     item
@@ -106,8 +106,8 @@ fn cargo_expand() -> Result<i32> {
                 return Ok(1);
             }
         }
-        (None, true) => which_rustfmt = None,
-        (None, false) => which_rustfmt = toolchain_find::find_installed_component("rustfmt"),
+        (None, true) => rustfmt = None,
+        (None, false) => rustfmt = which_rustfmt(),
     }
 
     let mut builder = tempfile::Builder::new();
@@ -130,7 +130,7 @@ fn cargo_expand() -> Result<i32> {
     }
 
     // Run rustfmt
-    if let Some(fmt) = which_rustfmt {
+    if let Some(rustfmt) = rustfmt {
         // Work around rustfmt not being able to parse paths containing $crate.
         // This placeholder should be the same width as $crate to preserve
         // alignments.
@@ -155,7 +155,7 @@ fn cargo_expand() -> Result<i32> {
         fs::write(rustfmt_config_path, "normalize_doc_attributes = true\n")?;
 
         // Ignore any errors.
-        let _status = Command::new(fmt)
+        let _status = Command::new(rustfmt)
             .arg(&outfile_path)
             .stderr(Stdio::null())
             .status();
@@ -192,6 +192,19 @@ fn cargo_expand() -> Result<i32> {
     }
 
     Ok(0)
+}
+
+fn which_rustfmt() -> Option<PathBuf> {
+    match env::var_os("RUSTFMT") {
+        Some(which) => {
+            if which.is_empty() {
+                None
+            } else {
+                Some(PathBuf::from(which))
+            }
+        }
+        None => toolchain_find::find_installed_component("rustfmt"),
+    }
 }
 
 // Based on https://github.com/rsolomo/cargo-check
