@@ -96,7 +96,7 @@ fn cargo_expand() -> Result<i32> {
             return Ok(1);
         }
         (Some(item), false) => {
-            which_rustfmt = which("rustfmt");
+            which_rustfmt = toolchain_find::find_installed_component("rustfmt");
             if which_rustfmt.is_none() {
                 eprintln!(
                     "ERROR: cannot expand single item ({}) without rustfmt.",
@@ -107,7 +107,7 @@ fn cargo_expand() -> Result<i32> {
             }
         }
         (None, true) => which_rustfmt = None,
-        (None, false) => which_rustfmt = which("rustfmt"),
+        (None, false) => which_rustfmt = toolchain_find::find_installed_component("rustfmt"),
     }
 
     let mut builder = tempfile::Builder::new();
@@ -286,41 +286,6 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     cmd.arg(outfile);
     cmd.arg("-Zunstable-options");
     cmd.arg("--pretty=expanded");
-}
-
-fn which(cmd: &str) -> Option<OsString> {
-    if env::args_os().any(|arg| arg == *"--help") {
-        return None;
-    }
-
-    if let Some(which) = env::var_os(&cmd.to_uppercase()) {
-        return if which.is_empty() { None } else { Some(which) };
-    }
-
-    let spawn = Command::new(cmd)
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn();
-    let mut child = match spawn {
-        Ok(child) => child,
-        Err(_) => {
-            return None;
-        }
-    };
-
-    let exit = match child.wait() {
-        Ok(exit) => exit,
-        Err(_) => {
-            return None;
-        }
-    };
-
-    if exit.success() {
-        Some(cmd.into())
-    } else {
-        None
-    }
 }
 
 fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
