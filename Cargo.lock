@@ -130,7 +130,7 @@ name = "cargo-expand"
 version = "0.4.5"
 dependencies = [
  "atty 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "prettyprint 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "prettyprint 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -695,7 +695,7 @@ dependencies = [
 
 [[package]]
 name = "prettyprint"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "ansi_colours 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1342,7 +1342,7 @@ dependencies = [
 "checksum percent-encoding 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "31010dd2e1ac33d5b46a5b413495239882813e0369f8ed8a5e266f173602f831"
 "checksum pkg-config 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)" = "676e8eb2b1b4c9043511a9b7bea0915320d7e502b0a079fb03f9635a5252b18c"
 "checksum plist 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0c7316832d9ac5da02786bdc89a3faf0ca07070212b388766e969078fd593edc"
-"checksum prettyprint 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "06c7fd7df0ca90c4740ca6a17efc4b990a7e7c06085b4fe2b8201f28714016d2"
+"checksum prettyprint 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "32b1964785b8e72d4b7ea386979e50f731fbd27bbaa1ae858daf0da113adb6dc"
 "checksum proc-macro2 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)" = "38fddd23d98b2144d197c0eca5705632d4fe2667d14a6be5df8934f8d74f1978"
 "checksum quick-error 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "9274b940887ce9addde99c4eee6b5c44cc494b182b97e73dc8ffdcb3397fd3f0"
 "checksum quote 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)" = "cdd8e04bd9c52e0342b406469d494fcb033be4bdbe5c606016defbb1681411e1"
