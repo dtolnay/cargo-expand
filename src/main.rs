@@ -214,7 +214,12 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     let mut line = Line::new("cargo");
 
     line.arg("rustc");
-    line.arg("--profile=check");
+
+    if args.tests && args.test.is_none() {
+        line.arg("--profile=test");
+    } else {
+        line.arg("--profile=check");
+    }
 
     if let Some(features) = &args.features {
         line.arg("--features");
@@ -298,10 +303,6 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     }
 
     line.arg("--");
-
-    if args.tests && args.test.is_none() {
-        line.arg("--test");
-    }
 
     line.arg("-o");
     line.arg(outfile);
