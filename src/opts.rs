@@ -75,6 +75,10 @@ pub struct Args {
     #[structopt(short, long, value_name = "N")]
     pub jobs: Option<u64>,
 
+    /// Print command lines as they are executed
+    #[structopt(long)]
+    pub verbose: bool,
+
     /// Coloring: auto, always, never
     #[structopt(long, value_name = "WHEN")]
     pub color: Option<String>,

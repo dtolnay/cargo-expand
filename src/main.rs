@@ -1,3 +1,4 @@
+mod cmd;
 mod edit;
 mod error;
 mod filter;
@@ -15,6 +16,7 @@ use prettyprint::{PagingMode, PrettyPrinter};
 use quote::quote;
 use structopt::StructOpt;
 
+use crate::cmd::Line;
 use crate::error::Result;
 use crate::opts::{Args, Opts};
 
@@ -209,96 +211,108 @@ fn which_rustfmt() -> Option<PathBuf> {
 
 // Based on https://github.com/rsolomo/cargo-check
 fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
-    cmd.arg("rustc");
-    cmd.arg("--profile=check");
+    let mut line = Line::new("cargo");
+
+    line.arg("rustc");
+    line.arg("--profile=check");
 
     if let Some(features) = &args.features {
-        cmd.arg("--features");
-        cmd.arg(features);
+        line.arg("--features");
+        line.arg(features);
     }
 
     if args.all_features {
-        cmd.arg("--all-features");
+        line.arg("--all-features");
     }
 
     if args.no_default_features {
-        cmd.arg("--no-default-features");
+        line.arg("--no-default-features");
     }
 
     if args.lib {
-        cmd.arg("--lib");
+        line.arg("--lib");
     }
 
     if let Some(bin) = &args.bin {
-        cmd.arg("--bin");
-        cmd.arg(bin);
+        line.arg("--bin");
+        line.arg(bin);
     }
 
     if let Some(example) = &args.example {
-        cmd.arg("--example");
-        cmd.arg(example);
+        line.arg("--example");
+        line.arg(example);
     }
 
     if let Some(test) = &args.test {
-        cmd.arg("--test");
-        cmd.arg(test);
+        line.arg("--test");
+        line.arg(test);
     }
 
     if let Some(bench) = &args.bench {
-        cmd.arg("--bench");
-        cmd.arg(bench);
+        line.arg("--bench");
+        line.arg(bench);
     }
 
     if let Some(target) = &args.target {
-        cmd.arg("--target");
-        cmd.arg(target);
+        line.arg("--target");
+        line.arg(target);
     }
 
     if let Some(target_dir) = &args.target_dir {
-        cmd.arg("--target-dir");
-        cmd.arg(target_dir);
+        line.arg("--target-dir");
+        line.arg(target_dir);
     }
 
     if let Some(manifest_path) = &args.manifest_path {
-        cmd.arg("--manifest-path");
-        cmd.arg(manifest_path);
+        line.arg("--manifest-path");
+        line.arg(manifest_path);
     }
 
     if let Some(jobs) = args.jobs {
-        cmd.arg("--jobs");
-        cmd.arg(jobs.to_string());
+        line.arg("--jobs");
+        line.arg(jobs.to_string());
     }
 
-    cmd.arg("--color");
+    if args.verbose {
+        line.arg("--verbose");
+    }
+
+    line.arg("--color");
     if let Some(color) = &args.color {
-        cmd.arg(color);
+        line.arg(color);
     } else {
-        cmd.arg(if atty::is(Stderr) { "always" } else { "never" });
+        line.arg(if atty::is(Stderr) { "always" } else { "never" });
     }
 
     if args.frozen {
-        cmd.arg("--frozen");
+        line.arg("--frozen");
     }
 
     if args.locked {
-        cmd.arg("--locked");
+        line.arg("--locked");
     }
 
     for unstable_flag in &args.unstable_flags {
-        cmd.arg("-Z");
-        cmd.arg(unstable_flag);
+        line.arg("-Z");
+        line.arg(unstable_flag);
     }
 
-    cmd.arg("--");
+    line.arg("--");
 
     if args.tests && args.test.is_none() {
-        cmd.arg("--test");
+        line.arg("--test");
     }
 
-    cmd.arg("-o");
-    cmd.arg(outfile);
-    cmd.arg("-Zunstable-options");
-    cmd.arg("--pretty=expanded");
+    line.arg("-o");
+    line.arg(outfile);
+    line.arg("-Zunstable-options");
+    line.arg("--pretty=expanded");
+
+    if args.verbose {
+        let _ = writeln!(&mut io::stderr(), "     Running `{}`", line);
+    }
+
+    cmd.args(line);
 }
 
 fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
