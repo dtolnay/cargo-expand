@@ -122,6 +122,10 @@ fn cargo_expand() -> Result<i32> {
     apply_args(&mut cmd, &args, &outfile_path);
     let code = filter_err(&mut cmd, ignore_cargo_err)?;
 
+    if !outfile_path.exists() {
+        return Ok(1);
+    }
+
     let mut content = fs::read_to_string(&outfile_path)?;
     if content.is_empty() {
         let _ = writeln!(
