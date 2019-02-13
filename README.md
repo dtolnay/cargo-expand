@@ -118,6 +118,20 @@ To expand a specific module or type or function only:
 [fatarrow.png]: https://raw.githubusercontent.com/dtolnay/cargo-expand/screenshots/fatarrow.png
 [syn]: https://github.com/dtolnay/syn
 
+## Configuration
+
+The cargo expand command reads the `[expand]` section of $CARGO_HOME/config if
+there is one. Currently the only configuration option is the syntax highlighting
+theme.
+
+```toml
+[expand]
+theme = "TwoDark"
+```
+
+Run `cargo expand --themes` to print a list of available themes. Use `theme =
+"none"` to disable coloring.
+
 ## Disclaimer
 
 Be aware that macro expansion to text is a lossy process. This is a debugging
