@@ -25,7 +25,7 @@ fn main() {
     process::exit(match result {
         Ok(code) => code,
         Err(err) => {
-            let _ = writeln!(&mut io::stderr(), "{}", err);
+            let _ = writeln!(io::stderr(), "{}", err);
             1
         }
     });
@@ -99,7 +99,7 @@ fn cargo_expand() -> Result<i32> {
             .get_themes()
             .keys()
         {
-            let _ = writeln!(&mut io::stdout(), "{}", theme);
+            let _ = writeln!(io::stdout(), "{}", theme);
         }
         return Ok(0);
     }
@@ -108,7 +108,7 @@ fn cargo_expand() -> Result<i32> {
     match (&args.item, args.ugly) {
         (Some(item), true) => {
             let _ = writeln!(
-                &mut io::stderr(),
+                io::stderr(),
                 "ERROR: cannot expand single item ({}) in ugly mode.",
                 item,
             );
@@ -118,12 +118,12 @@ fn cargo_expand() -> Result<i32> {
             rustfmt = which_rustfmt();
             if rustfmt.is_none() {
                 let _ = writeln!(
-                    &mut io::stderr(),
+                    io::stderr(),
                     "ERROR: cannot expand single item ({}) without rustfmt.",
                     item,
                 );
                 let _ = writeln!(
-                    &mut io::stderr(),
+                    io::stderr(),
                     "Install rustfmt by running `rustup component add rustfmt --toolchain nightly`.",
                 );
                 return Ok(1);
@@ -149,10 +149,7 @@ fn cargo_expand() -> Result<i32> {
 
     let mut content = fs::read_to_string(&outfile_path)?;
     if content.is_empty() {
-        let _ = writeln!(
-            &mut io::stderr(),
-            "ERROR: rustc produced no expanded output"
-        );
+        let _ = writeln!(io::stderr(), "ERROR: rustc produced no expanded output",);
         return Ok(if code == 0 { 1 } else { code });
     }
 
@@ -172,7 +169,7 @@ fn cargo_expand() -> Result<i32> {
                 syntax_tree.attrs.clear();
                 syntax_tree.items = filter.apply_to(&syntax_tree);
                 if syntax_tree.items.is_empty() {
-                    let _ = writeln!(&mut io::stderr(), "WARNING: no such item: {}", filter);
+                    let _ = writeln!(io::stderr(), "WARNING: no such item: {}", filter);
                     return Ok(1);
                 }
             }
@@ -199,7 +196,7 @@ fn cargo_expand() -> Result<i32> {
         Some("never") => false,
         None | Some("auto") | Some(_) => atty::is(Stdout),
     };
-    let _ = writeln!(&mut io::stderr());
+    let _ = writeln!(io::stderr());
     if do_color {
         if content.ends_with('\n') {
             // Pretty printer seems to print an extra trailing newline.
@@ -222,7 +219,7 @@ fn cargo_expand() -> Result<i32> {
         // Ignore any errors.
         let _ = printer.string(content);
     } else {
-        let _ = write!(&mut io::stdout(), "{}", content);
+        let _ = write!(io::stdout(), "{}", content);
     }
 
     Ok(0)
@@ -342,7 +339,7 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     line.arg("--pretty=expanded");
 
     if args.verbose {
-        let _ = writeln!(&mut io::stderr(), "     Running `{}`", line);
+        let _ = writeln!(io::stderr(), "     Running `{}`", line);
     }
 
     cmd.args(line);
@@ -357,7 +354,7 @@ fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
             break;
         }
         if !ignore(&line) {
-            let _ = write!(&mut io::stderr(), "{}", line);
+            let _ = write!(io::stderr(), "{}", line);
         }
         line.clear();
     }
