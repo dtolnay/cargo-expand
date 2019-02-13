@@ -1,7 +1,6 @@
 mod cmd;
 mod edit;
 mod error;
-mod filter;
 mod opts;
 
 use std::env;
@@ -147,7 +146,9 @@ fn cargo_expand() -> Result<i32> {
         if let Ok(mut syntax_tree) = syn::parse_file(&content) {
             edit::remove_macro_rules(&mut syntax_tree);
             if let Some(filter) = args.item {
-                filter::filter(&mut syntax_tree, &filter);
+                syntax_tree.shebang = None;
+                syntax_tree.attrs.clear();
+                syntax_tree.items = filter.apply_to(&syntax_tree);
                 if syntax_tree.items.is_empty() {
                     eprintln!("WARNING: no such item: {}", filter);
                     return Ok(1);

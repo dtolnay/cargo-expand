@@ -2,8 +2,7 @@ use std::path::PathBuf;
 
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
-
-use crate::filter::Filter;
+use syn_select::Selector;
 
 #[derive(StructOpt)]
 #[structopt(bin_name = "cargo")]
@@ -101,5 +100,5 @@ pub struct Args {
 
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
     #[structopt(value_name = "ITEM")]
-    pub item: Option<Filter>,
+    pub item: Option<Selector>,
 }

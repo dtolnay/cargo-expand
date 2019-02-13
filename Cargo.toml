@@ -17,6 +17,7 @@ prettyprint = "0.4"
 proc-macro2 = "0.4"
 quote = { version = "0.6", default-features = false }
 structopt = "0.2"
+syn-select = "0.1.4"
 tempfile = "3.0"
 toolchain_find = "0.1"
 
