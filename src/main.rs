@@ -107,17 +107,25 @@ fn cargo_expand() -> Result<i32> {
     let rustfmt;
     match (&args.item, args.ugly) {
         (Some(item), true) => {
-            eprintln!("ERROR: cannot expand single item ({}) in ugly mode.", item);
+            let _ = writeln!(
+                &mut io::stderr(),
+                "ERROR: cannot expand single item ({}) in ugly mode.",
+                item,
+            );
             return Ok(1);
         }
         (Some(item), false) => {
             rustfmt = which_rustfmt();
             if rustfmt.is_none() {
-                eprintln!(
+                let _ = writeln!(
+                    &mut io::stderr(),
                     "ERROR: cannot expand single item ({}) without rustfmt.",
-                    item
+                    item,
                 );
-                eprintln!("Install rustfmt by running `rustup component add rustfmt --toolchain nightly`.");
+                let _ = writeln!(
+                    &mut io::stderr(),
+                    "Install rustfmt by running `rustup component add rustfmt --toolchain nightly`.",
+                );
                 return Ok(1);
             }
         }
@@ -164,7 +172,7 @@ fn cargo_expand() -> Result<i32> {
                 syntax_tree.attrs.clear();
                 syntax_tree.items = filter.apply_to(&syntax_tree);
                 if syntax_tree.items.is_empty() {
-                    eprintln!("WARNING: no such item: {}", filter);
+                    let _ = writeln!(&mut io::stderr(), "WARNING: no such item: {}", filter);
                     return Ok(1);
                 }
             }
