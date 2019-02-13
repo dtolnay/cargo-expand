@@ -90,6 +90,13 @@ fn cargo_binary() -> OsString {
 fn cargo_expand() -> Result<i32> {
     let Opts::Expand(args) = Opts::from_args();
 
+    if args.themes {
+        for theme in PrettyPrinter::default().build().unwrap().get_themes().keys() {
+            let _ = writeln!(&mut io::stdout(), "{}", theme);
+        }
+        return Ok(0);
+    }
+
     let rustfmt;
     match (&args.item, args.ugly) {
         (Some(item), true) => {
@@ -183,14 +190,19 @@ fn cargo_expand() -> Result<i32> {
             // Pretty printer seems to print an extra trailing newline.
             content.truncate(content.len() - 1);
         }
-        let printer = PrettyPrinter::default()
-            .header(false)
-            .grid(false)
-            .line_numbers(false)
-            .language("rust")
-            .paging_mode(PagingMode::Never)
-            .build()
-            .unwrap();
+
+        let mut builder = PrettyPrinter::default();
+        builder.header(false);
+        builder.grid(false);
+        builder.line_numbers(false);
+        builder.language("rust");
+        builder.paging_mode(PagingMode::Never);
+
+        if let Some(theme) = args.theme {
+            builder.theme(theme);
+        }
+
+        let printer = builder.build().unwrap();
 
         // Ignore any errors.
         let _ = printer.string(content);

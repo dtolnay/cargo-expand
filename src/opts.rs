@@ -98,6 +98,14 @@ pub struct Args {
     #[structopt(long)]
     pub ugly: bool,
 
+    /// Select syntax highlighting theme
+    #[structopt(long, value_name = "NAME")]
+    pub theme: Option<String>,
+
+    /// Print available syntax highlighting theme names
+    #[structopt(long)]
+    pub themes: bool,
+
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
     #[structopt(value_name = "ITEM")]
     pub item: Option<Selector>,
