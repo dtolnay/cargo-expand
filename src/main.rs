@@ -93,7 +93,12 @@ fn cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in PrettyPrinter::default().build().unwrap().get_themes().keys() {
+        for theme in PrettyPrinter::default()
+            .build()
+            .unwrap()
+            .get_themes()
+            .keys()
+        {
             let _ = writeln!(&mut io::stdout(), "{}", theme);
         }
         return Ok(0);
