@@ -191,10 +191,12 @@ fn cargo_expand() -> Result<i32> {
     }
 
     // Run pretty printer
+    let theme = args.theme.or(config.theme);
+    let none_theme = theme.as_ref().map(String::as_str) == Some("none");
     let do_color = match args.color.as_ref().map(String::as_str) {
         Some("always") => true,
         Some("never") => false,
-        None | Some("auto") | Some(_) => atty::is(Stdout),
+        None | Some("auto") | Some(_) => !none_theme && atty::is(Stdout),
     };
     let _ = writeln!(io::stderr());
     if do_color {
@@ -210,7 +212,7 @@ fn cargo_expand() -> Result<i32> {
         builder.language("rust");
         builder.paging_mode(PagingMode::Never);
 
-        if let Some(theme) = args.theme.or(config.theme) {
+        if let Some(theme) = theme {
             builder.theme(theme);
         }
 
