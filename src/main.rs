@@ -1,4 +1,5 @@
 mod cmd;
+mod config;
 mod edit;
 mod error;
 mod opts;
@@ -89,6 +90,7 @@ fn cargo_binary() -> OsString {
 
 fn cargo_expand() -> Result<i32> {
     let Opts::Expand(args) = Opts::from_args();
+    let config = config::deserialize();
 
     if args.themes {
         for theme in PrettyPrinter::default().build().unwrap().get_themes().keys() {
@@ -198,7 +200,7 @@ fn cargo_expand() -> Result<i32> {
         builder.language("rust");
         builder.paging_mode(PagingMode::Never);
 
-        if let Some(theme) = args.theme {
+        if let Some(theme) = args.theme.or(config.theme) {
             builder.theme(theme);
         }
 
