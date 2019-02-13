@@ -1,4 +1,6 @@
+use std::fmt::{self, Display};
 use std::path::PathBuf;
+use std::str::FromStr;
 
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
@@ -80,7 +82,7 @@ pub struct Args {
 
     /// Coloring: auto, always, never
     #[structopt(long, value_name = "WHEN")]
-    pub color: Option<String>,
+    pub color: Option<Coloring>,
 
     /// Require Cargo.lock and cache are up to date
     #[structopt(long)]
@@ -109,4 +111,38 @@ pub struct Args {
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
     #[structopt(value_name = "ITEM")]
     pub item: Option<Selector>,
+}
+
+#[derive(Debug)]
+pub enum Coloring {
+    Auto,
+    Always,
+    Never,
+}
+
+impl FromStr for Coloring {
+    type Err = String;
+
+    fn from_str(name: &str) -> Result<Self, Self::Err> {
+        match name {
+            "auto" => Ok(Coloring::Auto),
+            "always" => Ok(Coloring::Always),
+            "never" => Ok(Coloring::Never),
+            other => Err(format!(
+                "must be auto, always, or never, but found `{}`",
+                other,
+            )),
+        }
+    }
+}
+
+impl Display for Coloring {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let name = match self {
+            Coloring::Auto => "auto",
+            Coloring::Always => "always",
+            Coloring::Never => "never",
+        };
+        formatter.write_str(name)
+    }
 }

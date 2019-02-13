@@ -18,6 +18,7 @@ use structopt::StructOpt;
 
 use crate::cmd::Line;
 use crate::error::Result;
+use crate::opts::Coloring::*;
 use crate::opts::{Args, Opts};
 
 fn main() {
@@ -193,10 +194,10 @@ fn cargo_expand() -> Result<i32> {
     // Run pretty printer
     let theme = args.theme.or(config.theme);
     let none_theme = theme.as_ref().map(String::as_str) == Some("none");
-    let do_color = match args.color.as_ref().map(String::as_str) {
-        Some("always") => true,
-        Some("never") => false,
-        None | Some("auto") | Some(_) => !none_theme && atty::is(Stdout),
+    let do_color = match args.color {
+        Some(Always) => true,
+        Some(Never) => false,
+        None | Some(Auto) => !none_theme && atty::is(Stdout),
     };
     let _ = writeln!(io::stderr());
     if do_color {
@@ -315,7 +316,7 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
 
     line.arg("--color");
     if let Some(color) = &args.color {
-        line.arg(color);
+        line.arg(color.to_string());
     } else {
         line.arg(if atty::is(Stderr) { "always" } else { "never" });
     }
