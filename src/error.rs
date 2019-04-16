@@ -31,10 +31,12 @@ impl From<toml::ser::Error> for Error {
 
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        use self::Error::*;
+
         match self {
-            Error::Io(error) => Display::fmt(error, formatter),
-            Error::Print(error) => Display::fmt(error, formatter),
-            Error::Toml(error) => Display::fmt(error, formatter),
+            Io(e) => e.fmt(formatter),
+            Print(e) => e.fmt(formatter),
+            Toml(e) => e.fmt(formatter),
         }
     }
 }
