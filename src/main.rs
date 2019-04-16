@@ -2,6 +2,7 @@ mod cmd;
 mod config;
 mod edit;
 mod error;
+mod fmt;
 mod opts;
 
 use std::env;
@@ -178,8 +179,7 @@ fn cargo_expand() -> Result<i32> {
         }
         fs::write(&outfile_path, content)?;
 
-        let rustfmt_config_path = outdir.path().join("rustfmt.toml");
-        fs::write(rustfmt_config_path, "normalize_doc_attributes = true\n")?;
+        fmt::write_rustfmt_config(&outdir)?;
 
         // Ignore any errors.
         let _status = Command::new(rustfmt)
