@@ -306,6 +306,11 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
         line.arg(manifest_path);
     }
 
+    if let Some(package) = &args.package {
+        line.arg("--package");
+        line.arg(package);
+    }
+
     if let Some(jobs) = args.jobs {
         line.arg("--jobs");
         line.arg(jobs.to_string());

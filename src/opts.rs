@@ -73,6 +73,10 @@ pub struct Args {
     #[structopt(long, value_name = "PATH", parse(from_os_str))]
     pub manifest_path: Option<PathBuf>,
 
+    /// Package to expand
+    #[structopt(short, long, value_name = "SPEC")]
+    pub package: Option<String>,
+
     /// Number of parallel jobs, defaults to # of CPUs
     #[structopt(short, long, value_name = "N")]
     pub jobs: Option<u64>,
