@@ -7,11 +7,12 @@ use structopt::StructOpt;
 use syn_select::Selector;
 
 #[derive(StructOpt)]
-#[structopt(bin_name = "cargo")]
+#[structopt(bin_name = "cargo", author = "")]
 pub enum Opts {
     /// Show the result of macro expansion.
     #[structopt(
         name = "expand",
+        author = "",
         raw(
             setting = "AppSettings::UnifiedHelpMessage",
             setting = "AppSettings::DeriveDisplayOrder",
@@ -22,7 +23,7 @@ pub enum Opts {
 }
 
 #[derive(StructOpt, Debug)]
-#[structopt(rename_all = "kebab-case")]
+#[structopt(rename_all = "kebab-case", author = "")]
 pub struct Args {
     /// Space-separated list of features to activate
     #[structopt(long, value_name = "FEATURES")]
