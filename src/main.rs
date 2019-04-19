@@ -183,6 +183,7 @@ fn cargo_expand() -> Result<i32> {
 
         // Ignore any errors.
         let _status = Command::new(rustfmt)
+            .arg("--edition=2018")
             .arg(&outfile_path)
             .stderr(Stdio::null())
             .status();
