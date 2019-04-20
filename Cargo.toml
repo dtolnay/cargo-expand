@@ -13,6 +13,7 @@ readme = "README.md"
 
 [dependencies]
 atty = "0.2"
+libc = "0.2"
 prettyprint = "0.6"
 proc-macro2 = "0.4"
 quote = { version = "0.6", default-features = false }

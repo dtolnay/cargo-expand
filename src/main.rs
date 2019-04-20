@@ -9,8 +9,9 @@ use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, BufRead, Write};
+use std::mem;
 use std::path::{Path, PathBuf};
-use std::process::{self, Command, Stdio};
+use std::process::{self, ChildStderr, Command, Stdio};
 
 use atty::Stream::{Stderr, Stdout};
 use prettyprint::{PagingMode, PrettyPrinter};
@@ -356,6 +357,11 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
 
 fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
     let mut child = cmd.stderr(Stdio::piped()).spawn()?;
+
+    if let Some(child_stderr) = &child.stderr {
+        set_term_size(child_stderr);
+    }
+
     let mut stderr = io::BufReader::new(child.stderr.take().unwrap());
     let mut line = String::new();
     while let Ok(n) = stderr.read_line(&mut line) {
@@ -370,6 +376,28 @@ fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
     let code = child.wait()?.code().unwrap_or(1);
     Ok(code)
 }
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+fn set_term_size(child: &ChildStderr) {
+    use std::os::unix::io::AsRawFd;
+
+    unsafe {
+        let mut winsize: libc::winsize = mem::zeroed();
+        if libc::ioctl(libc::STDERR_FILENO, libc::TIOCGWINSZ, &mut winsize) < 0 {
+            return;
+        }
+        if winsize.ws_col == 0 {
+            return;
+        }
+        let ret = libc::ioctl(child.as_raw_fd(), libc::TIOCSWINSZ, &winsize);
+        if ret < 0 {
+            eprintln!("ERROR: {}", io::Error::last_os_error());
+        }
+    }
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+fn set_term_size(_: &ChildStderr) {}
 
 fn ignore_cargo_err(line: &str) -> bool {
     if line.trim().is_empty() {
