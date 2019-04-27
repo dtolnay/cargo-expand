@@ -16,11 +16,12 @@ use atty::Stream::{Stderr, Stdout};
 use prettyprint::{PagingMode, PrettyPrinter};
 use quote::quote;
 use structopt::StructOpt;
+use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use crate::cmd::Line;
 use crate::error::Result;
 use crate::opts::Coloring::*;
-use crate::opts::{Args, Opts};
+use crate::opts::{Args, Coloring, Opts};
 
 fn main() {
     let result = cargo_expand_or_run_nightly();
@@ -350,10 +351,24 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     if args.verbose {
         let mut display = line.clone();
         display.insert(0, "+nightly");
-        let _ = writeln!(io::stderr(), "     Running `{}`", display);
+        print_command(display, args);
     }
 
     cmd.args(line);
+}
+
+fn print_command(line: Line, args: &Args) {
+    let color_choice = match args.color {
+        Some(Coloring::Auto) | None => ColorChoice::Auto,
+        Some(Coloring::Always) => ColorChoice::Always,
+        Some(Coloring::Never) => ColorChoice::Never,
+    };
+
+    let mut stream = StandardStream::stderr(color_choice);
+    let _ = stream.set_color(ColorSpec::new().set_bold(true).set_fg(Some(Green)));
+    let _ = write!(stream, "{:>12}", "Running");
+    let _ = stream.reset();
+    let _ = writeln!(stream, " `{}`", line);
 }
 
 fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {

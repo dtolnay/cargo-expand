@@ -20,6 +20,7 @@ serde = { version = "1.0", features = ["derive"] }
 structopt = "0.2"
 syn-select = "0.1.4"
 tempfile = "3.0"
+termcolor = "1.0"
 toml = "0.5"
 toolchain_find = "0.1"
 
