@@ -1,6 +1,7 @@
 use std::ffi::{OsStr, OsString};
 use std::fmt::{self, Display};
 
+#[derive(Clone)]
 pub struct Line {
     bin: OsString,
     args: Vec<OsString>,
@@ -16,6 +17,10 @@ impl Line {
 
     pub fn arg<S: AsRef<OsStr>>(&mut self, arg: S) {
         self.args.push(arg.as_ref().to_owned());
+    }
+
+    pub fn insert<S: AsRef<OsStr>>(&mut self, index: usize, arg: S) {
+        self.args.insert(index, arg.as_ref().to_owned());
     }
 }
 

@@ -348,7 +348,9 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     line.arg("--pretty=expanded");
 
     if args.verbose {
-        let _ = writeln!(io::stderr(), "     Running `{}`", line);
+        let mut display = line.clone();
+        display.insert(0, "+nightly");
+        let _ = writeln!(io::stderr(), "     Running `{}`", display);
     }
 
     cmd.args(line);
