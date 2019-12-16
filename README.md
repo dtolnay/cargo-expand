@@ -158,7 +158,7 @@ fn f() -> i32 {
 
 Refer to [The Book] for more on the considerations around macro hygiene.
 
-[The Book]: https://doc.rust-lang.org/book/first-edition/macros.html#hygiene
+[The Book]: https://doc.rust-lang.org/1.30.0/book/first-edition/macros.html#hygiene
 
 <br>
 
