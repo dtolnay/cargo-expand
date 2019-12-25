@@ -166,7 +166,7 @@ fn cargo_expand() -> Result<i32> {
 
         // Discard comments, which are misplaced by the compiler
         if let Ok(mut syntax_tree) = syn::parse_file(&content) {
-            edit::remove_macro_rules(&mut syntax_tree);
+            edit::sanitize(&mut syntax_tree);
             if let Some(filter) = args.item {
                 syntax_tree.shebang = None;
                 syntax_tree.attrs.clear();
