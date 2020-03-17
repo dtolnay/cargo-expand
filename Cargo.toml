@@ -33,3 +33,6 @@ features = ["full", "parsing", "printing", "visit-mut"]
 
 [badges]
 travis-ci = { repository = "dtolnay/cargo-expand" }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
