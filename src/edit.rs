@@ -43,6 +43,7 @@ impl VisitMut for Sanitize {
             }
             Stmt::Item(_) => {}
         }
+        visit_mut::visit_stmt_mut(self, i);
     }
 }
 
