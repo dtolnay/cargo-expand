@@ -50,16 +50,15 @@ fn main() {
 
 ```rust
 #![feature(prelude_import)]
-#![no_std]
 #[prelude_import]
 use std::prelude::v1::*;
 #[macro_use]
-extern crate std as std;
+extern crate std;
 struct S;
 #[automatically_derived]
 #[allow(unused_qualifications)]
-impl $crate::fmt::Debug for S {
-    fn fmt(&self, f: &mut $crate::fmt::Formatter) -> $crate::fmt::Result {
+impl ::core::fmt::Debug for S {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
         match *self {
             S => {
                 let mut debug_trait_builder = f.debug_tuple("S");
@@ -70,24 +69,11 @@ impl $crate::fmt::Debug for S {
 }
 fn main() {
     {
-        $crate::io::_print($crate::fmt::Arguments::new_v1_formatted(
+        ::std::io::_print(::core::fmt::Arguments::new_v1(
             &["", "\n"],
             &match (&S,) {
-                (arg0,) => [$crate::fmt::ArgumentV1::new(
-                    arg0,
-                    $crate::fmt::Debug::fmt,
-                )],
+                (arg0,) => [::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Debug::fmt)],
             },
-            &[$crate::fmt::rt::v1::Argument {
-                position: $crate::fmt::rt::v1::Position::At(0usize),
-                format: $crate::fmt::rt::v1::FormatSpec {
-                    fill: ' ',
-                    align: $crate::fmt::rt::v1::Alignment::Unknown,
-                    flags: 0u32,
-                    precision: $crate::fmt::rt::v1::Count::Implied,
-                    width: $crate::fmt::rt::v1::Count::Implied,
-                },
-            }],
         ));
     };
 }
