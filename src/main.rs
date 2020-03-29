@@ -11,6 +11,7 @@ use std::fs;
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
+use std::str::FromStr;
 
 use atty::Stream::{Stderr, Stdout};
 use prettyprint::{PagingMode, PrettyPrinter};
@@ -19,6 +20,7 @@ use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use crate::cmd::Line;
+use crate::config::Config;
 use crate::error::Result;
 use crate::opts::Coloring::*;
 use crate::opts::{Args, Coloring, Opts};
@@ -140,10 +142,11 @@ fn cargo_expand() -> Result<i32> {
     builder.prefix("cargo-expand");
     let outdir = builder.tempdir().expect("failed to create tmp file");
     let outfile_path = outdir.path().join("expanded");
+    let color = get_color(&args, &config);
 
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
-    apply_args(&mut cmd, &args, &outfile_path);
+    apply_args(&mut cmd, &args, &color, &outfile_path);
     let code = filter_err(&mut cmd, ignore_cargo_err)?;
 
     if !outfile_path.exists() {
@@ -196,10 +199,10 @@ fn cargo_expand() -> Result<i32> {
     // Run pretty printer
     let theme = args.theme.or(config.theme);
     let none_theme = theme.as_ref().map(String::as_str) == Some("none");
-    let do_color = match args.color {
-        Some(Always) => true,
-        Some(Never) => false,
-        None | Some(Auto) => !none_theme && atty::is(Stdout),
+    let do_color = match color {
+        Always => true,
+        Never => false,
+        Auto => !none_theme && atty::is(Stdout),
     };
     let _ = writeln!(io::stderr());
     if do_color {
@@ -244,7 +247,7 @@ fn which_rustfmt() -> Option<PathBuf> {
 }
 
 // Based on https://github.com/rsolomo/cargo-check
-fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
+fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) {
     let mut line = Line::new("cargo");
 
     line.arg("rustc");
@@ -322,10 +325,9 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     }
 
     line.arg("--color");
-    if let Some(color) = &args.color {
-        line.arg(color.to_string());
-    } else {
-        line.arg(if atty::is(Stderr) { "always" } else { "never" });
+    match color {
+        Coloring::Auto => line.arg(if atty::is(Stderr) { "always" } else { "never" }),
+        color => line.arg(color.to_string()),
     }
 
     if args.frozen {
@@ -351,17 +353,17 @@ fn apply_args(cmd: &mut Command, args: &Args, outfile: &Path) {
     if args.verbose {
         let mut display = line.clone();
         display.insert(0, "+nightly");
-        print_command(display, args);
+        print_command(display, color);
     }
 
     cmd.args(line);
 }
 
-fn print_command(line: Line, args: &Args) {
-    let color_choice = match args.color {
-        Some(Coloring::Auto) | None => ColorChoice::Auto,
-        Some(Coloring::Always) => ColorChoice::Always,
-        Some(Coloring::Never) => ColorChoice::Never,
+fn print_command(line: Line, color: &Coloring) {
+    let color_choice = match color {
+        Coloring::Auto => ColorChoice::Auto,
+        Coloring::Always => ColorChoice::Always,
+        Coloring::Never => ColorChoice::Never,
     };
 
     let mut stream = StandardStream::stderr(color_choice);
@@ -410,4 +412,25 @@ fn ignore_cargo_err(line: &str) -> bool {
     }
 
     false
+}
+
+fn get_color(args: &Args, config: &Config) -> Coloring {
+    if let Some(value) = args.color {
+        return value;
+    }
+
+    if let Some(value) = config.color.as_ref() {
+        match Coloring::from_str(value.as_str()) {
+            Ok(color) => return color,
+            Err(err) => {
+                let _ = writeln!(
+                    io::stderr(),
+                    "WARNING: invalid color in cargo config: {}",
+                    err
+                );
+            }
+        }
+    }
+
+    Coloring::Auto // default
 }
