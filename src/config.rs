@@ -14,6 +14,7 @@ struct Sections {
 #[derive(Deserialize, Default)]
 pub struct Config {
     pub theme: Option<String>,
+    pub color: Option<String>,
 }
 
 pub fn deserialize() -> Config {

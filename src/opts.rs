@@ -115,7 +115,7 @@ pub struct Args {
     pub item: Option<Selector>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Coloring {
     Auto,
     Always,

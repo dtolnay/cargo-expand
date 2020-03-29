@@ -107,8 +107,9 @@ To expand a specific module or type or function only:
 ## Configuration
 
 The cargo expand command reads the `[expand]` section of $CARGO_HOME/config if
-there is one (usually ~/.cargo/config). Currently the only configuration option
-is the syntax highlighting theme.
+there is one (usually ~/.cargo/config).
+
+Set the default syntax highlighting theme with the `theme` setting:
 
 ```toml
 [expand]
@@ -117,6 +118,14 @@ theme = "TwoDark"
 
 Run `cargo expand --themes` to print a list of available themes. Use `theme =
 "none"` to disable coloring.
+
+Change the default coloring disposition (normally `auto`) with the `color`
+setting:
+
+```toml
+[expand]
+color = "always"
+```
 
 ## Disclaimer
 
