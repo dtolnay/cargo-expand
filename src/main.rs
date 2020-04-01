@@ -14,7 +14,11 @@ use std::process::{self, Command, Stdio};
 use std::str::FromStr;
 
 use atty::Stream::{Stderr, Stdout};
-use prettyprint::{PagingMode, PrettyPrinter};
+use bat::config::{
+    Config as BatConfig, HighlightedLineRanges, InputFile, LineRanges, OutputWrap, PagingMode,
+    StyleComponents, SyntaxMapping,
+};
+use bat::{Controller, HighlightingAssets};
 use quote::quote;
 use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
@@ -98,12 +102,7 @@ fn cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in PrettyPrinter::default()
-            .build()
-            .unwrap()
-            .get_themes()
-            .keys()
-        {
+        for theme in HighlightingAssets::from_binary().themes() {
             let _ = writeln!(io::stdout(), "{}", theme);
         }
         return Ok(0);
@@ -206,26 +205,33 @@ fn cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
-        if content.ends_with('\n') {
-            // Pretty printer seems to print an extra trailing newline.
-            content.truncate(content.len() - 1);
-        }
+        fs::write(&outfile_path, content)?;
 
-        let mut builder = PrettyPrinter::default();
-        builder.header(false);
-        builder.grid(false);
-        builder.line_numbers(false);
-        builder.language("rust");
-        builder.paging_mode(PagingMode::Never);
-
-        if let Some(theme) = theme {
-            builder.theme(theme);
-        }
-
-        let printer = builder.build().unwrap();
+        let bat_config = BatConfig {
+            files: vec![InputFile::Ordinary(outfile_path.as_os_str())],
+            language: Some("rust"),
+            show_nonprintable: false,
+            term_width: 0,
+            tab_width: 0,
+            loop_through: false,
+            colored_output: true,
+            true_color: false,
+            style_components: StyleComponents::new(&[]),
+            output_wrap: OutputWrap::None,
+            paging_mode: PagingMode::Never,
+            line_ranges: LineRanges::all(),
+            theme: theme.unwrap_or(HighlightingAssets::default_theme().to_owned()),
+            syntax_mapping: SyntaxMapping::empty(),
+            pager: None,
+            use_italic_text: false,
+            highlighted_lines: HighlightedLineRanges(LineRanges::none()),
+            ..Default::default()
+        };
+        let assets = HighlightingAssets::from_binary();
+        let controller = Controller::new(&bat_config, &assets);
 
         // Ignore any errors.
-        let _ = printer.string(content);
+        let _ = controller.run();
     } else {
         let _ = write!(io::stdout(), "{}", content);
     }
