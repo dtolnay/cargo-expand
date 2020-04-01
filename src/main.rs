@@ -155,7 +155,7 @@ fn cargo_expand() -> Result<i32> {
 
     let mut content = fs::read_to_string(&outfile_path)?;
     if content.is_empty() {
-        let _ = writeln!(io::stderr(), "ERROR: rustc produced no expanded output",);
+        let _ = writeln!(io::stderr(), "ERROR: rustc produced no expanded output");
         return Ok(if code == 0 { 1 } else { code });
     }
 
