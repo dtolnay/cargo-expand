@@ -31,6 +31,10 @@ toolchain or the one with which cargo expand itself is executed. If the default
 toolchain is one other than nightly, running `cargo expand` will find and use
 nightly anyway.
 
+If you have problems compiling the `onig` dependency, you can add
+`--no-default-features --features pure-rust` to use a slower but pure rust
+regex library.
+
 [rustfmt]: https://github.com/rust-lang/rustfmt
 
 ## Example

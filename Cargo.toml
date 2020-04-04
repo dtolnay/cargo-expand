@@ -11,20 +11,30 @@ categories = ["development-tools::cargo-plugins", "development-tools::debugging"
 edition = "2018"
 readme = "README.md"
 
+[features]
+pure-rust = ["syntect/fancy-regex"]
+default = ["syntect/onig"]
+
 [dependencies]
 atty = "0.2"
-onig = "=4.3.3"
-prettyprint = "=0.7.0"
+prettyprint = "=0.7.1"
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 structopt = "0.3"
 syn-select = "0.2"
-syntect = "=3.2.0"
-tempfile = "3.0"
-termcolor = "1.0"
+tempfile = "3.1"
+termcolor = "1.1"
 toml = "0.5"
 toolchain_find = "0.1"
+
+[dependencies.onig]
+version = "=5.0.0"
+optional = true
+
+[dependencies.syntect]
+version = "=4.1.0"
+default-features = false
 
 [dependencies.syn]
 version = "1.0"
