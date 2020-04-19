@@ -404,6 +404,8 @@ fn ignore_cargo_err(line: &str) -> bool {
         "ignoring -C extra-filename flag due to -o flag",
         "due to multiple output types requested, the explicitly specified \
          output file name will be adapted for each output type",
+        "warning emitted",
+        "warnings emitted",
     ];
     for s in &blacklist {
         if line.contains(s) {
