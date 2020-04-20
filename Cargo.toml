@@ -13,18 +13,20 @@ readme = "README.md"
 
 [dependencies]
 atty = "0.2"
-onig = "=4.3.3"
-prettyprint = "=0.7.0"
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 structopt = "0.3"
 syn-select = "0.2"
-syntect = "=3.2.0"
 tempfile = "3.0"
 termcolor = "1.0"
 toml = "0.5"
 toolchain_find = "0.1"
+
+[dependencies.prettyprint]
+version = "0.8.1"
+default-features = false
+features = ["regex-fancy"]
 
 [dependencies.syn]
 version = "1.0"
