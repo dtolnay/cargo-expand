@@ -139,7 +139,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cargo-expand"
-version = "0.4.20"
+version = "0.5.0"
 dependencies = [
  "atty 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "prettyprint 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
