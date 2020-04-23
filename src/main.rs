@@ -194,7 +194,7 @@ fn cargo_expand() -> Result<i32> {
 
     // Run pretty printer
     let theme = args.theme.or(config.theme);
-    let none_theme = theme.as_ref().map(String::as_str) == Some("none");
+    let none_theme = theme.as_deref() == Some("none");
     let do_color = match color {
         Always => true,
         Never => false,
