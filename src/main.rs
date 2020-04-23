@@ -14,7 +14,8 @@ use std::process::{self, Command, Stdio};
 use std::str::FromStr;
 
 use atty::Stream::{Stderr, Stdout};
-use prettyprint::{PagingMode, PrettyPrinter};
+use bat::assets::HighlightingAssets;
+use bat::PrettyPrinter;
 use quote::quote;
 use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
@@ -98,12 +99,7 @@ fn cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in PrettyPrinter::default()
-            .build()
-            .unwrap()
-            .get_themes()
-            .keys()
-        {
+        for theme in HighlightingAssets::from_binary().themes() {
             let _ = writeln!(io::stdout(), "{}", theme);
         }
         return Ok(0);
@@ -206,26 +202,22 @@ fn cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
-        if content.ends_with('\n') {
-            // Pretty printer seems to print an extra trailing newline.
-            content.truncate(content.len() - 1);
-        }
-
-        let mut builder = PrettyPrinter::default();
-        builder.header(false);
-        builder.grid(false);
-        builder.line_numbers(false);
-        builder.language("rust");
-        builder.paging_mode(PagingMode::Never);
-
+        let mut pretty_printer = PrettyPrinter::new();
+        pretty_printer
+            .input_from_bytes(content.as_bytes())
+            .language("rust")
+            .tab_width(Some(4))
+            .true_color(false)
+            .header(false)
+            .line_numbers(false)
+            .grid(false)
+            .vcs_modification_markers(false);
         if let Some(theme) = theme {
-            builder.theme(theme);
+            pretty_printer.theme(theme);
         }
-
-        let printer = builder.build().unwrap();
 
         // Ignore any errors.
-        let _ = printer.string(content);
+        let _ = pretty_printer.print();
     } else {
         let _ = write!(io::stdout(), "{}", content);
     }
