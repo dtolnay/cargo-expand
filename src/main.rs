@@ -14,11 +14,8 @@ use std::process::{self, Command, Stdio};
 use std::str::FromStr;
 
 use atty::Stream::{Stderr, Stdout};
-use bat::config::{
-    Config as BatConfig, HighlightedLineRanges, InputFile, LineRanges, OutputWrap, PagingMode,
-    StyleComponents, SyntaxMapping,
-};
-use bat::{Controller, HighlightingAssets};
+use bat::assets::HighlightingAssets;
+use bat::PrettyPrinter;
 use quote::quote;
 use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
@@ -205,33 +202,22 @@ fn cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
-        fs::write(&outfile_path, content)?;
-
-        let bat_config = BatConfig {
-            files: vec![InputFile::Ordinary(outfile_path.as_os_str())],
-            language: Some("rust"),
-            show_nonprintable: false,
-            term_width: 0,
-            tab_width: 0,
-            loop_through: false,
-            colored_output: true,
-            true_color: false,
-            style_components: StyleComponents::new(&[]),
-            output_wrap: OutputWrap::None,
-            paging_mode: PagingMode::Never,
-            line_ranges: LineRanges::all(),
-            theme: theme.unwrap_or(HighlightingAssets::default_theme().to_owned()),
-            syntax_mapping: SyntaxMapping::empty(),
-            pager: None,
-            use_italic_text: false,
-            highlighted_lines: HighlightedLineRanges(LineRanges::none()),
-            ..Default::default()
-        };
-        let assets = HighlightingAssets::from_binary();
-        let controller = Controller::new(&bat_config, &assets);
+        let mut pretty_printer = PrettyPrinter::new();
+        pretty_printer
+            .input_from_bytes(content.as_bytes())
+            .language("rust")
+            .tab_width(Some(4))
+            .true_color(false)
+            .header(false)
+            .line_numbers(false)
+            .grid(false)
+            .vcs_modification_markers(false);
+        if let Some(theme) = theme {
+            pretty_printer.theme(theme);
+        }
 
         // Ignore any errors.
-        let _ = controller.run();
+        let _ = pretty_printer.print();
     } else {
         let _ = write!(io::stdout(), "{}", content);
     }
