@@ -88,9 +88,9 @@ checksum = "b41b7ea54a0c9d92199de89e20e58d49f02f8e699814ef3fdf266f6f748d15c7"
 
 [[package]]
 name = "bat"
-version = "0.14.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4f3f3e642dcbd5cba51128d99b54ac75872fd3c417bff1ed1a8d08a0c7bac0d"
+checksum = "c511711c116f9845e4a8212e21f72c4201414649c9e7e584ab8a68cd0ad2de46"
 dependencies = [
  "ansi_colours",
  "ansi_term 0.12.1",
@@ -810,9 +810,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.17"
+version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0df0eb663f387145cab623dea85b09c2c5b4b0aef44e945d928e682fce71bb03"
+checksum = "410a7488c0a728c7ceb4ad59b9567eb4053d02e8cc7f5c0e0eeeb39518369213"
 dependencies = [
  "proc-macro2",
  "quote",
