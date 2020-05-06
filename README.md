@@ -1,6 +1,6 @@
 # cargo-expand
 
-[![Build Status](https://travis-ci.org/dtolnay/cargo-expand.svg?branch=master)](https://travis-ci.org/dtolnay/cargo-expand)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/cargo-expand/CI/master)](https://github.com/dtolnay/cargo-expand/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/cargo-expand.svg)](https://crates.io/crates/cargo-expand)
 
 Once installed, the following command prints out the result of macro expansion
