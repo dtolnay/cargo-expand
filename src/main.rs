@@ -210,8 +210,7 @@ fn cargo_expand() -> Result<i32> {
             .true_color(false)
             .header(false)
             .line_numbers(false)
-            .grid(false)
-            .vcs_modification_markers(false);
+            .grid(false);
         if let Some(theme) = theme {
             pretty_printer.theme(theme);
         }
