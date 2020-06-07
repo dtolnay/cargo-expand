@@ -181,12 +181,21 @@ fn cargo_expand() -> Result<i32> {
 
         fmt::write_rustfmt_config(&outdir)?;
 
-        // Ignore any errors.
-        let _status = Command::new(rustfmt)
+        let output = Command::new(&rustfmt)
             .arg("--edition=2018")
             .arg(&outfile_path)
             .stderr(Stdio::null())
-            .status();
+            .output();
+        if let Ok(output) = output {
+            if !output.status.success() {
+                // Probably was the wrong edition.
+                let _status = Command::new(&rustfmt)
+                    .arg("--edition=2015")
+                    .arg(&outfile_path)
+                    .stderr(Stdio::null())
+                    .status();
+            }
+        }
 
         content = fs::read_to_string(&outfile_path)?;
         content = content.replace(DOLLAR_CRATE_PLACEHOLDER, "$crate");
