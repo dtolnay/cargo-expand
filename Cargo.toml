@@ -13,7 +13,6 @@ readme = "README.md"
 
 [dependencies]
 atty = "0.2"
-bincode = "=1.2.1" # https://github.com/dtolnay/cargo-expand/issues/87
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
