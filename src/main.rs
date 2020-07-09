@@ -395,7 +395,7 @@ fn ignore_cargo_err(line: &str) -> bool {
         return true;
     }
 
-    let blacklist = [
+    let discarded_lines = [
         "ignoring specified output filename because multiple outputs were \
          requested",
         "ignoring specified output filename for 'link' output because multiple \
@@ -407,7 +407,7 @@ fn ignore_cargo_err(line: &str) -> bool {
         "warning emitted",
         "warnings emitted",
     ];
-    for s in &blacklist {
+    for s in &discarded_lines {
         if line.contains(s) {
             return true;
         }
