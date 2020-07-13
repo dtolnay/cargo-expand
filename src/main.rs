@@ -258,6 +258,10 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
         line.arg("--profile=check");
     }
 
+    if args.release {
+        line.arg("--release");
+    }
+
     if let Some(features) = &args.features {
         line.arg("--features");
         line.arg(features);

@@ -74,6 +74,10 @@ pub struct Args {
     #[structopt(short, long, value_name = "SPEC")]
     pub package: Option<String>,
 
+    /// Build artifacts in release mode, with optimizations
+    #[structopt(long)]
+    pub release: bool,
+
     /// Number of parallel jobs, defaults to # of CPUs
     #[structopt(short, long, value_name = "N")]
     pub jobs: Option<u64>,
