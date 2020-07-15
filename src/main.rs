@@ -1,3 +1,8 @@
+#![allow(
+    // We support older compilers
+    clippy::match_like_matches_macro,
+)]
+
 mod cmd;
 mod config;
 mod edit;
