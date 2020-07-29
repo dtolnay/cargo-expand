@@ -168,6 +168,10 @@ fn cargo_expand() -> Result<i32> {
         const DOLLAR_CRATE_PLACEHOLDER: &str = "Ξcrate";
         content = content.replace("$crate", DOLLAR_CRATE_PLACEHOLDER);
 
+        // Support cargo-expand built with panic=abort, as otherwise proc-macro2
+        // ends up using a catch_unwind.
+        proc_macro2::fallback::force();
+
         // Discard comments, which are misplaced by the compiler
         if let Ok(mut syntax_tree) = syn::parse_file(&content) {
             edit::sanitize(&mut syntax_tree);
