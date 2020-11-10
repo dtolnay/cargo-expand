@@ -45,8 +45,7 @@ fn main() {
 fn cargo_expand_or_run_nightly() -> Result<i32> {
     const NO_RUN_NIGHTLY: &str = "CARGO_EXPAND_NO_RUN_NIGHTLY";
 
-    let maybe_nightly = !definitely_not_nightly();
-    if maybe_nightly || env::var_os(NO_RUN_NIGHTLY).is_some() {
+    if env::var_os(NO_RUN_NIGHTLY).is_some() || maybe_nightly() || !can_run_plus_nightly() {
         return cargo_expand();
     }
 
@@ -78,6 +77,10 @@ fn cargo_expand_or_run_nightly() -> Result<i32> {
     })
 }
 
+fn maybe_nightly() -> bool {
+    !definitely_not_nightly()
+}
+
 fn definitely_not_nightly() -> bool {
     let mut cmd = Command::new(cargo_binary());
     cmd.arg("--version");
@@ -93,6 +96,14 @@ fn definitely_not_nightly() -> bool {
     };
 
     version.starts_with("cargo 1") && !version.contains("nightly")
+}
+
+fn can_run_plus_nightly() -> bool {
+    Command::new("cargo")
+        .arg("+nightly")
+        .arg("--version")
+        .output()
+        .map_or(false, |output| output.status.success())
 }
 
 fn cargo_binary() -> OsString {
