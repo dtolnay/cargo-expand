@@ -24,7 +24,7 @@ toml = "0.5"
 toolchain_find = "0.1"
 
 [dependencies.bat]
-version = "0.15"
+version = "0.16"
 default-features = false
 features = ["regex-fancy"]
 
