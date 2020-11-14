@@ -1,5 +1,6 @@
 #![allow(
     // We support older compilers
+    clippy::manual_strip,
     clippy::match_like_matches_macro,
 )]
 

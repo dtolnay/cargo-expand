@@ -115,7 +115,7 @@ pub struct Args {
     pub themes: bool,
 
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
-    #[structopt(value_name = "ITEM")]
+    #[structopt(value_name = "ITEM", parse(try_from_str = parse_selector))]
     pub item: Option<Selector>,
 }
 
@@ -150,5 +150,13 @@ impl Display for Coloring {
             Coloring::Never => "never",
         };
         formatter.write_str(name)
+    }
+}
+
+fn parse_selector(s: &str) -> Result<Selector, <Selector as FromStr>::Err> {
+    if s.starts_with("::") {
+        s[2..].parse()
+    } else {
+        s.parse()
     }
 }
