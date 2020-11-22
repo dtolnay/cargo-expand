@@ -351,7 +351,11 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
 
     line.arg("--color");
     match color {
-        Coloring::Auto => line.arg(if atty::is(Stderr) { "always" } else { "never" }),
+        Coloring::Auto => line.arg(if cfg!(not(windows)) && atty::is(Stderr) {
+            "always"
+        } else {
+            "never"
+        }),
         color => line.arg(color.to_string()),
     }
 
