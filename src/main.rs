@@ -1,7 +1,12 @@
 #![allow(
-    // We support older compilers
+    clippy::enum_glob_use,
     clippy::manual_strip,
     clippy::match_like_matches_macro,
+    clippy::needless_pass_by_value,
+    clippy::non_ascii_literal,
+    clippy::struct_excessive_bools,
+    clippy::too_many_lines,
+    clippy::trivially_copy_pass_by_ref
 )]
 
 mod cmd;
