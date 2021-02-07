@@ -6,8 +6,8 @@ on:
   schedule: [cron: "40 1 * * *"]
 
 jobs:
-  nightly:
-    name: Rust nightly
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [beta, stable, 1.44.0]
+        rust: [nightly, beta, stable, 1.44.0]
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@master
