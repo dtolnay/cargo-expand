@@ -1,8 +1,8 @@
 #![feature(prelude_import)]
-#![doc = " Test"]
+//! Test
 #[prelude_import]
 use std::prelude::v1::*;
 #[macro_use]
 extern crate std;
-#[doc = " Test"]
+/// Test
 pub fn test() {}
