@@ -12,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
       - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs
       - run: diff tests/lib.expand.rs expand.rs
 
