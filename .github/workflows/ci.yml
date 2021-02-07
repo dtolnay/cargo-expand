@@ -6,13 +6,22 @@ on:
   schedule: [cron: "40 1 * * *"]
 
 jobs:
-  test:
+  nightly:
+    name: Rust nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs
+      - run: diff tests/lib.expand.rs expand.rs
+
+  build:
     name: Rust ${{matrix.rust}}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.44.0]
+        rust: [beta, stable, 1.44.0]
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@master
