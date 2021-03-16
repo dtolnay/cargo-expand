@@ -15,6 +15,8 @@ struct Sections {
 pub struct Config {
     pub theme: Option<String>,
     pub color: Option<String>,
+    #[serde(default = "bool::default")]
+    pub pager: bool,
 }
 
 pub fn deserialize() -> Config {

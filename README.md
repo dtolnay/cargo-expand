@@ -128,6 +128,13 @@ setting:
 color = "always"
 ```
 
+Enable paging of the output with the `pager` setting:
+
+```toml
+[expand]
+pager = true
+```
+
 ## Disclaimer
 
 Be aware that macro expansion to text is a lossy process. This is a debugging
