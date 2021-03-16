@@ -27,7 +27,7 @@ toolchain_find = "0.2"
 [dependencies.bat]
 version = "0.18"
 default-features = false
-features = ["regex-fancy", "paging"]
+features = ["paging", "regex-fancy"]
 
 [dependencies.syn]
 version = "1.0"
