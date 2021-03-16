@@ -27,7 +27,7 @@ use std::str::FromStr;
 
 use atty::Stream::{Stderr, Stdout};
 use bat::assets::HighlightingAssets;
-use bat::PrettyPrinter;
+use bat::{PagingMode, PrettyPrinter};
 use quote::quote;
 use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
@@ -249,6 +249,9 @@ fn cargo_expand() -> Result<i32> {
             .grid(false);
         if let Some(theme) = theme {
             pretty_printer.theme(theme);
+        }
+        if config.pager {
+            pretty_printer.paging_mode(PagingMode::QuitIfOneScreen);
         }
 
         // Ignore any errors.
