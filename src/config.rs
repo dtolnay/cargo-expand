@@ -25,10 +25,11 @@ pub fn deserialize() -> Config {
 
 fn try_deserialize() -> Option<Config> {
     let cargo_home = env::var_os("CARGO_HOME")?;
-    let config_path = PathBuf::from(cargo_home).join("config");
-    if !config_path.exists() {
-        return None;
-    }
+    let config_names = ["config", "config.toml"];
+    let config_path = config_names
+        .iter()
+        .map(|name| PathBuf::from(cargo_home.clone()).join(name))
+        .find(|path| path.exists())?;
 
     let content = fs::read(&config_path).ok()?;
 
