@@ -14,7 +14,7 @@ $ cargo expand
 This is a wrapper around the more verbose compiler command:
 
 ```console
-$ cargo rustc --profile=check -- -Zunstable-options --pretty=expanded
+$ cargo rustc --profile=check -- -Zunpretty=expanded
 ```
 
 ## Installation
