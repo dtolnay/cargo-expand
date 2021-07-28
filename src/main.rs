@@ -385,8 +385,7 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
 
     line.arg("-o");
     line.arg(outfile);
-    line.arg("-Zunstable-options");
-    line.arg("--pretty=expanded");
+    line.arg("-Zunpretty=expanded");
 
     if args.verbose {
         let mut display = line.clone();
