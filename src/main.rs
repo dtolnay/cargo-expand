@@ -443,6 +443,7 @@ fn ignore_cargo_err(line: &str) -> bool {
          output file name will be adapted for each output type",
         "warning emitted",
         "warnings emitted",
+        ") generated ",
     ];
     for s in &discarded_lines {
         if line.contains(s) {
