@@ -459,6 +459,10 @@ fn get_color(args: &Args, config: &Config) -> Coloring {
         return value;
     }
 
+    if env::var_os("NO_COLOR").is_some() {
+        return Coloring::Never;
+    }
+
     if let Some(value) = config.color.as_ref() {
         match Coloring::from_str(value.as_str()) {
             Ok(color) => return color,
