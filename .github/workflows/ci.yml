@@ -30,6 +30,7 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo check
+      - run: cargo update && cargo check
 
   clippy:
     name: Clippy
