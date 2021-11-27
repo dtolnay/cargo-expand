@@ -376,6 +376,10 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
         line.arg("--locked");
     }
 
+    if args.offline {
+        line.arg("--offline");
+    }
+
     for unstable_flag in &args.unstable_flags {
         line.arg("-Z");
         line.arg(unstable_flag);
