@@ -98,6 +98,10 @@ pub struct Args {
     #[structopt(long)]
     pub locked: bool,
 
+    /// Run without accessing the network
+    #[structopt(long)]
+    pub offline: bool,
+
     /// Unstable (nightly-only) flags to Cargo
     #[structopt(short = "Z", value_name = "FLAG")]
     pub unstable_flags: Vec<String>,
