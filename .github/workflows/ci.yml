@@ -49,4 +49,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: dtolnay/install@cargo-outdated
       - run: cargo update
-      - run: cargo outdated --exit-code 1
+      - run: cargo outdated --exit-code 1 --ignore syntect
