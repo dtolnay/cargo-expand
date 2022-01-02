@@ -25,6 +25,7 @@ use crate::opts::{Args, Coloring, Opts};
 use atty::Stream::{Stderr, Stdout};
 use bat::assets::HighlightingAssets;
 use bat::{PagingMode, PrettyPrinter};
+use clap::Parser;
 use quote::quote;
 use std::env;
 use std::ffi::OsString;
@@ -33,7 +34,6 @@ use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::str::FromStr;
-use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
@@ -116,7 +116,7 @@ fn cargo_binary() -> OsString {
 }
 
 fn cargo_expand() -> Result<i32> {
-    let Opts::Expand(args) = Opts::from_args();
+    let Opts::Expand(args) = Opts::parse();
     let config = config::deserialize();
 
     if args.themes {

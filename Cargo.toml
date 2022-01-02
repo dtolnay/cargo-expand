@@ -14,10 +14,10 @@ autotests = false
 
 [dependencies]
 atty = "0.2"
+clap = { version = "3.0", default-features = false, features = ["derive", "std", "suggestions"] }
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
-structopt = "0.3"
 syn-select = "0.2"
 tempfile = "3.0"
 termcolor = "1.0"
