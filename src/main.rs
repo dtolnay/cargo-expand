@@ -17,6 +17,15 @@ mod error;
 mod fmt;
 mod opts;
 
+use crate::cmd::Line;
+use crate::config::Config;
+use crate::error::Result;
+use crate::opts::Coloring::*;
+use crate::opts::{Args, Coloring, Opts};
+use atty::Stream::{Stderr, Stdout};
+use bat::assets::HighlightingAssets;
+use bat::{PagingMode, PrettyPrinter};
+use quote::quote;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
@@ -24,19 +33,8 @@ use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::str::FromStr;
-
-use atty::Stream::{Stderr, Stdout};
-use bat::assets::HighlightingAssets;
-use bat::{PagingMode, PrettyPrinter};
-use quote::quote;
 use structopt::StructOpt;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
-
-use crate::cmd::Line;
-use crate::config::Config;
-use crate::error::Result;
-use crate::opts::Coloring::*;
-use crate::opts::{Args, Coloring, Opts};
 
 fn main() {
     let result = cargo_expand_or_run_nightly();

@@ -1,9 +1,7 @@
+use crate::error::Result;
+use serde::Serialize;
 use std::fs;
 use std::path::Path;
-
-use serde::Serialize;
-
-use crate::error::Result;
 
 #[derive(Serialize)]
 struct Rustfmt {

@@ -1,7 +1,6 @@
 use std::fmt::{self, Display};
 use std::path::PathBuf;
 use std::str::FromStr;
-
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
 use syn_select::Selector;
