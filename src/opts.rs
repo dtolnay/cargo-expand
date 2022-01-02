@@ -161,3 +161,8 @@ fn parse_selector(s: &str) -> Result<Selector, <Selector as FromStr>::Err> {
         s.parse()
     }
 }
+
+#[test]
+fn test_cli() {
+    <Opts as clap::IntoApp>::into_app().debug_assert();
+}
