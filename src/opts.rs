@@ -5,12 +5,13 @@ use std::str::FromStr;
 use syn_select::Selector;
 
 #[derive(Parser)]
-#[clap(bin_name = "cargo", version)]
+#[clap(bin_name = "cargo", version, author)]
 pub enum Opts {
     /// Show the result of macro expansion.
     #[clap(
         name = "expand",
         version,
+        author,
         setting = AppSettings::DeriveDisplayOrder,
         setting = AppSettings::DontCollapseArgsInUsage
     )]
