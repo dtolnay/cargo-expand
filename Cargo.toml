@@ -19,6 +19,7 @@ proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 syn-select = "0.2"
+syntect = "=4.6.0" # work around https://github.com/trishume/syntect/issues/402
 tempfile = "3.0"
 termcolor = "1.0"
 toml = "0.5"
