@@ -128,7 +128,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-expand"
-version = "1.0.13"
+version = "1.0.14"
 dependencies = [
  "atty",
  "bat",
