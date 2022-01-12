@@ -1,5 +1,6 @@
 #![allow(
     clippy::enum_glob_use,
+    clippy::items_after_statements,
     clippy::let_underscore_drop,
     clippy::manual_strip,
     clippy::match_like_matches_macro,
@@ -126,9 +127,9 @@ fn cargo_expand() -> Result<i32> {
         return Ok(0);
     }
 
-    let rustfmt;
-    match (&args.item, args.ugly) {
-        (Some(item), true) => {
+    let mut rustfmt = None;
+    if let Some(item) = &args.item {
+        if args.ugly {
             let _ = writeln!(
                 io::stderr(),
                 "ERROR: cannot expand single item ({}) in ugly mode.",
@@ -136,7 +137,7 @@ fn cargo_expand() -> Result<i32> {
             );
             return Ok(1);
         }
-        (Some(item), false) => {
+        if !cfg!(feature = "prettyplease") {
             rustfmt = which_rustfmt();
             if rustfmt.is_none() {
                 let _ = writeln!(
@@ -151,8 +152,6 @@ fn cargo_expand() -> Result<i32> {
                 return Ok(1);
             }
         }
-        (None, true) => rustfmt = None,
-        (None, false) => rustfmt = which_rustfmt(),
     }
 
     let mut builder = tempfile::Builder::new();
@@ -176,20 +175,30 @@ fn cargo_expand() -> Result<i32> {
         return Ok(if code == 0 { 1 } else { code });
     }
 
-    // Run rustfmt
-    if let Some(rustfmt) = rustfmt {
+    // Format the expanded code
+    if !args.ugly {
+        let questionably_formatted = content;
+
         // Work around rustfmt not being able to parse paths containing $crate.
         // This placeholder should be the same width as $crate to preserve
         // alignments.
         const DOLLAR_CRATE_PLACEHOLDER: &str = "Ξcrate";
-        content = content.replace("$crate", DOLLAR_CRATE_PLACEHOLDER);
+        let wip = questionably_formatted.replace("$crate", DOLLAR_CRATE_PLACEHOLDER);
 
         // Support cargo-expand built with panic=abort, as otherwise proc-macro2
         // ends up using a catch_unwind.
         proc_macro2::fallback::force();
 
+        enum Stage {
+            Formatted(String),
+            Unformatted(String),
+            QuestionablyFormatted,
+        }
+
+        let mut stage = Stage::QuestionablyFormatted;
+
         // Discard comments, which are misplaced by the compiler
-        if let Ok(mut syntax_tree) = syn::parse_file(&content) {
+        if let Ok(mut syntax_tree) = syn::parse_file(&wip) {
             edit::sanitize(&mut syntax_tree);
             if let Some(filter) = args.item {
                 syntax_tree.shebang = None;
@@ -200,30 +209,58 @@ fn cargo_expand() -> Result<i32> {
                     return Ok(1);
                 }
             }
-            content = quote!(#syntax_tree).to_string();
-        }
-        fs::write(&outfile_path, content)?;
-
-        fmt::write_rustfmt_config(&outdir)?;
-
-        let output = Command::new(&rustfmt)
-            .arg("--edition=2018")
-            .arg(&outfile_path)
-            .stderr(Stdio::null())
-            .output();
-        if let Ok(output) = output {
-            if !output.status.success() {
-                // Probably was the wrong edition.
-                let _status = Command::new(&rustfmt)
-                    .arg("--edition=2015")
-                    .arg(&outfile_path)
-                    .stderr(Stdio::null())
-                    .status();
+            #[cfg(feature = "prettyplease")]
+            // This is behind a feature because it's probably not mature enough
+            // to use in panic=abort mode yet. I'll remove the feature and do
+            // this by default when prettyplease is further along, or when
+            // cfg(panic = "unwind") is stabilized, whichever comes first.
+            // Tracking issue: https://github.com/rust-lang/rust/issues/77443
+            {
+                if let Ok(formatted) =
+                    std::panic::catch_unwind(|| prettyplease::unparse(&syntax_tree))
+                {
+                    stage = Stage::Formatted(formatted);
+                }
+            }
+            if let Stage::QuestionablyFormatted = stage {
+                let unformatted = quote!(#syntax_tree).to_string();
+                stage = Stage::Unformatted(unformatted);
             }
         }
 
-        content = fs::read_to_string(&outfile_path)?;
-        content = content.replace(DOLLAR_CRATE_PLACEHOLDER, "$crate");
+        let to_rustfmt = match &stage {
+            Stage::Formatted(_) => None,
+            Stage::Unformatted(unformatted) => Some(unformatted),
+            Stage::QuestionablyFormatted => Some(&wip),
+        };
+
+        if let Some(unformatted) = to_rustfmt {
+            if let Some(rustfmt) = rustfmt.or_else(which_rustfmt) {
+                fs::write(&outfile_path, unformatted)?;
+
+                fmt::write_rustfmt_config(&outdir)?;
+
+                for edition in &["2018", "2015"] {
+                    let output = Command::new(&rustfmt)
+                        .arg("--edition")
+                        .arg(edition)
+                        .arg(&outfile_path)
+                        .stderr(Stdio::null())
+                        .output();
+                    if let Ok(output) = output {
+                        if output.status.success() {
+                            stage = Stage::Formatted(fs::read_to_string(&outfile_path)?);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        content = match stage {
+            Stage::Formatted(formatted) => formatted.replace(DOLLAR_CRATE_PLACEHOLDER, "$crate"),
+            Stage::Unformatted(_) | Stage::QuestionablyFormatted => questionably_formatted,
+        };
     }
 
     // Run pretty printer
