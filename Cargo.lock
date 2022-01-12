@@ -133,6 +133,7 @@ dependencies = [
  "atty",
  "bat",
  "clap",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "serde",
@@ -535,6 +536,16 @@ dependencies = [
  "serde",
  "time",
  "xml-rs",
+]
+
+[[package]]
+name = "prettyplease"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f3ebd569945e276e2c8000677484f50f5c242b3495929ae1c7d42d89778939a"
+dependencies = [
+ "proc-macro2",
+ "syn",
 ]
 
 [[package]]
