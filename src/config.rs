@@ -36,7 +36,7 @@ fn try_deserialize() -> Option<Config> {
         Ok(config) => config,
         Err(err) => {
             let _ = writeln!(
-                &mut io::stderr(),
+                io::stderr(),
                 "Warning: {}: {}",
                 config_path.display(),
                 err
