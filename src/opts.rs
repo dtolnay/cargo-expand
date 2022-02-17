@@ -13,7 +13,7 @@ pub enum Opts {
         version,
         author,
         setting = AppSettings::DeriveDisplayOrder,
-        setting = AppSettings::DontCollapseArgsInUsage
+        dont_collapse_args_in_usage = true
     )]
     Expand(Args),
 }
@@ -165,5 +165,5 @@ fn parse_selector(s: &str) -> Result<Selector, <Selector as FromStr>::Err> {
 
 #[test]
 fn test_cli() {
-    <Opts as clap::IntoApp>::into_app().debug_assert();
+    <Opts as clap::CommandFactory>::command().debug_assert();
 }
