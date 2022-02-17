@@ -134,7 +134,7 @@ checksum = "439989e6b8c38d1b6570a384ef1e49c8848128f5a97f3914baef02920842712f"
 
 [[package]]
 name = "cargo-expand"
-version = "1.0.15"
+version = "1.0.16"
 dependencies = [
  "atty",
  "bat",
