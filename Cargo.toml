@@ -26,7 +26,7 @@ toml = "0.5"
 toolchain_find = "0.2"
 
 [dependencies.bat]
-version = "0.19"
+version = "0.20"
 default-features = false
 features = ["paging", "regex-fancy"]
 
