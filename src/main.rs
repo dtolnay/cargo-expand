@@ -6,6 +6,7 @@
     clippy::match_like_matches_macro,
     clippy::needless_pass_by_value,
     clippy::non_ascii_literal,
+    clippy::option_option,
     clippy::struct_excessive_bools,
     clippy::too_many_lines,
     clippy::trivially_copy_pass_by_ref
