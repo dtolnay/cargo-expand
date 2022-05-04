@@ -32,9 +32,13 @@ use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, BufRead, Write};
+#[cfg(feature = "prettyplease")]
+use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::str::FromStr;
+#[cfg(feature = "prettyplease")]
+use std::thread::Result as ThreadResult;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
@@ -216,9 +220,7 @@ fn cargo_expand() -> Result<i32> {
             // cfg(panic = "unwind") is stabilized, whichever comes first.
             // Tracking issue: https://github.com/rust-lang/rust/issues/77443
             {
-                if let Ok(formatted) =
-                    std::panic::catch_unwind(|| prettyplease::unparse(&syntax_tree))
-                {
+                if let Ok(formatted) = ignore_panic(|| prettyplease::unparse(&syntax_tree)) {
                     stage = Stage::Formatted(formatted);
                 }
             }
@@ -491,6 +493,29 @@ fn ignore_cargo_err(line: &str) -> bool {
     }
 
     false
+}
+
+#[cfg(feature = "prettyplease")]
+fn ignore_panic<F, T>(f: F) -> ThreadResult<T>
+where
+    F: UnwindSafe + FnOnce() -> T,
+{
+    type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
+
+    let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
+    let sanity_check = &*null_hook as *const PanicHook;
+    let original_hook = panic::take_hook();
+    panic::set_hook(null_hook);
+
+    let result = panic::catch_unwind(f);
+
+    let hopefully_null_hook = panic::take_hook();
+    panic::set_hook(original_hook);
+    if sanity_check != &*hopefully_null_hook {
+        panic!("race condition on std::panic hook");
+    }
+
+    result
 }
 
 fn get_color(args: &Args, config: &Config) -> Coloring {
