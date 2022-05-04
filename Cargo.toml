@@ -1,6 +1,6 @@
 [package]
 name = "cargo-expand"
-version = "1.0.18"
+version = "1.0.19"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Wrapper around rustc -Zunpretty=expanded. Shows the result of macro expansion and #[derive] expansion."
