@@ -348,22 +348,22 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
 
     if let Some(bin) = &args.bin {
         line.arg("--bin");
-        line.arg(bin);
+        line.args(bin);
     }
 
     if let Some(example) = &args.example {
         line.arg("--example");
-        line.arg(example);
+        line.args(example);
     }
 
     if let Some(test) = &args.test {
         line.arg("--test");
-        line.arg(test);
+        line.args(test);
     }
 
     if let Some(bench) = &args.bench {
         line.arg("--bench");
-        line.arg(bench);
+        line.args(bench);
     }
 
     if let Some(target) = &args.target {
@@ -383,7 +383,7 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
 
     if let Some(package) = &args.package {
         line.arg("--package");
-        line.arg(package);
+        line.args(package);
     }
 
     if let Some(jobs) = args.jobs {

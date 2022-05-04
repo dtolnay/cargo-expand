@@ -37,24 +37,24 @@ pub struct Args {
     pub lib: bool,
 
     /// Expand only the specified binary
-    #[clap(long, value_name = "NAME")]
-    pub bin: Option<String>,
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    pub bin: Option<Option<String>>,
 
     /// Expand only the specified example
-    #[clap(long, value_name = "NAME")]
-    pub example: Option<String>,
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    pub example: Option<Option<String>>,
 
     /// Expand only the specified test target
-    #[clap(long, value_name = "NAME")]
-    pub test: Option<String>,
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    pub test: Option<Option<String>>,
 
     /// Include tests when expanding the lib or bin
     #[clap(long)]
     pub tests: bool,
 
     /// Expand only the specified bench target
-    #[clap(long, value_name = "NAME")]
-    pub bench: Option<String>,
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    pub bench: Option<Option<String>>,
 
     /// Target triple which compiles will be for
     #[clap(long, value_name = "TARGET")]
@@ -69,8 +69,14 @@ pub struct Args {
     pub manifest_path: Option<PathBuf>,
 
     /// Package to expand
-    #[clap(short, long, value_name = "SPEC")]
-    pub package: Option<String>,
+    #[clap(
+        short,
+        long,
+        value_name = "SPEC",
+        min_values = 0,
+        multiple_values = false
+    )]
+    pub package: Option<Option<String>>,
 
     /// Build artifacts in release mode, with optimizations
     #[clap(long)]
