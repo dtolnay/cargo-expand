@@ -19,6 +19,15 @@ impl Line {
         self.args.push(arg.as_ref().to_owned());
     }
 
+    pub fn args<I, S>(&mut self, args: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>,
+    {
+        self.args
+            .extend(args.into_iter().map(|arg| arg.as_ref().to_owned()));
+    }
+
     pub fn insert<S: AsRef<OsStr>>(&mut self, index: usize, arg: S) {
         self.args.insert(index, arg.as_ref().to_owned());
     }
