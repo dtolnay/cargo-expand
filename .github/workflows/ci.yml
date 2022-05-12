@@ -58,4 +58,4 @@ jobs:
       - uses: actions/checkout@v3
       - uses: dtolnay/install@cargo-outdated
       - run: cargo update
-      - run: cargo outdated --exit-code 1 --ignore bat,syntect
+      - run: cargo outdated --exit-code 1 --ignore bat
