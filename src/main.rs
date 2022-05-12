@@ -42,6 +42,8 @@ use std::str::FromStr;
 use std::thread::Result as ThreadResult;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
+cargo_subcommand_metadata::description!("Show result of macro expansion");
+
 fn main() {
     let result = cargo_expand_or_run_nightly();
     process::exit(match result {
