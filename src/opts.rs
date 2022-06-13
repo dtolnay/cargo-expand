@@ -21,51 +21,51 @@ pub enum Opts {
 #[derive(Parser, Debug)]
 pub struct Args {
     /// Space-separated list of features to activate
-    #[clap(long, value_name = "FEATURES")]
+    #[clap(long, value_name = "FEATURES", action)]
     pub features: Option<String>,
 
     /// Activate all available features
-    #[clap(long)]
+    #[clap(long, action)]
     pub all_features: bool,
 
     /// Do not activate the `default` feature
-    #[clap(long)]
+    #[clap(long, action)]
     pub no_default_features: bool,
 
     /// Expand only this package's library
-    #[clap(long)]
+    #[clap(long, action)]
     pub lib: bool,
 
     /// Expand only the specified binary
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
     pub bin: Option<Option<String>>,
 
     /// Expand only the specified example
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
     pub example: Option<Option<String>>,
 
     /// Expand only the specified test target
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
     pub test: Option<Option<String>>,
 
     /// Include tests when expanding the lib or bin
-    #[clap(long)]
+    #[clap(long, action)]
     pub tests: bool,
 
     /// Expand only the specified bench target
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false)]
+    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
     pub bench: Option<Option<String>>,
 
     /// Target triple which compiles will be for
-    #[clap(long, value_name = "TARGET")]
+    #[clap(long, value_name = "TARGET", action)]
     pub target: Option<String>,
 
     /// Directory for all generated artifacts
-    #[clap(long, value_name = "DIRECTORY", parse(from_os_str))]
+    #[clap(long, value_name = "DIRECTORY", action)]
     pub target_dir: Option<PathBuf>,
 
     /// Path to Cargo.toml
-    #[clap(long, value_name = "PATH", parse(from_os_str))]
+    #[clap(long, value_name = "PATH", action)]
     pub manifest_path: Option<PathBuf>,
 
     /// Package to expand
@@ -74,56 +74,57 @@ pub struct Args {
         long,
         value_name = "SPEC",
         min_values = 0,
-        multiple_values = false
+        multiple_values = false,
+        action
     )]
     pub package: Option<Option<String>>,
 
     /// Build artifacts in release mode, with optimizations
-    #[clap(long)]
+    #[clap(long, action)]
     pub release: bool,
 
     /// Number of parallel jobs, defaults to # of CPUs
-    #[clap(short, long, value_name = "N")]
+    #[clap(short, long, value_name = "N", action)]
     pub jobs: Option<u64>,
 
     /// Print command lines as they are executed
-    #[clap(long)]
+    #[clap(long, action)]
     pub verbose: bool,
 
     /// Coloring: auto, always, never
-    #[clap(long, value_name = "WHEN")]
+    #[clap(long, value_name = "WHEN", action)]
     pub color: Option<Coloring>,
 
     /// Require Cargo.lock and cache are up to date
-    #[clap(long)]
+    #[clap(long, action)]
     pub frozen: bool,
 
     /// Require Cargo.lock is up to date
-    #[clap(long)]
+    #[clap(long, action)]
     pub locked: bool,
 
     /// Run without accessing the network
-    #[clap(long)]
+    #[clap(long, action)]
     pub offline: bool,
 
     /// Unstable (nightly-only) flags to Cargo
-    #[clap(short = 'Z', value_name = "FLAG")]
+    #[clap(short = 'Z', value_name = "FLAG", action)]
     pub unstable_flags: Vec<String>,
 
     /// Do not attempt to run rustfmt
-    #[clap(long)]
+    #[clap(long, action)]
     pub ugly: bool,
 
     /// Select syntax highlighting theme
-    #[clap(long, value_name = "NAME")]
+    #[clap(long, value_name = "NAME", action)]
     pub theme: Option<String>,
 
     /// Print available syntax highlighting theme names
-    #[clap(long)]
+    #[clap(long, action)]
     pub themes: bool,
 
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
-    #[clap(value_name = "ITEM", parse(try_from_str = parse_selector))]
+    #[clap(value_name = "ITEM", value_parser = parse_selector)]
     pub item: Option<Selector>,
 }
 
