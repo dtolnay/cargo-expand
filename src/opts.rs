@@ -1,3 +1,7 @@
+// Clap 3.2 upgrade in https://github.com/dtolnay/cargo-expand/pull/146
+// blocked on https://github.com/TedDriggs/syn-select/pull/9
+#![allow(deprecated)]
+
 use clap::{AppSettings, Parser};
 use std::fmt::{self, Display};
 use std::path::PathBuf;
