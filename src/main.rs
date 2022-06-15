@@ -25,7 +25,6 @@ use crate::error::Result;
 use crate::opts::Coloring::*;
 use crate::opts::{Args, Coloring, Opts};
 use atty::Stream::{Stderr, Stdout};
-use bat::assets::HighlightingAssets;
 use bat::{PagingMode, PrettyPrinter};
 use clap::Parser;
 use quote::quote;
@@ -128,7 +127,7 @@ fn cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in HighlightingAssets::from_binary().themes() {
+        for theme in PrettyPrinter::new().themes() {
             let _ = writeln!(io::stdout(), "{}", theme);
         }
         return Ok(0);
