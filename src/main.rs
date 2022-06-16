@@ -13,6 +13,7 @@
 )]
 
 mod cmd;
+mod color;
 mod config;
 mod edit;
 mod error;
@@ -25,7 +26,6 @@ use crate::error::Result;
 use crate::opts::Coloring::*;
 use crate::opts::{Args, Coloring, Opts};
 use atty::Stream::{Stderr, Stdout};
-use bat::{PagingMode, PrettyPrinter};
 use clap::Parser;
 use quote::quote;
 use std::env;
@@ -127,9 +127,7 @@ fn cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in PrettyPrinter::new().themes() {
-            let _ = writeln!(io::stdout(), "{}", theme);
-        }
+        let _ = color::print_themes();
         return Ok(0);
     }
 
@@ -277,24 +275,8 @@ fn cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
-        let mut pretty_printer = PrettyPrinter::new();
-        pretty_printer
-            .input_from_bytes(content.as_bytes())
-            .language("rust")
-            .tab_width(Some(4))
-            .true_color(false)
-            .header(false)
-            .line_numbers(false)
-            .grid(false);
-        if let Some(theme) = theme {
-            pretty_printer.theme(theme);
-        }
-        if config.pager {
-            pretty_printer.paging_mode(PagingMode::QuitIfOneScreen);
-        }
-
         // Ignore any errors.
-        let _ = pretty_printer.print();
+        let _ = color::print_colored(&content, theme.as_deref(), config.pager);
     } else {
         let _ = write!(io::stdout(), "{}", content);
     }
