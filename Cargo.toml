@@ -16,7 +16,7 @@ autotests = false
 atty = "0.2"
 cargo-subcommand-metadata = "0.1"
 clap = { version = "3.2.5", default-features = false, features = ["deprecated", "derive", "std", "suggestions"] }
-prettyplease = { version = "0.1", optional = true }
+prettyplease = { version = "0.1.12", optional = true }
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
