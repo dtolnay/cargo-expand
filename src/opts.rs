@@ -4,13 +4,15 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use syn_select::Selector;
 
+const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
+
 #[derive(Parser)]
-#[clap(bin_name = "cargo", version, author)]
+#[clap(bin_name = "cargo", version = VERSION, author)]
 pub enum Opts {
     /// Show the result of macro expansion.
     #[clap(
         name = "expand",
-        version,
+        version = VERSION,
         author,
         setting = AppSettings::DeriveDisplayOrder,
         dont_collapse_args_in_usage = true
