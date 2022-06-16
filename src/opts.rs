@@ -109,6 +109,10 @@ pub struct Args {
     #[clap(long, action)]
     pub release: bool,
 
+    /// Build artifacts with the specified profile
+    #[clap(long, value_name = "PROFILE-NAME", action)]
+    pub profile: Option<String>,
+
     /// Number of parallel jobs, defaults to # of CPUs
     #[clap(short, long, value_name = "N", action)]
     pub jobs: Option<u64>,
