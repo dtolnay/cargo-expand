@@ -37,15 +37,33 @@ pub struct Args {
     pub lib: bool,
 
     /// Expand only the specified binary
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
+    #[clap(
+        long,
+        value_name = "NAME",
+        min_values = 0,
+        multiple_values = false,
+        action
+    )]
     pub bin: Option<Option<String>>,
 
     /// Expand only the specified example
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
+    #[clap(
+        long,
+        value_name = "NAME",
+        min_values = 0,
+        multiple_values = false,
+        action
+    )]
     pub example: Option<Option<String>>,
 
     /// Expand only the specified test target
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
+    #[clap(
+        long,
+        value_name = "NAME",
+        min_values = 0,
+        multiple_values = false,
+        action
+    )]
     pub test: Option<Option<String>>,
 
     /// Include tests when expanding the lib or bin
@@ -53,7 +71,13 @@ pub struct Args {
     pub tests: bool,
 
     /// Expand only the specified bench target
-    #[clap(long, value_name = "NAME", min_values = 0, multiple_values = false, action)]
+    #[clap(
+        long,
+        value_name = "NAME",
+        min_values = 0,
+        multiple_values = false,
+        action
+    )]
     pub bench: Option<Option<String>>,
 
     /// Target triple which compiles will be for
