@@ -321,10 +321,13 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
 
     line.arg("rustc");
 
-    if args.tests && args.test.is_none() {
-        line.arg("--profile=test");
+    line.arg("--profile");
+    if let Some(profile) = &args.profile {
+        line.arg(profile);
+    } else if args.tests && args.test.is_none() {
+        line.arg("test");
     } else {
-        line.arg("--profile=check");
+        line.arg("check");
     }
 
     if args.release {
