@@ -57,12 +57,14 @@ fn main() {
 fn cargo_expand_or_run_nightly() -> Result<i32> {
     const NO_RUN_NIGHTLY: &str = "CARGO_EXPAND_NO_RUN_NIGHTLY";
 
-    if env::var_os(NO_RUN_NIGHTLY).is_some() || maybe_nightly() || !can_run_plus_nightly() {
+    if env::var_os(NO_RUN_NIGHTLY).is_some() || maybe_nightly() || !can_rustup_run_nightly() {
         return cargo_expand();
     }
 
-    let mut nightly = Command::new("cargo");
-    nightly.arg("+nightly");
+    let mut nightly = Command::new("rustup");
+    nightly.arg("run");
+    nightly.arg("nightly");
+    nightly.arg("cargo");
     nightly.arg("expand");
 
     let mut args = env::args_os().peekable();
@@ -110,9 +112,11 @@ fn definitely_not_nightly() -> bool {
     version.starts_with("cargo 1") && !version.contains("nightly")
 }
 
-fn can_run_plus_nightly() -> bool {
-    Command::new("cargo")
-        .arg("+nightly")
+fn can_rustup_run_nightly() -> bool {
+    Command::new("rustup")
+        .arg("run")
+        .arg("nightly")
+        .arg("cargo")
         .arg("--version")
         .output()
         .map_or(false, |output| output.status.success())
