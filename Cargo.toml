@@ -2,15 +2,15 @@
 name = "cargo-expand"
 version = "1.0.28"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-license = "MIT OR Apache-2.0"
-description = "Wrapper around rustc -Zunpretty=expanded. Shows the result of macro expansion and #[derive] expansion."
-repository = "https://github.com/dtolnay/cargo-expand"
-documentation = "https://github.com/dtolnay/cargo-expand"
-keywords = ["cargo", "subcommand", "expanded"]
-categories = ["development-tools::cargo-plugins", "development-tools::debugging"]
-edition = "2021"
-readme = "README.md"
 autotests = false
+categories = ["development-tools::cargo-plugins", "development-tools::debugging"]
+description = "Wrapper around rustc -Zunpretty=expanded. Shows the result of macro expansion and #[derive] expansion."
+documentation = "https://github.com/dtolnay/cargo-expand"
+edition = "2021"
+keywords = ["cargo", "subcommand", "expanded"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/dtolnay/cargo-expand"
 
 [dependencies]
 atty = "0.2"
