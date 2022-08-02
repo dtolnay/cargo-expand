@@ -7,7 +7,7 @@ categories = ["development-tools::cargo-plugins", "development-tools::debugging"
 description = "Wrapper around rustc -Zunpretty=expanded. Shows the result of macro expansion and #[derive] expansion."
 documentation = "https://github.com/dtolnay/cargo-expand"
 edition = "2021"
-keywords = ["cargo", "subcommand", "expanded"]
+keywords = ["cargo", "subcommand", "macros"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/dtolnay/cargo-expand"
