@@ -19,8 +19,6 @@ jobs:
           components: rustfmt
       - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs
       - run: diff tests/lib.expand.rs expand.rs
-      - run: cargo run --features prettyplease -- expand --manifest-path tests/Cargo.toml > expand.rs
-      - run: diff tests/lib.expand.rs expand.rs
 
   build:
     name: Rust ${{matrix.rust}}
@@ -28,17 +26,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.58.0]
+        rust: [nightly, beta, stable, 1.60.0]
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo check
-      - run: cargo check --features prettyplease
       - run: cargo update
       - run: cargo check
-      - run: cargo check --features prettyplease
       - run: cargo test
 
   clippy:
