@@ -248,7 +248,7 @@ fn cargo_expand() -> Result<i32> {
 
                 fmt::write_rustfmt_config(&outdir)?;
 
-                for edition in &["2018", "2015"] {
+                for edition in &["2021", "2018", "2015"] {
                     let output = Command::new(&rustfmt)
                         .arg("--edition")
                         .arg(edition)
