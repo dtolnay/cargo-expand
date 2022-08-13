@@ -36,6 +36,7 @@ use std::io::{self, BufRead, Write};
 use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
+use std::ptr;
 use std::str::FromStr;
 #[cfg(feature = "prettyplease")]
 use std::thread::Result as ThreadResult;
@@ -512,7 +513,7 @@ where
     type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
 
     let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
-    let sanity_check = &*null_hook as *const PanicHook;
+    let sanity_check = ptr::addr_of!(*null_hook);
     let original_hook = panic::take_hook();
     panic::set_hook(null_hook);
 
