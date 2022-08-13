@@ -2,6 +2,7 @@
     clippy::enum_glob_use,
     clippy::items_after_statements,
     clippy::let_underscore_drop,
+    clippy::manual_assert,
     clippy::manual_strip,
     clippy::match_like_matches_macro,
     clippy::needless_pass_by_value,
