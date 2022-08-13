@@ -33,13 +33,11 @@ use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, BufRead, Write};
-#[cfg(feature = "prettyplease")]
 use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::ptr;
 use std::str::FromStr;
-#[cfg(feature = "prettyplease")]
 use std::thread::Result as ThreadResult;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -139,7 +137,6 @@ fn cargo_expand() -> Result<i32> {
         return Ok(0);
     }
 
-    let mut rustfmt = None;
     if let Some(item) = &args.item {
         if args.ugly {
             let _ = writeln!(
@@ -149,20 +146,18 @@ fn cargo_expand() -> Result<i32> {
             );
             return Ok(1);
         }
-        if !cfg!(feature = "prettyplease") {
-            rustfmt = which_rustfmt();
-            if rustfmt.is_none() {
-                let _ = writeln!(
-                    io::stderr(),
-                    "ERROR: cannot expand single item ({}) without rustfmt.",
-                    item,
-                );
-                let _ = writeln!(
-                    io::stderr(),
-                    "Install rustfmt by running `rustup component add rustfmt --toolchain nightly`.",
-                );
-                return Ok(1);
-            }
+    }
+
+    let mut rustfmt = None;
+    if config.rustfmt {
+        rustfmt = which_rustfmt();
+        if rustfmt.is_none() {
+            let _ = io::stderr().write_all(
+                b"ERROR: cargo-expand configuration sets rustfmt=true, but \
+                rustfmt is not found. Install rustfmt by running `rustup \
+                component add rustfmt --toolchain nightly`.\n",
+            );
+            return Ok(1);
         }
     }
 
@@ -221,13 +216,7 @@ fn cargo_expand() -> Result<i32> {
                     return Ok(1);
                 }
             }
-            #[cfg(feature = "prettyplease")]
-            // This is behind a feature because it's probably not mature enough
-            // to use in panic=abort mode yet. I'll remove the feature and do
-            // this by default when prettyplease is further along, or when
-            // cfg(panic = "unwind") is stabilized, whichever comes first.
-            // Tracking issue: https://github.com/rust-lang/rust/issues/77443
-            {
+            if !config.rustfmt {
                 if let Ok(formatted) = ignore_panic(|| prettyplease::unparse(&syntax_tree)) {
                     stage = Stage::Formatted(formatted);
                 }
@@ -506,7 +495,6 @@ fn ignore_cargo_err(line: &str) -> bool {
     false
 }
 
-#[cfg(feature = "prettyplease")]
 fn ignore_panic<F, T>(f: F) -> ThreadResult<T>
 where
     F: UnwindSafe + FnOnce() -> T,

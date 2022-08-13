@@ -16,6 +16,11 @@ pub struct Config {
     pub color: Option<String>,
     #[serde(default)]
     pub pager: bool,
+    /// Format using rustfmt instead of prettyplease. This is significantly
+    /// slower, and less reliable on macro-generated code, but produces more
+    /// aesthetic formatting when it works.
+    #[serde(default)]
+    pub rustfmt: bool,
 }
 
 pub fn deserialize() -> Config {
