@@ -9,7 +9,6 @@ documentation = "https://github.com/dtolnay/cargo-expand"
 edition = "2021"
 keywords = ["cargo", "subcommand", "macros"]
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/dtolnay/cargo-expand"
 
 [features]
