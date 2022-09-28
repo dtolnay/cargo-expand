@@ -19,7 +19,7 @@ prettyplease = []
 atty = "0.2"
 bat = { version = "0.22", default-features = false, features = ["paging", "regex-fancy"] }
 cargo-subcommand-metadata = "0.1"
-clap = { version = "3.2.5", default-features = false, features = ["deprecated", "derive", "std", "suggestions"] }
+clap = { version = "4", features = ["deprecated", "derive"] }
 prettyplease = { version = "0.1.18", features = ["verbatim"] }
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
