@@ -29,7 +29,7 @@ use crate::opts::Coloring::*;
 use crate::opts::{Args, Coloring, Opts};
 use atty::Stream::{Stderr, Stdout};
 use bat::{PagingMode, PrettyPrinter};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use quote::quote;
 use std::env;
 use std::ffi::OsString;
@@ -39,7 +39,6 @@ use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::ptr;
-use std::str::FromStr;
 use std::thread::Result as ThreadResult;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -404,7 +403,7 @@ fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) 
         } else {
             "never"
         }),
-        color => line.arg(color.to_string()),
+        color => line.arg(color.to_possible_value().unwrap().get_name()),
     }
 
     if args.frozen {
@@ -529,7 +528,8 @@ fn get_color(args: &Args, config: &Config) -> Coloring {
     }
 
     if let Some(value) = config.color.as_ref() {
-        match Coloring::from_str(value.as_str()) {
+        let ignore_case = false;
+        match Coloring::from_str(value.as_str(), ignore_case) {
             Ok(color) => return color,
             Err(err) => {
                 let _ = writeln!(
