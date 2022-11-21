@@ -1,5 +1,4 @@
-use clap::Parser;
-use std::fmt::{self, Display};
+use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 use std::str::FromStr;
 use syn_select::Selector;
@@ -121,38 +120,11 @@ pub struct Args {
     pub item: Option<Selector>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(ValueEnum, Debug, Clone, Copy)]
 pub enum Coloring {
     Auto,
     Always,
     Never,
-}
-
-impl FromStr for Coloring {
-    type Err = String;
-
-    fn from_str(name: &str) -> Result<Self, Self::Err> {
-        match name {
-            "auto" => Ok(Coloring::Auto),
-            "always" => Ok(Coloring::Always),
-            "never" => Ok(Coloring::Never),
-            other => Err(format!(
-                "must be auto, always, or never, but found `{}`",
-                other,
-            )),
-        }
-    }
-}
-
-impl Display for Coloring {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let name = match self {
-            Coloring::Auto => "auto",
-            Coloring::Always => "always",
-            Coloring::Never => "never",
-        };
-        formatter.write_str(name)
-    }
 }
 
 fn parse_selector(s: &str) -> Result<Selector, <Selector as FromStr>::Err> {
