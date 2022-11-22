@@ -171,7 +171,7 @@ fn cargo_expand() -> Result<i32> {
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
     apply_args(&mut cmd, &args, &color, &outfile_path);
-    let code = filter_err(&mut cmd, ignore_cargo_err)?;
+    let code = filter_err(&mut cmd)?;
 
     if !outfile_path.exists() {
         return Ok(1);
@@ -451,7 +451,7 @@ fn print_command(line: Line, color: &Coloring) {
     let _ = writeln!(stream, " `{}`", line);
 }
 
-fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
+fn filter_err(cmd: &mut Command) -> io::Result<i32> {
     let mut child = cmd.stderr(Stdio::piped()).spawn()?;
     let mut stderr = io::BufReader::new(child.stderr.take().unwrap());
     let mut line = String::new();
@@ -459,7 +459,7 @@ fn filter_err(cmd: &mut Command, ignore: fn(&str) -> bool) -> io::Result<i32> {
         if n == 0 {
             break;
         }
-        if !ignore(&line) {
+        if !ignore_cargo_err(&line) {
             let _ = write!(io::stderr(), "{}", line);
         }
         line.clear();
