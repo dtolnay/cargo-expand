@@ -311,7 +311,6 @@ fn which_rustfmt() -> Option<PathBuf> {
     }
 }
 
-// Based on https://github.com/rsolomo/cargo-check
 fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path) {
     let mut line = Line::new("cargo");
 
