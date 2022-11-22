@@ -10,11 +10,11 @@ const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 pub enum Opts {
     /// Show the result of macro expansion.
     #[command(name = "expand", version = VERSION, author)]
-    Expand(Args),
+    Expand(Expand),
 }
 
 #[derive(Parser, Debug)]
-pub struct Args {
+pub struct Expand {
     /// Space-separated list of features to activate
     #[arg(long, value_name = "FEATURES")]
     pub features: Option<String>,

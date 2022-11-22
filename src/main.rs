@@ -26,7 +26,7 @@ use crate::cmd::Line;
 use crate::config::Config;
 use crate::error::Result;
 use crate::opts::Coloring::*;
-use crate::opts::{Args, Coloring, Opts};
+use crate::opts::{Coloring, Expand, Opts};
 use atty::Stream::{Stderr, Stdout};
 use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
@@ -312,7 +312,7 @@ fn which_rustfmt() -> Option<PathBuf> {
 }
 
 // Based on https://github.com/rsolomo/cargo-check
-fn apply_args(cmd: &mut Command, args: &Args, color: &Coloring, outfile: &Path) {
+fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path) {
     let mut line = Line::new("cargo");
 
     line.arg("rustc");
@@ -518,7 +518,7 @@ where
     result
 }
 
-fn get_color(args: &Args, config: &Config) -> Coloring {
+fn get_color(args: &Expand, config: &Config) -> Coloring {
     if let Some(value) = args.color {
         return value;
     }
