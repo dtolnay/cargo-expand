@@ -7,7 +7,7 @@ const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 
 #[derive(Parser)]
 #[command(bin_name = "cargo", version = VERSION, author)]
-pub enum Opts {
+pub enum Subcommand {
     /// Show the result of macro expansion.
     #[command(name = "expand", version = VERSION, author)]
     Expand(Expand),
@@ -137,5 +137,5 @@ fn parse_selector(s: &str) -> Result<Selector, <Selector as FromStr>::Err> {
 
 #[test]
 fn test_cli() {
-    <Opts as clap::CommandFactory>::command().debug_assert();
+    <Subcommand as clap::CommandFactory>::command().debug_assert();
 }

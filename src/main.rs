@@ -26,7 +26,7 @@ use crate::cmd::Line;
 use crate::config::Config;
 use crate::error::Result;
 use crate::opts::Coloring::*;
-use crate::opts::{Coloring, Expand, Opts};
+use crate::opts::{Coloring, Expand, Subcommand};
 use atty::Stream::{Stderr, Stdout};
 use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
@@ -128,7 +128,7 @@ fn cargo_binary() -> OsString {
 }
 
 fn cargo_expand() -> Result<i32> {
-    let Opts::Expand(args) = Opts::parse();
+    let Subcommand::Expand(args) = Subcommand::parse();
     let config = config::deserialize();
 
     if args.themes {
