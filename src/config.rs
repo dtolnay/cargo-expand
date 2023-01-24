@@ -35,9 +35,9 @@ fn try_deserialize() -> Option<Config> {
         .map(|name| cargo_home.join(name))
         .find(|path| path.exists())?;
 
-    let content = fs::read(&config_path).ok()?;
+    let content = fs::read_to_string(&config_path).ok()?;
 
-    let full_config: Sections = match toml::from_slice(&content) {
+    let full_config: Sections = match toml::from_str(&content) {
         Ok(config) => config,
         Err(err) => {
             _ = writeln!(io::stderr(), "Warning: {}: {}", config_path.display(), err);
