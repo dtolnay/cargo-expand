@@ -28,7 +28,7 @@ syn = { version = "1.0", default-features = false, features = ["full", "parsing"
 syn-select = "0.2.1"
 tempfile = "3.0"
 termcolor = "1.0"
-toml = "0.6"
+toml = "0.7"
 toolchain_find = "0.2"
 
 [package.metadata.docs.rs]
