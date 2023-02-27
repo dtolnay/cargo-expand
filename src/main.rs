@@ -49,7 +49,7 @@ fn main() {
     process::exit(match result {
         Ok(code) => code,
         Err(err) => {
-            _ = writeln!(io::stderr(), "{}", err);
+            let _ = writeln!(io::stderr(), "{}", err);
             1
         }
     });

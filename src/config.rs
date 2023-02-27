@@ -40,7 +40,7 @@ fn try_deserialize() -> Option<Config> {
     let full_config: Sections = match toml::from_str(&content) {
         Ok(config) => config,
         Err(err) => {
-            _ = writeln!(io::stderr(), "Warning: {}: {}", config_path.display(), err);
+            let _ = writeln!(io::stderr(), "Warning: {}: {}", config_path.display(), err);
             return None;
         }
     };
