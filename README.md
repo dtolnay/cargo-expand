@@ -107,8 +107,8 @@ To expand a specific module or type or function only:
 
 ## Configuration
 
-The cargo expand command reads the `[expand]` section of $CARGO_HOME/config if
-there is one (usually ~/.cargo/config).
+The cargo expand command reads the `[expand]` section of $CARGO_HOME/config.toml
+if there is one (usually ~/.cargo/config.toml).
 
 Set the default syntax highlighting theme with the `theme` setting:
 
