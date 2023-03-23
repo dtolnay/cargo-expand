@@ -152,7 +152,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde",
- "syn 2.0.7",
+ "syn 2.0.8",
  "syn-select-next",
  "tempfile",
  "termcolor",
@@ -588,7 +588,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4508c0eff4d1e708551034de4bddd61bf8bda8c7b5ae72bd844cf68ea21117ac"
 dependencies = [
  "proc-macro2",
- "syn 2.0.7",
+ "syn 2.0.8",
 ]
 
 [[package]]
@@ -744,7 +744,7 @@ checksum = "e801c1712f48475582b7696ac71e0ca34ebb30e09338425384269d9717c62cad"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.7",
+ "syn 2.0.8",
 ]
 
 [[package]]
@@ -810,9 +810,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.7"
+version = "2.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9a90d19f27bb60792270bb90225f96d97fc5705395134b2ca1dcbb3acc27f4"
+checksum = "bcc02725fd69ab9f26eab07fad303e2497fad6fb9eba4f96c4d1687bdf704ad9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -825,7 +825,7 @@ version = "0.3.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d622937c7925d892000de1c56a309ddb1d772acd25b1b426cd05ac933a958fed"
 dependencies = [
- "syn 2.0.7",
+ "syn 2.0.8",
 ]
 
 [[package]]
@@ -888,7 +888,7 @@ checksum = "f9456a42c5b0d803c8cd86e73dd7cc9edd429499f37a3550d286d5e86720569f"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.7",
+ "syn 2.0.8",
 ]
 
 [[package]]
