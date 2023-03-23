@@ -152,8 +152,8 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde",
- "syn 1.0.109",
- "syn-select",
+ "syn 2.0.7",
+ "syn-select-next",
  "tempfile",
  "termcolor",
  "toml",
@@ -583,12 +583,12 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.1.25"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8646e95016a7a6c4adea95bafa8a16baab64b583356217f2c85db4a39d9a86"
+checksum = "4508c0eff4d1e708551034de4bddd61bf8bda8c7b5ae72bd844cf68ea21117ac"
 dependencies = [
  "proc-macro2",
- "syn 1.0.109",
+ "syn 2.0.7",
 ]
 
 [[package]]
@@ -820,12 +820,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "syn-select"
-version = "0.2.1"
+name = "syn-select-next"
+version = "0.3.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5341d05f60821d430a8a7a452b9e267a8c675da4ad1801e7c0a01566c4a4ba48"
+checksum = "d622937c7925d892000de1c56a309ddb1d772acd25b1b426cd05ac933a958fed"
 dependencies = [
- "syn 1.0.109",
+ "syn 2.0.7",
 ]
 
 [[package]]
