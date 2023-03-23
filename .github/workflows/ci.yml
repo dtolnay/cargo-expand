@@ -54,6 +54,8 @@ jobs:
       - run: cargo update
       - run: cargo check
       - run: cargo test
+        env:
+          RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.rust == 'nightly' && '--cfg exhaustive' || ''}}
 
   clippy:
     name: Clippy
