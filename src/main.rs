@@ -1,8 +1,8 @@
 #![allow(
     clippy::bool_to_int_with_if,
     clippy::enum_glob_use,
-    clippy::let_underscore_untyped,
     clippy::items_after_statements,
+    clippy::let_underscore_untyped,
     clippy::manual_assert,
     clippy::manual_strip,
     clippy::match_like_matches_macro,
