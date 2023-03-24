@@ -323,12 +323,10 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         line.arg(profile);
     } else if args.tests && args.test.is_none() {
         line.arg("test");
+    } else if args.release {
+        line.arg("release");
     } else {
         line.arg("check");
-    }
-
-    if args.release {
-        line.arg("--release");
     }
 
     if let Some(features) = &args.features {
