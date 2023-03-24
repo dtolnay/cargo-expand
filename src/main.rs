@@ -322,7 +322,11 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     if let Some(profile) = &args.profile {
         line.arg(profile);
     } else if args.tests && args.test.is_none() {
-        line.arg("test");
+        if args.release {
+            line.arg("bench");
+        } else {
+            line.arg("test");
+        }
     } else if args.release {
         line.arg("release");
     } else {
