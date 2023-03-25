@@ -6,7 +6,7 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
     let mut version = env!("CARGO_PKG_VERSION").to_owned();
-    if let Ok(prettyplease_version) = env::var("DEP_PRETTYPLEASE01_VERSION") {
+    if let Ok(prettyplease_version) = env::var("DEP_PRETTYPLEASE02_VERSION") {
         // TODO: Make this appear only if `--version --verbose` is used.
         version.push_str(" + prettyplease ");
         version.push_str(&prettyplease_version);
