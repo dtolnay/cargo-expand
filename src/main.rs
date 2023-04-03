@@ -29,9 +29,9 @@ use crate::config::Config;
 use crate::error::Result;
 use crate::opts::Coloring::*;
 use crate::opts::{Coloring, Expand, Subcommand};
-use atty::Stream::{Stderr, Stdout};
 use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
+use is_terminal::IsTerminal;
 use quote::quote;
 use std::env;
 use std::ffi::OsString;
@@ -271,7 +271,7 @@ fn cargo_expand() -> Result<i32> {
     let do_color = match color {
         Always => true,
         Never => false,
-        Auto => !none_theme && atty::is(Stdout),
+        Auto => !none_theme && io::stdout().is_terminal(),
     };
     let _ = writeln!(io::stderr());
     if do_color {
@@ -401,7 +401,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
 
     line.arg("--color");
     match color {
-        Coloring::Auto => line.arg(if cfg!(not(windows)) && atty::is(Stderr) {
+        Coloring::Auto => line.arg(if cfg!(not(windows)) && io::stderr().is_terminal() {
             "always"
         } else {
             "never"

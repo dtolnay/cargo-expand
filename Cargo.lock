@@ -177,10 +177,10 @@ checksum = "38fcc2979eff34a4b84e1cf9a1e3da42a7d44b3b690a40cdcb23e3d556cfb2e5"
 name = "cargo-expand"
 version = "1.0.46"
 dependencies = [
- "atty",
  "bat",
  "cargo-subcommand-metadata",
  "clap",
+ "is-terminal",
  "prettyplease",
  "proc-macro2",
  "quote",
