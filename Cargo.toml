@@ -29,7 +29,7 @@ syn-select-next = "=0.3.0-alpha.1"
 tempfile = "3.0"
 termcolor = "1.0"
 toml = "0.7"
-toolchain_find = "0.2"
+toolchain_find = "0.3"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
