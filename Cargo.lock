@@ -204,7 +204,7 @@ dependencies = [
  "quote",
  "serde",
  "syn",
- "syn-select-next",
+ "syn-select",
  "tempfile",
  "termcolor",
  "toml",
@@ -924,10 +924,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "syn-select-next"
-version = "0.3.0-alpha.1"
+name = "syn-select"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d622937c7925d892000de1c56a309ddb1d772acd25b1b426cd05ac933a958fed"
+checksum = "ea24402791e2625a28bcaf662046e09a48a7610f806688cf35901d78ba938bb4"
 dependencies = [
  "syn",
 ]

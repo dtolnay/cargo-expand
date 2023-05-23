@@ -25,7 +25,7 @@ proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 syn = { version = "2.0.16", default-features = false, features = ["full", "parsing", "printing", "visit-mut"] }
-syn-select-next = "=0.3.0-alpha.1"
+syn-select = "0.3"
 tempfile = "3.0"
 termcolor = "1.0"
 toml = "0.7"
