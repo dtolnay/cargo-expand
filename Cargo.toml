@@ -20,7 +20,7 @@ bat = { version = "0.23", default-features = false, features = ["paging", "regex
 cargo-subcommand-metadata = "0.1"
 clap = { version = "4", features = ["deprecated", "derive"] }
 is-terminal = "0.4"
-prettyplease = { version = "0.2.5", features = ["verbatim"] }
+prettyplease = { version = "0.2.6", features = ["verbatim"] }
 proc-macro2 = "1.0"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
