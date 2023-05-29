@@ -1058,9 +1058,9 @@ dependencies = [
 
 [[package]]
 name = "toolchain_find"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa8c746c4e8d786ff304a6a73d7b406420d9a7c7d8292e090979dc85213113ed"
+checksum = "ebc8c9a7f0a2966e1acdaf0461023d0b01471eeead645370cf4c3f5cff153f2a"
 dependencies = [
  "home",
  "once_cell",
