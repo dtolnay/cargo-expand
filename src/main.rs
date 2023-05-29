@@ -47,7 +47,7 @@ use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor
 cargo_subcommand_metadata::description!("Show result of macro expansion");
 
 fn main() {
-    let result = cargo_expand_or_run_nightly();
+    let result = cargo_expand();
     process::exit(match result {
         Ok(code) => code,
         Err(err) => {
@@ -55,74 +55,6 @@ fn main() {
             1
         }
     });
-}
-
-fn cargo_expand_or_run_nightly() -> Result<i32> {
-    const NO_RUN_NIGHTLY: &str = "CARGO_EXPAND_NO_RUN_NIGHTLY";
-
-    if env::var_os(NO_RUN_NIGHTLY).is_some() || maybe_nightly() || !can_rustup_run_nightly() {
-        return cargo_expand();
-    }
-
-    let mut nightly = Command::new("rustup");
-    nightly.arg("run");
-    nightly.arg("nightly");
-    nightly.arg("cargo");
-    nightly.arg("expand");
-
-    let mut args = env::args_os().peekable();
-    args.next().unwrap(); // cargo
-    if args.peek().map_or(false, |arg| arg == "expand") {
-        args.next().unwrap(); // expand
-    }
-    nightly.args(args);
-
-    // Hopefully prevent infinite re-run loop.
-    nightly.env(NO_RUN_NIGHTLY, "");
-
-    let status = nightly.status()?;
-
-    Ok(match status.code() {
-        Some(code) => code,
-        None => {
-            if status.success() {
-                0
-            } else {
-                1
-            }
-        }
-    })
-}
-
-fn maybe_nightly() -> bool {
-    !definitely_not_nightly()
-}
-
-fn definitely_not_nightly() -> bool {
-    let mut cmd = Command::new(cargo_binary());
-    cmd.arg("--version");
-
-    let output = match cmd.output() {
-        Ok(output) => output,
-        Err(_) => return false,
-    };
-
-    let version = match String::from_utf8(output.stdout) {
-        Ok(version) => version,
-        Err(_) => return false,
-    };
-
-    version.starts_with("cargo 1") && !version.contains("nightly")
-}
-
-fn can_rustup_run_nightly() -> bool {
-    Command::new("rustup")
-        .arg("run")
-        .arg("nightly")
-        .arg("cargo")
-        .arg("--version")
-        .output()
-        .map_or(false, |output| output.status.success())
 }
 
 fn cargo_binary() -> OsString {
@@ -173,6 +105,7 @@ fn cargo_expand() -> Result<i32> {
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
     apply_args(&mut cmd, &args, &color, &outfile_path);
+    cmd.env("RUSTC_BOOTSTRAP", "1");
     let code = filter_err(&mut cmd)?;
 
     if !outfile_path.exists() {
