@@ -13,7 +13,8 @@
     clippy::option_option,
     clippy::struct_excessive_bools,
     clippy::too_many_lines,
-    clippy::trivially_copy_pass_by_ref
+    clippy::trivially_copy_pass_by_ref,
+    clippy::uninlined_format_args,
 )]
 #![cfg_attr(all(test, exhaustive), feature(non_exhaustive_omitted_patterns_lint))]
 
