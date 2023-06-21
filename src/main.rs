@@ -24,12 +24,14 @@ mod edit;
 mod error;
 mod fmt;
 mod opts;
+mod unparse;
 
 use crate::cmd::Line;
 use crate::config::Config;
 use crate::error::Result;
 use crate::opts::Coloring::*;
 use crate::opts::{Coloring, Expand, Subcommand};
+use crate::unparse::unparse_maximal;
 use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
 use is_terminal::IsTerminal;
@@ -154,7 +156,7 @@ fn cargo_expand() -> Result<i32> {
                 }
             }
             if !config.rustfmt {
-                if let Ok(formatted) = ignore_panic(|| prettyplease::unparse(&syntax_tree)) {
+                if let Ok(formatted) = ignore_panic(|| unparse_maximal(&syntax_tree)) {
                     stage = Stage::Formatted(formatted);
                 }
             }
