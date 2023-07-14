@@ -282,28 +282,50 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         line.arg("--no-default-features");
     }
 
+    let mut no_build_target = true;
     if args.lib {
         line.arg("--lib");
+        no_build_target = false;
     }
 
     if let Some(bin) = &args.bin {
         line.arg("--bin");
         line.args(bin);
+        no_build_target = false;
     }
 
     if let Some(example) = &args.example {
         line.arg("--example");
         line.args(example);
+        no_build_target = false;
     }
 
     if let Some(test) = &args.test {
         line.arg("--test");
         line.args(test);
+        no_build_target = false;
     }
 
     if let Some(bench) = &args.bench {
         line.arg("--bench");
         line.args(bench);
+        no_build_target = false;
+    }
+
+    if no_build_target {
+        match cargo_metadata(&args.manifest_path) {
+            Ok(cargo_metadata) => {
+                if let Some(root_package) = cargo_metadata.root_package() {
+                    if let Some(ref default_run) = root_package.default_run {
+                        line.arg("--bin");
+                        line.args(Some(default_run));
+                    }
+                }
+            },
+            Err(err) => {
+                let _ = writeln!(io::stderr(), "WARNING: run cargo metadata fail: {}", err);
+            },
+        }
     }
 
     if let Some(target) = &args.target {
@@ -481,4 +503,15 @@ fn get_color(args: &Expand, config: &Config) -> Coloring {
     }
 
     Coloring::Auto // default
+}
+
+fn cargo_metadata(manifest_path: &Option<PathBuf>) -> cargo_metadata::Result<cargo_metadata::Metadata> {
+    let mut cmd = cargo_metadata::MetadataCommand::new();
+    match manifest_path {
+        Some(manifest_path) => {
+            cmd.manifest_path(manifest_path);
+        },
+        None => {},
+    }
+    cmd.exec()
 }
