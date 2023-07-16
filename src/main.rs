@@ -1,6 +1,4 @@
 #![allow(
-    clippy::bool_to_int_with_if,
-    clippy::enum_glob_use,
     clippy::items_after_statements,
     clippy::manual_assert,
     clippy::manual_strip,
