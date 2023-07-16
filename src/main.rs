@@ -313,17 +313,12 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     }
 
     if !has_explicit_build_target {
-        match cargo_metadata(args.manifest_path.as_deref()) {
-            Ok(cargo_metadata) => {
-                if let Some(root_package) = cargo_metadata.root_package() {
-                    if let Some(default_run) = &root_package.default_run {
-                        line.arg("--bin");
-                        line.arg(default_run);
-                    }
+        if let Ok(cargo_metadata) = cargo_metadata(args.manifest_path.as_deref()) {
+            if let Some(root_package) = cargo_metadata.root_package() {
+                if let Some(default_run) = &root_package.default_run {
+                    line.arg("--bin");
+                    line.arg(default_run);
                 }
-            }
-            Err(err) => {
-                let _ = writeln!(io::stderr(), "WARNING: run cargo metadata fail: {}", err);
             }
         }
     }
