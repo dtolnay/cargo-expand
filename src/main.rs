@@ -509,11 +509,8 @@ fn cargo_metadata(
     manifest_path: &Option<PathBuf>,
 ) -> cargo_metadata::Result<cargo_metadata::Metadata> {
     let mut cmd = cargo_metadata::MetadataCommand::new();
-    match manifest_path {
-        Some(manifest_path) => {
-            cmd.manifest_path(manifest_path);
-        }
-        None => {}
+    if let Some(manifest_path) = manifest_path {
+        cmd.manifest_path(manifest_path);
     }
     cmd.exec()
 }
