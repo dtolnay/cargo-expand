@@ -8,7 +8,6 @@
     clippy::match_like_matches_macro,
     clippy::match_same_arms, // https://github.com/rust-lang/rust-clippy/issues/10327
     clippy::module_name_repetitions,
-    clippy::needless_borrow, // https://github.com/rust-lang/rust-clippy/issues/9710
     clippy::needless_pass_by_value,
     clippy::non_ascii_literal,
     clippy::option_option,
