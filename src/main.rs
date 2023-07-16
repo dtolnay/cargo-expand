@@ -282,37 +282,37 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         line.arg("--no-default-features");
     }
 
-    let mut no_build_target = true;
+    let mut has_explicit_build_target = false;
     if args.lib {
         line.arg("--lib");
-        no_build_target = false;
+        has_explicit_build_target = true;
     }
 
     if let Some(bin) = &args.bin {
         line.arg("--bin");
         line.args(bin);
-        no_build_target = false;
+        has_explicit_build_target = true;
     }
 
     if let Some(example) = &args.example {
         line.arg("--example");
         line.args(example);
-        no_build_target = false;
+        has_explicit_build_target = true;
     }
 
     if let Some(test) = &args.test {
         line.arg("--test");
         line.args(test);
-        no_build_target = false;
+        has_explicit_build_target = true;
     }
 
     if let Some(bench) = &args.bench {
         line.arg("--bench");
         line.args(bench);
-        no_build_target = false;
+        has_explicit_build_target = true;
     }
 
-    if no_build_target {
+    if !has_explicit_build_target {
         match cargo_metadata(&args.manifest_path) {
             Ok(cargo_metadata) => {
                 if let Some(root_package) = cargo_metadata.root_package() {
