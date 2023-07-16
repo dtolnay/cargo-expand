@@ -36,6 +36,7 @@ use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
 use is_terminal::IsTerminal;
 use quote::quote;
+use serde::Deserialize;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
@@ -313,8 +314,8 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     }
 
     if !has_explicit_build_target {
-        if let Ok(cargo_metadata) = cargo_metadata(args.manifest_path.as_deref()) {
-            if let Some(root_package) = cargo_metadata.root_package() {
+        if let Ok(cargo_manifest) = cargo_manifest(args.manifest_path.as_deref()) {
+            if let Some(root_package) = cargo_manifest.package {
                 if let Some(default_run) = &root_package.default_run {
                     line.arg("--bin");
                     line.arg(default_run);
@@ -500,13 +501,22 @@ fn get_color(args: &Expand, config: &Config) -> Coloring {
     Coloring::Auto // default
 }
 
-fn cargo_metadata(
-    manifest_path: Option<&Path>,
-) -> cargo_metadata::Result<cargo_metadata::Metadata> {
-    let mut cmd = cargo_metadata::MetadataCommand::new();
+#[derive(Deserialize, Debug)]
+struct CargoManifest {
+    package: Option<CargoPackage>,
+}
+
+#[derive(Deserialize, Debug)]
+struct CargoPackage {
+    #[serde(rename = "default-run")]
+    default_run: Option<String>,
+}
+
+fn cargo_manifest(manifest_path: Option<&Path>) -> Result<CargoManifest> {
     let manifest_path = find_cargo_manifest(manifest_path)?;
-    cmd.manifest_path(manifest_path);
-    cmd.exec()
+    let content = fs::read_to_string(&manifest_path)?;
+    let cargo_manifest: CargoManifest = toml::from_str(&content)?;
+    Ok(cargo_manifest)
 }
 
 fn find_cargo_manifest(manifest_path: Option<&Path>) -> io::Result<PathBuf> {
