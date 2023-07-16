@@ -19,6 +19,7 @@ prettyplease = []
 [dependencies]
 bat = { version = "0.23", default-features = false, features = ["paging", "regex-fancy"] }
 cargo-subcommand-metadata = "0.1"
+cargo_metadata = "0.15.4"
 clap = { version = "4", features = ["deprecated", "derive"] }
 is-terminal = "0.4"
 prettyplease = { version = "0.2.9", features = ["verbatim"] }
