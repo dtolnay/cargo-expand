@@ -313,7 +313,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     }
 
     if !has_explicit_build_target {
-        match cargo_metadata(&args.manifest_path) {
+        match cargo_metadata(args.manifest_path.as_deref()) {
             Ok(cargo_metadata) => {
                 if let Some(root_package) = cargo_metadata.root_package() {
                     if let Some(ref default_run) = root_package.default_run {
@@ -506,7 +506,7 @@ fn get_color(args: &Expand, config: &Config) -> Coloring {
 }
 
 fn cargo_metadata(
-    manifest_path: &Option<PathBuf>,
+    manifest_path: Option<&Path>,
 ) -> cargo_metadata::Result<cargo_metadata::Metadata> {
     let mut cmd = cargo_metadata::MetadataCommand::new();
     if let Some(manifest_path) = manifest_path {
