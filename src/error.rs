@@ -3,7 +3,8 @@ use std::io;
 
 pub enum Error {
     Io(io::Error),
-    Toml(toml::ser::Error),
+    TomlSer(toml::ser::Error),
+    TomlDe(toml::de::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -16,7 +17,13 @@ impl From<io::Error> for Error {
 
 impl From<toml::ser::Error> for Error {
     fn from(error: toml::ser::Error) -> Self {
-        Error::Toml(error)
+        Error::TomlSer(error)
+    }
+}
+
+impl From<toml::de::Error> for Error {
+    fn from(error: toml::de::Error) -> Self {
+        Error::TomlDe(error)
     }
 }
 
@@ -26,7 +33,8 @@ impl Display for Error {
 
         match self {
             Io(e) => e.fmt(formatter),
-            Toml(e) => e.fmt(formatter),
+            TomlSer(e) => e.fmt(formatter),
+            TomlDe(e) => e.fmt(formatter),
         }
     }
 }
