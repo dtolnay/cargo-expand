@@ -24,6 +24,7 @@ mod config;
 mod edit;
 mod error;
 mod fmt;
+mod manifest;
 mod opts;
 mod unparse;
 
@@ -37,11 +38,10 @@ use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
 use is_terminal::IsTerminal;
 use quote::quote;
-use serde::Deserialize;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
-use std::io::{self, BufRead, ErrorKind, Write};
+use std::io::{self, BufRead, Write};
 use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
@@ -315,7 +315,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     }
 
     if !has_explicit_build_target {
-        if let Ok(cargo_manifest) = cargo_manifest(args.manifest_path.as_deref()) {
+        if let Ok(cargo_manifest) = manifest::parse(args.manifest_path.as_deref()) {
             if let Some(root_package) = cargo_manifest.package {
                 if let Some(default_run) = &root_package.default_run {
                     line.arg("--bin");
@@ -500,41 +500,4 @@ fn get_color(args: &Expand, config: &Config) -> Coloring {
     }
 
     Coloring::Auto // default
-}
-
-#[derive(Deserialize, Debug)]
-struct CargoManifest {
-    package: Option<CargoPackage>,
-}
-
-#[derive(Deserialize, Debug)]
-struct CargoPackage {
-    #[serde(rename = "default-run")]
-    default_run: Option<String>,
-}
-
-fn cargo_manifest(manifest_path: Option<&Path>) -> Result<CargoManifest> {
-    let manifest_path = find_cargo_manifest(manifest_path)?;
-    let content = fs::read_to_string(&manifest_path)?;
-    let cargo_manifest: CargoManifest = toml::from_str(&content)?;
-    Ok(cargo_manifest)
-}
-
-fn find_cargo_manifest(manifest_path: Option<&Path>) -> io::Result<PathBuf> {
-    if let Some(manifest_path) = manifest_path {
-        return Ok(manifest_path.to_owned());
-    }
-
-    let dir = env::current_dir()?;
-    let mut dir = dir.as_path();
-    loop {
-        let path = dir.join("Cargo.toml");
-        if path.try_exists()? {
-            return Ok(path);
-        }
-        dir = match dir.parent() {
-            Some(parent) => parent,
-            None => return Err(io::Error::new(ErrorKind::NotFound, "Cargo.toml not found")),
-        };
-    }
 }
