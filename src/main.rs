@@ -318,7 +318,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
                 if let Some(root_package) = cargo_metadata.root_package() {
                     if let Some(ref default_run) = root_package.default_run {
                         line.arg("--bin");
-                        line.args(Some(default_run));
+                        line.arg(default_run);
                     }
                 }
             }
