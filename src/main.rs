@@ -39,7 +39,7 @@ use quote::quote;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, ErrorKind, Write};
 use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
@@ -504,8 +504,26 @@ fn cargo_metadata(
     manifest_path: Option<&Path>,
 ) -> cargo_metadata::Result<cargo_metadata::Metadata> {
     let mut cmd = cargo_metadata::MetadataCommand::new();
-    if let Some(manifest_path) = manifest_path {
-        cmd.manifest_path(manifest_path);
-    }
+    let manifest_path = find_cargo_manifest(manifest_path)?;
+    cmd.manifest_path(manifest_path);
     cmd.exec()
+}
+
+fn find_cargo_manifest(manifest_path: Option<&Path>) -> io::Result<PathBuf> {
+    if let Some(manifest_path) = manifest_path {
+        return Ok(manifest_path.to_owned());
+    }
+
+    let dir = env::current_dir()?;
+    let mut dir = dir.as_path();
+    loop {
+        let path = dir.join("Cargo.toml");
+        if path.try_exists()? {
+            return Ok(path);
+        }
+        dir = match dir.parent() {
+            Some(parent) => parent,
+            None => return Err(io::Error::new(ErrorKind::NotFound, "Cargo.toml not found")),
+        };
+    }
 }
