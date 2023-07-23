@@ -27,7 +27,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
       - name: Enable type layout randomization
         run: echo RUSTFLAGS=${RUSTFLAGS}\ -Zrandomize-layout >> $GITHUB_ENV
-        if: false # FIXME https://github.com/rust-lang/rust/issues/113941
       - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs
       - run: diff tests/lib.expand.rs expand.rs
 
@@ -48,7 +47,7 @@ jobs:
           toolchain: ${{matrix.rust}}
       - name: Enable type layout randomization
         run: echo RUSTFLAGS=${RUSTFLAGS}\ -Zrandomize-layout >> $GITHUB_ENV
-        if: matrix.rust == 'nightly' && false # FIXME https://github.com/rust-lang/rust/issues/113941
+        if: matrix.rust == 'nightly'
       - run: cargo check --locked
       - run: cargo update
       - run: cargo check
