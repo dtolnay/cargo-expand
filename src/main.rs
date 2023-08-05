@@ -30,7 +30,7 @@ use crate::opts::Coloring::*;
 use crate::opts::{Coloring, Expand, Subcommand};
 use crate::unparse::unparse_maximal;
 use bat::{PagingMode, PrettyPrinter};
-use clap::{Parser, ValueEnum};
+use clap::{CommandFactory, Parser, ValueEnum};
 use quote::quote;
 use std::env;
 use std::ffi::OsString;
@@ -62,6 +62,13 @@ fn cargo_binary() -> OsString {
 
 fn cargo_expand() -> Result<i32> {
     let Subcommand::Expand(args) = Subcommand::parse();
+
+    if args.version {
+        let mut stdout = io::stdout();
+        let _ = stdout.write_all(Subcommand::command().render_version().as_bytes());
+        return Ok(0);
+    }
+
     let config = config::deserialize();
 
     if args.themes {
