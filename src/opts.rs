@@ -6,7 +6,7 @@ use syn_select::Selector;
 const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 
 #[derive(Parser)]
-#[command(bin_name = "cargo", version = VERSION, author)]
+#[command(bin_name = "cargo", version = VERSION, author, disable_help_subcommand = true)]
 pub enum Subcommand {
     /// Show the result of macro expansion.
     #[command(name = "expand", version = VERSION, author)]
