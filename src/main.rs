@@ -22,6 +22,7 @@ mod fmt;
 mod manifest;
 mod opts;
 mod unparse;
+mod version;
 
 use crate::cmd::Line;
 use crate::config::Config;
@@ -29,8 +30,9 @@ use crate::error::Result;
 use crate::opts::Coloring::*;
 use crate::opts::{Coloring, Expand, Subcommand};
 use crate::unparse::unparse_maximal;
+use crate::version::Version;
 use bat::{PagingMode, PrettyPrinter};
-use clap::{CommandFactory, Parser, ValueEnum};
+use clap::{Parser, ValueEnum};
 use quote::quote;
 use std::env;
 use std::ffi::OsString;
@@ -64,8 +66,10 @@ fn cargo_expand() -> Result<i32> {
     let Subcommand::Expand(args) = Subcommand::parse();
 
     if args.version {
-        let mut stdout = io::stdout();
-        let _ = stdout.write_all(Subcommand::command().render_version().as_bytes());
+        let version = Version {
+            verbose: args.verbose,
+        };
+        let _ = writeln!(io::stdout(), "{}", version);
         return Ok(0);
     }
 
