@@ -9,7 +9,7 @@ const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 #[command(bin_name = "cargo", version = VERSION, author, disable_help_subcommand = true)]
 pub enum Subcommand {
     /// Show the result of macro expansion.
-    #[command(name = "expand", version = VERSION, author)]
+    #[command(name = "expand", version = VERSION, author, disable_version_flag = true)]
     Expand(Expand),
 }
 
@@ -118,6 +118,10 @@ pub struct Expand {
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
     #[arg(value_name = "ITEM", value_parser = parse_selector)]
     pub item: Option<Selector>,
+
+    /// Print version
+    #[arg(long)]
+    pub version: bool,
 }
 
 #[derive(ValueEnum, Debug, Clone, Copy)]
