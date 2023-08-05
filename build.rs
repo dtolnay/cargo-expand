@@ -5,14 +5,12 @@ use std::path::PathBuf;
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
-    let mut version = env!("CARGO_PKG_VERSION").to_owned();
-    if let Ok(prettyplease_version) = env::var("DEP_PRETTYPLEASE02_VERSION") {
-        // TODO: Make this appear only if `--version --verbose` is used.
-        version.push_str(" + prettyplease ");
-        version.push_str(&prettyplease_version);
-    }
+    let prettyplease_version = match env::var("DEP_PRETTYPLEASE02_VERSION") {
+        Ok(prettyplease_version) => format!(r#"Some("{}")"#, prettyplease_version.escape_debug()),
+        Err(_) => "None".to_owned(),
+    };
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let version_file = out_dir.join("version");
-    fs::write(version_file, version).unwrap();
+    let prettyplease_version_file = out_dir.join("prettyplease.version");
+    fs::write(prettyplease_version_file, prettyplease_version).unwrap();
 }
