@@ -23,7 +23,7 @@ clap = { version = "4", features = ["deprecated", "derive"] }
 prettyplease = { version = "0.2.11", features = ["verbatim"] }
 proc-macro2 = "1.0.63"
 quote = { version = "1.0", default-features = false }
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0.183", features = ["derive"] }
 syn = { version = "2.0.22", default-features = false, features = ["clone-impls", "fold", "full", "parsing", "printing", "visit-mut"] }
 syn-select = "0.3"
 tempfile = "3.0"
