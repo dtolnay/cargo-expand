@@ -28,7 +28,7 @@ syn = { version = "2.0.33", default-features = false, features = ["clone-impls",
 syn-select = "0.3"
 tempfile = "3.0"
 termcolor = "1.0"
-toml = "0.7"
+toml = "0.8"
 toolchain_find = "0.4"
 
 [package.metadata.docs.rs]
