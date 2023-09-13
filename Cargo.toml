@@ -21,10 +21,10 @@ bat = { version = "0.23", default-features = false, features = ["paging", "regex
 cargo-subcommand-metadata = "0.1"
 clap = { version = "4", features = ["deprecated", "derive"] }
 prettyplease = { version = "0.2.15", features = ["verbatim"] }
-proc-macro2 = "1.0.63"
+proc-macro2 = "1.0.67"
 quote = { version = "1.0", default-features = false }
 serde = { version = "1.0.183", features = ["derive"] }
-syn = { version = "2.0.31", default-features = false, features = ["clone-impls", "fold", "full", "parsing", "printing", "visit-mut"] }
+syn = { version = "2.0.33", default-features = false, features = ["clone-impls", "fold", "full", "parsing", "printing", "visit-mut"] }
 syn-select = "0.3"
 tempfile = "3.0"
 termcolor = "1.0"
