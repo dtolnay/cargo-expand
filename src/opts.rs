@@ -20,17 +20,37 @@ pub enum Subcommand {
 
 #[derive(Parser, Debug)]
 pub struct Expand {
-    /// Space-separated list of features to activate
-    #[arg(long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
-    pub features: Option<String>,
+    /// Do not attempt to run rustfmt
+    #[arg(long)]
+    pub ugly: bool,
 
-    /// Activate all available features
-    #[arg(long, help_heading = FEATURE_SELECTION)]
-    pub all_features: bool,
+    /// Select syntax highlighting theme
+    #[arg(long, value_name = "NAME")]
+    pub theme: Option<String>,
 
-    /// Do not activate the `default` feature
-    #[arg(long, help_heading = FEATURE_SELECTION)]
-    pub no_default_features: bool,
+    /// Print available syntax highlighting theme names
+    #[arg(long)]
+    pub themes: bool,
+
+    /// Print command lines as they are executed
+    #[arg(long)]
+    pub verbose: bool,
+
+    /// Coloring: auto, always, never
+    #[arg(long, value_name = "WHEN")]
+    pub color: Option<Coloring>,
+
+    /// Unstable (nightly-only) flags to Cargo
+    #[arg(short = 'Z', value_name = "FLAG")]
+    pub unstable_flags: Vec<String>,
+
+    /// Print version
+    #[arg(long)]
+    pub version: bool,
+
+    /// Package to expand
+    #[arg(short, long, value_name = "SPEC", num_args = 0..=1, help_heading = PACKAGE_SELECTION)]
+    pub package: Option<Option<String>>,
 
     /// Expand only this package's library
     #[arg(long, help_heading = TARGET_SELECTION)]
@@ -56,6 +76,30 @@ pub struct Expand {
     #[arg(long, value_name = "NAME", num_args = 0..=1, help_heading = TARGET_SELECTION)]
     pub bench: Option<Option<String>>,
 
+    /// Space-separated list of features to activate
+    #[arg(long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
+    pub features: Option<String>,
+
+    /// Activate all available features
+    #[arg(long, help_heading = FEATURE_SELECTION)]
+    pub all_features: bool,
+
+    /// Do not activate the `default` feature
+    #[arg(long, help_heading = FEATURE_SELECTION)]
+    pub no_default_features: bool,
+
+    /// Number of parallel jobs, defaults to # of CPUs
+    #[arg(short, long, value_name = "N", help_heading = COMPILATION_OPTIONS)]
+    pub jobs: Option<u64>,
+
+    /// Build artifacts in release mode, with optimizations
+    #[arg(long, help_heading = COMPILATION_OPTIONS)]
+    pub release: bool,
+
+    /// Build artifacts with the specified profile
+    #[arg(long, value_name = "PROFILE-NAME", help_heading = COMPILATION_OPTIONS)]
+    pub profile: Option<String>,
+
     /// Target triple which compiles will be for
     #[arg(long, value_name = "TARGET", help_heading = COMPILATION_OPTIONS)]
     pub target: Option<String>,
@@ -67,30 +111,6 @@ pub struct Expand {
     /// Path to Cargo.toml
     #[arg(long, value_name = "PATH", help_heading = MANIFEST_OPTIONS)]
     pub manifest_path: Option<PathBuf>,
-
-    /// Package to expand
-    #[arg(short, long, value_name = "SPEC", num_args = 0..=1, help_heading = PACKAGE_SELECTION)]
-    pub package: Option<Option<String>>,
-
-    /// Build artifacts in release mode, with optimizations
-    #[arg(long, help_heading = COMPILATION_OPTIONS)]
-    pub release: bool,
-
-    /// Build artifacts with the specified profile
-    #[arg(long, value_name = "PROFILE-NAME", help_heading = COMPILATION_OPTIONS)]
-    pub profile: Option<String>,
-
-    /// Number of parallel jobs, defaults to # of CPUs
-    #[arg(short, long, value_name = "N", help_heading = COMPILATION_OPTIONS)]
-    pub jobs: Option<u64>,
-
-    /// Print command lines as they are executed
-    #[arg(long)]
-    pub verbose: bool,
-
-    /// Coloring: auto, always, never
-    #[arg(long, value_name = "WHEN")]
-    pub color: Option<Coloring>,
 
     /// Require Cargo.lock and cache are up to date
     #[arg(long, help_heading = MANIFEST_OPTIONS)]
@@ -104,29 +124,9 @@ pub struct Expand {
     #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub offline: bool,
 
-    /// Unstable (nightly-only) flags to Cargo
-    #[arg(short = 'Z', value_name = "FLAG")]
-    pub unstable_flags: Vec<String>,
-
-    /// Do not attempt to run rustfmt
-    #[arg(long)]
-    pub ugly: bool,
-
-    /// Select syntax highlighting theme
-    #[arg(long, value_name = "NAME")]
-    pub theme: Option<String>,
-
-    /// Print available syntax highlighting theme names
-    #[arg(long)]
-    pub themes: bool,
-
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
     #[arg(value_name = "ITEM", value_parser = parse_selector)]
     pub item: Option<Selector>,
-
-    /// Print version
-    #[arg(long)]
-    pub version: bool,
 }
 
 #[derive(ValueEnum, Debug, Clone, Copy)]
