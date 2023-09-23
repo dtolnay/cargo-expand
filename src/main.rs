@@ -275,6 +275,11 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         color => line.arg(color.to_possible_value().unwrap().get_name()),
     }
 
+    for kv in &args.config {
+        line.arg("--config");
+        line.arg(kv);
+    }
+
     for unstable_flag in &args.unstable_flags {
         line.arg("-Z");
         line.arg(unstable_flag);

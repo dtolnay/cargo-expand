@@ -40,6 +40,10 @@ pub struct Expand {
     #[arg(long, value_name = "WHEN")]
     pub color: Option<Coloring>,
 
+    /// Override a configuration value
+    #[arg(long, value_name = "KEY=VALUE")]
+    pub config: Vec<String>,
+
     /// Unstable (nightly-only) flags to Cargo
     #[arg(short = 'Z', value_name = "FLAG")]
     pub unstable_flags: Vec<String>,
