@@ -3,6 +3,13 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use syn_select::Selector;
 
+// Help headings
+const PACKAGE_SELECTION: &str = "Package Selection";
+const TARGET_SELECTION: &str = "Target Selection";
+const FEATURE_SELECTION: &str = "Feature Selection";
+const COMPILATION_OPTIONS: &str = "Compilation Options";
+const MANIFEST_OPTIONS: &str = "Manifest Options";
+
 #[derive(Parser)]
 #[command(bin_name = "cargo", version, author, disable_help_subcommand = true)]
 pub enum Subcommand {
@@ -14,67 +21,67 @@ pub enum Subcommand {
 #[derive(Parser, Debug)]
 pub struct Expand {
     /// Space-separated list of features to activate
-    #[arg(long, value_name = "FEATURES")]
+    #[arg(long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
     pub features: Option<String>,
 
     /// Activate all available features
-    #[arg(long)]
+    #[arg(long, help_heading = FEATURE_SELECTION)]
     pub all_features: bool,
 
     /// Do not activate the `default` feature
-    #[arg(long)]
+    #[arg(long, help_heading = FEATURE_SELECTION)]
     pub no_default_features: bool,
 
     /// Expand only this package's library
-    #[arg(long)]
+    #[arg(long, help_heading = TARGET_SELECTION)]
     pub lib: bool,
 
     /// Expand only the specified binary
-    #[arg(long, value_name = "NAME", num_args = 0..=1)]
+    #[arg(long, value_name = "NAME", num_args = 0..=1, help_heading = TARGET_SELECTION)]
     pub bin: Option<Option<String>>,
 
     /// Expand only the specified example
-    #[arg(long, value_name = "NAME", num_args = 0..=1)]
+    #[arg(long, value_name = "NAME", num_args = 0..=1, help_heading = TARGET_SELECTION)]
     pub example: Option<Option<String>>,
 
     /// Expand only the specified test target
-    #[arg(long, value_name = "NAME", num_args = 0..=1)]
+    #[arg(long, value_name = "NAME", num_args = 0..=1, help_heading = TARGET_SELECTION)]
     pub test: Option<Option<String>>,
 
     /// Include tests when expanding the lib or bin
-    #[arg(long)]
+    #[arg(long, help_heading = TARGET_SELECTION)]
     pub tests: bool,
 
     /// Expand only the specified bench target
-    #[arg(long, value_name = "NAME", num_args = 0..=1)]
+    #[arg(long, value_name = "NAME", num_args = 0..=1, help_heading = TARGET_SELECTION)]
     pub bench: Option<Option<String>>,
 
     /// Target triple which compiles will be for
-    #[arg(long, value_name = "TARGET")]
+    #[arg(long, value_name = "TARGET", help_heading = COMPILATION_OPTIONS)]
     pub target: Option<String>,
 
     /// Directory for all generated artifacts
-    #[arg(long, value_name = "DIRECTORY")]
+    #[arg(long, value_name = "DIRECTORY", help_heading = COMPILATION_OPTIONS)]
     pub target_dir: Option<PathBuf>,
 
     /// Path to Cargo.toml
-    #[arg(long, value_name = "PATH")]
+    #[arg(long, value_name = "PATH", help_heading = MANIFEST_OPTIONS)]
     pub manifest_path: Option<PathBuf>,
 
     /// Package to expand
-    #[arg(short, long, value_name = "SPEC", num_args = 0..=1)]
+    #[arg(short, long, value_name = "SPEC", num_args = 0..=1, help_heading = PACKAGE_SELECTION)]
     pub package: Option<Option<String>>,
 
     /// Build artifacts in release mode, with optimizations
-    #[arg(long)]
+    #[arg(long, help_heading = COMPILATION_OPTIONS)]
     pub release: bool,
 
     /// Build artifacts with the specified profile
-    #[arg(long, value_name = "PROFILE-NAME")]
+    #[arg(long, value_name = "PROFILE-NAME", help_heading = COMPILATION_OPTIONS)]
     pub profile: Option<String>,
 
     /// Number of parallel jobs, defaults to # of CPUs
-    #[arg(short, long, value_name = "N")]
+    #[arg(short, long, value_name = "N", help_heading = COMPILATION_OPTIONS)]
     pub jobs: Option<u64>,
 
     /// Print command lines as they are executed
@@ -86,15 +93,15 @@ pub struct Expand {
     pub color: Option<Coloring>,
 
     /// Require Cargo.lock and cache are up to date
-    #[arg(long)]
+    #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub frozen: bool,
 
     /// Require Cargo.lock is up to date
-    #[arg(long)]
+    #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub locked: bool,
 
     /// Run without accessing the network
-    #[arg(long)]
+    #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub offline: bool,
 
     /// Unstable (nightly-only) flags to Cargo
