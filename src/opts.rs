@@ -76,7 +76,7 @@ pub struct Expand {
     #[arg(long, value_name = "NAME", num_args = 0..=1, help_heading = TARGET_SELECTION)]
     pub bench: Option<Option<String>>,
 
-    /// Space-separated list of features to activate
+    /// Space or comma separated list of features to activate
     #[arg(long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
     pub features: Option<String>,
 
