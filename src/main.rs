@@ -261,32 +261,28 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
 
     line.arg("rustc");
 
-    line.arg("--profile");
-    if let Some(profile) = &args.profile {
-        line.arg(profile);
-    } else if args.tests && args.test.is_none() {
-        if args.release {
-            line.arg("bench");
+    if args.verbose {
+        line.arg("--verbose");
+    }
+
+    line.arg("--color");
+    match color {
+        Coloring::Auto => line.arg(if cfg!(not(windows)) && io::stderr().is_terminal() {
+            "always"
         } else {
-            line.arg("test");
-        }
-    } else if args.release {
-        line.arg("release");
-    } else {
-        line.arg("check");
+            "never"
+        }),
+        color => line.arg(color.to_possible_value().unwrap().get_name()),
     }
 
-    if let Some(features) = &args.features {
-        line.arg("--features");
-        line.arg(features);
+    for unstable_flag in &args.unstable_flags {
+        line.arg("-Z");
+        line.arg(unstable_flag);
     }
 
-    if args.all_features {
-        line.arg("--all-features");
-    }
-
-    if args.no_default_features {
-        line.arg("--no-default-features");
+    if let Some(package) = &args.package {
+        line.arg("--package");
+        line.args(package);
     }
 
     let mut has_explicit_build_target = false;
@@ -330,6 +326,39 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         }
     }
 
+    if let Some(features) = &args.features {
+        line.arg("--features");
+        line.arg(features);
+    }
+
+    if args.all_features {
+        line.arg("--all-features");
+    }
+
+    if args.no_default_features {
+        line.arg("--no-default-features");
+    }
+
+    if let Some(jobs) = args.jobs {
+        line.arg("--jobs");
+        line.arg(jobs.to_string());
+    }
+
+    line.arg("--profile");
+    if let Some(profile) = &args.profile {
+        line.arg(profile);
+    } else if args.tests && args.test.is_none() {
+        if args.release {
+            line.arg("bench");
+        } else {
+            line.arg("test");
+        }
+    } else if args.release {
+        line.arg("release");
+    } else {
+        line.arg("check");
+    }
+
     if let Some(target) = &args.target {
         line.arg("--target");
         line.arg(target);
@@ -345,30 +374,6 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         line.arg(manifest_path);
     }
 
-    if let Some(package) = &args.package {
-        line.arg("--package");
-        line.args(package);
-    }
-
-    if let Some(jobs) = args.jobs {
-        line.arg("--jobs");
-        line.arg(jobs.to_string());
-    }
-
-    if args.verbose {
-        line.arg("--verbose");
-    }
-
-    line.arg("--color");
-    match color {
-        Coloring::Auto => line.arg(if cfg!(not(windows)) && io::stderr().is_terminal() {
-            "always"
-        } else {
-            "never"
-        }),
-        color => line.arg(color.to_possible_value().unwrap().get_name()),
-    }
-
     if args.frozen {
         line.arg("--frozen");
     }
@@ -379,11 +384,6 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
 
     if args.offline {
         line.arg("--offline");
-    }
-
-    for unstable_flag in &args.unstable_flags {
-        line.arg("-Z");
-        line.arg(unstable_flag);
     }
 
     line.arg("--");
