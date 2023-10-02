@@ -36,7 +36,7 @@ pub struct Expand {
     #[arg(long)]
     pub verbose: bool,
 
-    /// Coloring: auto, always, never
+    /// Coloring
     #[arg(long, value_name = "WHEN")]
     pub color: Option<Coloring>,
 
