@@ -36,8 +36,8 @@ pub struct Expand {
     #[arg(long)]
     pub verbose: bool,
 
-    /// Syntax highlighting and colored Cargo output
-    #[arg(long, value_name = "WHEN")]
+    /// Syntax highlighting and colored Cargo output (auto, always, never)
+    #[arg(long, value_name = "WHEN", hide_possible_values = true)]
     pub color: Option<Coloring>,
 
     /// Override a configuration value
