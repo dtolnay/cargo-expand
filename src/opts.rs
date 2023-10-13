@@ -81,7 +81,7 @@ pub struct Expand {
     pub bench: Option<Option<String>>,
 
     /// Space or comma separated list of features to activate
-    #[arg(long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
+    #[arg(short = 'F', long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
     pub features: Option<String>,
 
     /// Activate all available features
