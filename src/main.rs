@@ -42,6 +42,7 @@ use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::ptr;
+use std::str;
 use std::thread::Result as ThreadResult;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -115,7 +116,9 @@ fn cargo_expand() -> Result<i32> {
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
     apply_args(&mut cmd, &args, &color, &outfile_path);
-    cmd.env("RUSTC_BOOTSTRAP", "1");
+    if needs_rustc_bootstrap() {
+        cmd.env("RUSTC_BOOTSTRAP", "1");
+    }
     let code = filter_err(&mut cmd)?;
 
     if !outfile_path.exists() {
@@ -404,6 +407,35 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     }
 
     cmd.args(line);
+}
+
+fn needs_rustc_bootstrap() -> bool {
+    let mut cmd = Command::new(cargo_binary());
+    cmd.arg("rustc");
+    cmd.arg("-Zunstable-options");
+    cmd.arg("--print=sysroot");
+    cmd.env("RUSTC_BOOTSTRAP", "1");
+    cmd.stdin(Stdio::null());
+    cmd.stderr(Stdio::null());
+    let Ok(output) = cmd.output() else {
+        return true;
+    };
+    let Ok(stdout) = str::from_utf8(&output.stdout) else {
+        return true;
+    };
+
+    let sysroot = Path::new(stdout.trim_end());
+    let rustc = sysroot.join("bin").join("rustc");
+    let mut cmd = Command::new(rustc);
+    cmd.arg("-Zunpretty=expanded");
+    cmd.arg("-");
+    cmd.stdin(Stdio::null());
+    cmd.stdout(Stdio::null());
+    cmd.stderr(Stdio::null());
+    let Ok(status) = cmd.status() else {
+        return true;
+    };
+    !status.success()
 }
 
 fn print_command(line: Line, color: &Coloring) {
