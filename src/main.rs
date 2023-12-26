@@ -410,22 +410,26 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
 }
 
 fn needs_rustc_bootstrap() -> bool {
-    let mut cmd = Command::new(cargo_binary());
-    cmd.arg("rustc");
-    cmd.arg("-Zunstable-options");
-    cmd.arg("--print=sysroot");
-    cmd.env("RUSTC_BOOTSTRAP", "1");
-    cmd.stdin(Stdio::null());
-    cmd.stderr(Stdio::null());
-    let Ok(output) = cmd.output() else {
-        return true;
-    };
-    let Ok(stdout) = str::from_utf8(&output.stdout) else {
-        return true;
+    let rustc = if let Some(rustc) = env::var_os("RUSTC") {
+        PathBuf::from(rustc)
+    } else {
+        let mut cmd = Command::new(cargo_binary());
+        cmd.arg("rustc");
+        cmd.arg("-Zunstable-options");
+        cmd.arg("--print=sysroot");
+        cmd.env("RUSTC_BOOTSTRAP", "1");
+        cmd.stdin(Stdio::null());
+        cmd.stderr(Stdio::null());
+        let Ok(output) = cmd.output() else {
+            return true;
+        };
+        let Ok(stdout) = str::from_utf8(&output.stdout) else {
+            return true;
+        };
+        let sysroot = Path::new(stdout.trim_end());
+        sysroot.join("bin").join("rustc")
     };
 
-    let sysroot = Path::new(stdout.trim_end());
-    let rustc = sysroot.join("bin").join("rustc");
     let mut cmd = Command::new(rustc);
     cmd.arg("-Zunpretty=expanded");
     cmd.arg("-");
