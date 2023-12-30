@@ -410,6 +410,10 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
 }
 
 fn needs_rustc_bootstrap() -> bool {
+    if env::var_os("RUSTC_BOOTSTRAP").is_some_and(|var| !var.is_empty()) {
+        return false;
+    }
+
     let rustc = if let Some(rustc) = env::var_os("RUSTC") {
         PathBuf::from(rustc)
     } else {
