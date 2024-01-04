@@ -61,6 +61,8 @@ fn remove_doc_attributes(attrs: &mut Vec<Attribute>) {
 
 fn attrs_mut(e: &mut Expr) -> Option<&mut Vec<Attribute>> {
     match e {
+        #![cfg_attr(all(test, exhaustive), deny(non_exhaustive_omitted_patterns))]
+
         Expr::Array(ExprArray { attrs, .. })
         | Expr::Assign(ExprAssign { attrs, .. })
         | Expr::Async(ExprAsync { attrs, .. })
@@ -101,8 +103,6 @@ fn attrs_mut(e: &mut Expr) -> Option<&mut Vec<Attribute>> {
         | Expr::Yield(ExprYield { attrs, .. }) => Some(attrs),
 
         Expr::Verbatim(_) => None,
-
-        #[cfg_attr(all(test, exhaustive), deny(non_exhaustive_omitted_patterns))]
         _ => None,
     }
 }
