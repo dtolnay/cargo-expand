@@ -141,10 +141,6 @@ fn cargo_expand() -> Result<i32> {
         const DOLLAR_CRATE_PLACEHOLDER: &str = "Ξcrate";
         let wip = questionably_formatted.replace("$crate", DOLLAR_CRATE_PLACEHOLDER);
 
-        // Support cargo-expand built with panic=abort, as otherwise proc-macro2
-        // ends up using a catch_unwind.
-        proc_macro2::fallback::force();
-
         enum Stage {
             Formatted(String),
             Unformatted(String),
