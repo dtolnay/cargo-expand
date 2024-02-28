@@ -1,4 +1,5 @@
 #![allow(
+    clippy::doc_markdown,
     clippy::items_after_statements,
     clippy::manual_assert,
     clippy::manual_strip,
