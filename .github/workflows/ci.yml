@@ -31,14 +31,25 @@ jobs:
       - run: diff tests/lib.expand.rs expand.rs
 
   build:
-    name: Rust ${{matrix.rust}}
+    name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
     needs: pre_ci
     if: needs.pre_ci.outputs.continue
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}-latest
     strategy:
       fail-fast: false
       matrix:
         rust: [nightly, beta, stable, 1.74.0]
+        os: [ubuntu]
+        include:
+          - name: macOS
+            os: macos
+            rust: nightly
+          - name: Windows (gnu)
+            os: windows
+            rust: nightly-x86_64-pc-windows-gnu
+          - name: Windows (msvc)
+            os: windows
+            rust: nightly-x86_64-pc-windows-msvc
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
