@@ -36,6 +36,7 @@ use bat::{PagingMode, PrettyPrinter};
 use clap::{Parser, ValueEnum};
 use quote::quote;
 use std::env;
+use std::error::Error as StdError;
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, BufRead, IsTerminal, Write};
@@ -54,7 +55,13 @@ fn main() {
     process::exit(match result {
         Ok(code) => code,
         Err(err) => {
-            let _ = writeln!(io::stderr(), "{}", err);
+            let mut stderr = io::stderr().lock();
+            let _ = writeln!(stderr, "{}", err);
+            let mut err = &err as &dyn StdError;
+            while let Some(source) = err.source() {
+                let _ = writeln!(stderr, "\nCaused by:\n  {}", source);
+                err = source;
+            }
             1
         }
     });

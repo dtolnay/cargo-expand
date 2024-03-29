@@ -1,6 +1,8 @@
+use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;
 
+#[derive(Debug)]
 pub enum Error {
     Io(io::Error),
     TomlSer(toml::ser::Error),
@@ -29,12 +31,20 @@ impl From<toml::de::Error> for Error {
 
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        use self::Error::*;
-
         match self {
-            Io(e) => e.fmt(formatter),
-            TomlSer(e) => e.fmt(formatter),
-            TomlDe(e) => e.fmt(formatter),
+            Error::Io(e) => e.fmt(formatter),
+            Error::TomlSer(e) => e.fmt(formatter),
+            Error::TomlDe(e) => e.fmt(formatter),
+        }
+    }
+}
+
+impl StdError for Error {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        match self {
+            Error::Io(e) => e.source(),
+            Error::TomlSer(e) => e.source(),
+            Error::TomlDe(e) => e.source(),
         }
     }
 }
