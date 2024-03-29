@@ -33,11 +33,11 @@ use crate::opts::{Coloring, Expand, Subcommand};
 use crate::unparse::unparse_maximal;
 use crate::version::Version;
 use bat::{PagingMode, PrettyPrinter};
-use clap::{Parser, ValueEnum};
+use clap::{CommandFactory as _, Parser, ValueEnum};
 use quote::quote;
 use std::env;
 use std::error::Error as StdError;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::io::{self, BufRead, IsTerminal, Write};
 use std::iter;
 use std::panic::{self, PanicInfo, UnwindSafe};
@@ -51,7 +51,12 @@ use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor
 cargo_subcommand_metadata::description!("Show result of macro expansion");
 
 fn main() {
-    let result = cargo_expand();
+    let result = if let Some(wrapper) = env::var_os(CARGO_EXPAND_RUSTC_WRAPPER) {
+        do_rustc_wrapper(&wrapper)
+    } else {
+        do_cargo_expand()
+    };
+
     process::exit(match result {
         Ok(code) => code,
         Err(err) => {
@@ -67,11 +72,40 @@ fn main() {
     });
 }
 
+const CARGO_EXPAND_RUSTC_WRAPPER: &str = "CARGO_EXPAND_RUSTC_WRAPPER";
+const ARG_Z_UNPRETTY_EXPANDED: &str = "-Zunpretty=expanded";
+
 fn cargo_binary() -> OsString {
     env::var_os("CARGO").unwrap_or_else(|| "cargo".to_owned().into())
 }
 
-fn cargo_expand() -> Result<i32> {
+fn do_rustc_wrapper(wrapper: &OsStr) -> Result<i32> {
+    let mut rustc_command = env::args_os().skip(1);
+    let mut cmd = if wrapper != "/" {
+        Command::new(wrapper)
+    } else if let Some(rustc) = rustc_command.next() {
+        Command::new(rustc)
+    } else {
+        Subcommand::command().print_help()?;
+        return Ok(1);
+    };
+
+    let mut is_unpretty_expanded = false;
+    for arg in rustc_command {
+        is_unpretty_expanded |= arg == ARG_Z_UNPRETTY_EXPANDED;
+        cmd.arg(arg);
+    }
+
+    if is_unpretty_expanded {
+        cmd.env("RUSTC_BOOTSTRAP", "1");
+    }
+
+    let exit_status = cmd.status()?;
+    let code = exit_status.code().unwrap_or(1);
+    Ok(code)
+}
+
+fn do_cargo_expand() -> Result<i32> {
     let Subcommand::Expand(args) = Subcommand::parse();
 
     if args.version {
@@ -124,9 +158,18 @@ fn cargo_expand() -> Result<i32> {
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
     apply_args(&mut cmd, &args, &color, &outfile_path);
+
     if needs_rustc_bootstrap() {
-        cmd.env("RUSTC_BOOTSTRAP", "1");
+        if let Ok(current_exe) = env::current_exe() {
+            let original_wrapper = env::var_os("RUSTC_WRAPPER");
+            let wrapper = original_wrapper.as_deref().unwrap_or(OsStr::new("/"));
+            cmd.env(CARGO_EXPAND_RUSTC_WRAPPER, wrapper);
+            cmd.env("RUSTC_WRAPPER", current_exe);
+        } else {
+            cmd.env("RUSTC_BOOTSTRAP", "1");
+        }
     }
+
     let code = filter_err(&mut cmd)?;
 
     if !outfile_path.exists() {
@@ -402,7 +445,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
 
     line.arg("-o");
     line.arg(outfile);
-    line.arg("-Zunpretty=expanded");
+    line.arg(ARG_Z_UNPRETTY_EXPANDED);
 
     if args.verbose {
         let mut display = line.clone();
