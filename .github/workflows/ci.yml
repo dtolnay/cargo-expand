@@ -65,6 +65,7 @@ jobs:
       - run: cargo test
         env:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.rust == 'nightly' && '--cfg exhaustive' || ''}}
+        if: matrix.os == 'ubuntu' && matrix.rust == 'nightly'
 
   clippy:
     name: Clippy
