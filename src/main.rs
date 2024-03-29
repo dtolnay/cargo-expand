@@ -39,6 +39,7 @@ use std::env;
 use std::error::Error as StdError;
 use std::ffi::OsString;
 use std::io::{self, BufRead, IsTerminal, Write};
+use std::iter;
 use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
@@ -437,7 +438,16 @@ fn needs_rustc_bootstrap() -> bool {
         sysroot.join("bin").join("rustc")
     };
 
-    let mut cmd = Command::new(rustc);
+    let rustc_wrapper = env::var_os("RUSTC_WRAPPER").filter(|wrapper| !wrapper.is_empty());
+    let rustc_workspace_wrapper =
+        env::var_os("RUSTC_WORKSPACE_WRAPPER").filter(|wrapper| !wrapper.is_empty());
+    let mut wrapped_rustc = rustc_wrapper
+        .into_iter()
+        .chain(rustc_workspace_wrapper)
+        .chain(iter::once(rustc.into_os_string()));
+
+    let mut cmd = Command::new(wrapped_rustc.next().unwrap());
+    cmd.args(wrapped_rustc);
     cmd.arg("-Zunpretty=expanded");
     cmd.arg("-");
     cmd.stdin(Stdio::null());
