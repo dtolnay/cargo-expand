@@ -17,20 +17,6 @@ jobs:
     uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
 
   test:
-    name: Test
-    needs: pre_ci
-    if: needs.pre_ci.outputs.continue
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-      - name: Enable type layout randomization
-        run: echo RUSTFLAGS=${RUSTFLAGS}\ -Zrandomize-layout >> $GITHUB_ENV
-      - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs
-      - run: diff tests/lib.expand.rs expand.rs
-
-  build:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
     needs: pre_ci
     if: needs.pre_ci.outputs.continue
@@ -66,6 +52,8 @@ jobs:
         env:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.rust == 'nightly' && '--cfg exhaustive' || ''}}
         if: matrix.os == 'ubuntu' && matrix.rust == 'nightly'
+      - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs && diff tests/lib.expand.rs expand.rs
+        if: startsWith(matrix.rust, 'nightly')
 
   clippy:
     name: Clippy
