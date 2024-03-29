@@ -100,9 +100,21 @@ fn do_rustc_wrapper(wrapper: &OsStr) -> Result<i32> {
         cmd.env("RUSTC_BOOTSTRAP", "1");
     }
 
-    let exit_status = cmd.status()?;
-    let code = exit_status.code().unwrap_or(1);
-    Ok(code)
+    #[cfg(unix)]
+    {
+        use crate::error::Error;
+        use std::os::unix::process::CommandExt as _;
+
+        let err = cmd.exec();
+        return Err(Error::Io(err));
+    }
+
+    #[cfg(not(unix))]
+    {
+        let exit_status = cmd.status()?;
+        let code = exit_status.code().unwrap_or(1);
+        return Ok(code);
+    }
 }
 
 fn do_cargo_expand() -> Result<i32> {
