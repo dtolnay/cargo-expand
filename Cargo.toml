@@ -1,6 +1,6 @@
 [package]
 name = "cargo-expand"
-version = "1.0.80"
+version = "1.0.81"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 autotests = false
 categories = ["development-tools::cargo-plugins", "development-tools::debugging"]
