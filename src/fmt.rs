@@ -1,6 +1,5 @@
 use crate::error::Result;
 use serde::Serialize;
-use std::fs;
 use std::path::Path;
 
 #[derive(Serialize)]
@@ -20,7 +19,7 @@ pub fn write_rustfmt_config(outdir: impl AsRef<Path>) -> Result<()> {
     let toml_string = toml::to_string(&config)?;
 
     let rustfmt_config_path = outdir.as_ref().join("rustfmt.toml");
-    fs::write(rustfmt_config_path, toml_string)?;
+    fs_err::write(rustfmt_config_path, toml_string)?;
 
     Ok(())
 }

@@ -38,7 +38,6 @@ use quote::quote;
 use std::env;
 use std::error::Error as StdError;
 use std::ffi::OsString;
-use std::fs;
 use std::io::{self, BufRead, IsTerminal, Write};
 use std::panic::{self, PanicInfo, UnwindSafe};
 use std::path::{Path, PathBuf};
@@ -133,7 +132,7 @@ fn cargo_expand() -> Result<i32> {
         return Ok(1);
     }
 
-    let mut content = fs::read_to_string(&outfile_path)?;
+    let mut content = fs_err::read_to_string(&outfile_path)?;
     if content.is_empty() {
         let _ = writeln!(io::stderr(), "ERROR: rustc produced no expanded output");
         return Ok(if code == 0 { 1 } else { code });
@@ -188,7 +187,7 @@ fn cargo_expand() -> Result<i32> {
 
         if let Some(unformatted) = to_rustfmt {
             if let Some(rustfmt) = rustfmt.or_else(which_rustfmt) {
-                fs::write(&outfile_path, unformatted)?;
+                fs_err::write(&outfile_path, unformatted)?;
 
                 fmt::write_rustfmt_config(&outdir)?;
 
@@ -201,7 +200,7 @@ fn cargo_expand() -> Result<i32> {
                         .output();
                     if let Ok(output) = output {
                         if output.status.success() {
-                            stage = Stage::Formatted(fs::read_to_string(&outfile_path)?);
+                            stage = Stage::Formatted(fs_err::read_to_string(&outfile_path)?);
                             break;
                         }
                     }

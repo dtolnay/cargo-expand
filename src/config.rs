@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use std::env;
-use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
 
@@ -35,7 +34,7 @@ fn try_deserialize() -> Option<Config> {
         .map(|name| cargo_home.join(name))
         .find(|path| path.exists())?;
 
-    let content = fs::read_to_string(&config_path).ok()?;
+    let content = fs_err::read_to_string(&config_path).ok()?;
 
     let full_config: Sections = match toml::from_str(&content) {
         Ok(config) => config,

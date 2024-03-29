@@ -1,7 +1,6 @@
 use crate::error::Result;
 use serde::Deserialize;
 use std::env;
-use std::fs;
 use std::io::{self, ErrorKind};
 use std::path::{Path, PathBuf};
 
@@ -18,7 +17,7 @@ pub struct CargoPackage {
 
 pub fn parse(manifest_path: Option<&Path>) -> Result<CargoManifest> {
     let manifest_path = find_cargo_manifest(manifest_path)?;
-    let content = fs::read_to_string(manifest_path)?;
+    let content = fs_err::read_to_string(manifest_path)?;
     let cargo_manifest: CargoManifest = toml::from_str(&content)?;
     Ok(cargo_manifest)
 }
