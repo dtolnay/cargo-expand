@@ -7,6 +7,7 @@
     clippy::match_same_arms, // https://github.com/rust-lang/rust-clippy/issues/10327
     clippy::module_name_repetitions,
     clippy::needless_pass_by_value,
+    clippy::needless_return,
     clippy::option_option,
     clippy::struct_excessive_bools,
     clippy::too_many_lines,
