@@ -43,14 +43,12 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
       - name: Enable type layout randomization
-        run: echo RUSTFLAGS=${RUSTFLAGS}\ -Zrandomize-layout >> $GITHUB_ENV
+        run: echo RUSTFLAGS=${RUSTFLAGS}\ -Zrandomize-layout\ --cfg=exhaustive >> $GITHUB_ENV
         if: matrix.rust == 'nightly'
       - run: cargo check --locked
       - run: cargo update
       - run: cargo check
       - run: cargo test
-        env:
-          RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.rust == 'nightly' && '--cfg exhaustive' || ''}}
         if: matrix.os == 'ubuntu' && matrix.rust == 'nightly'
       - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs && diff tests/lib.expand.rs expand.rs
         if: startsWith(matrix.rust, 'nightly')
