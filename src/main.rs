@@ -28,7 +28,6 @@ mod version;
 use crate::cmd::Line;
 use crate::config::Config;
 use crate::error::Result;
-use crate::opts::Coloring::*;
 use crate::opts::{Coloring, Expand, Subcommand};
 use crate::unparse::unparse_maximal;
 use crate::version::Version;
@@ -262,9 +261,9 @@ fn do_cargo_expand() -> Result<i32> {
     let theme = args.theme.or(config.theme);
     let none_theme = theme.as_deref() == Some("none");
     let do_color = match color {
-        Always => true,
-        Never => false,
-        Auto => !none_theme && io::stdout().is_terminal(),
+        Coloring::Always => true,
+        Coloring::Never => false,
+        Coloring::Auto => !none_theme && io::stdout().is_terminal(),
     };
     let _ = writeln!(io::stderr());
     if do_color {
