@@ -27,7 +27,7 @@ mod opts;
 mod unparse;
 mod version;
 
-use crate::cmd::CommandArgs;
+use crate::cmd::CommandExt as _;
 use crate::config::Config;
 use crate::error::Result;
 use crate::opts::{Coloring, Expand, Subcommand};
@@ -320,78 +320,77 @@ fn which_rustfmt() -> Option<PathBuf> {
 }
 
 fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path) -> Result<()> {
-    let mut line = CommandArgs::new();
-    line.arg("rustc");
+    cmd.arg("rustc");
 
     if args.verbose {
-        line.arg("--verbose");
+        cmd.arg("--verbose");
     }
 
     match color {
         Coloring::Auto => {
             if cfg!(not(windows)) && io::stderr().is_terminal() {
-                line.flag_value("--color", "always");
+                cmd.flag_value("--color", "always");
             } else {
-                line.flag_value("--color", "never");
+                cmd.flag_value("--color", "never");
             }
         }
-        color => line.flag_value("--color", color.to_possible_value().unwrap().get_name()),
+        color => cmd.flag_value("--color", color.to_possible_value().unwrap().get_name()),
     }
 
     for kv in &args.config {
-        line.flag_value("--config", kv);
+        cmd.flag_value("--config", kv);
     }
 
     for unstable_flag in &args.unstable_flags {
-        line.arg(format!("-Z{}", unstable_flag));
+        cmd.arg(format!("-Z{}", unstable_flag));
     }
 
     if let Some(opt_package) = &args.package {
         if let Some(package) = opt_package {
-            line.flag_value("--package", package);
+            cmd.flag_value("--package", package);
         } else {
-            line.arg("--package");
+            cmd.arg("--package");
         }
     }
 
     let mut has_explicit_build_target = false;
     if args.lib {
-        line.arg("--lib");
+        cmd.arg("--lib");
         has_explicit_build_target = true;
     }
 
     if let Some(opt_bin) = &args.bin {
         if let Some(bin) = opt_bin {
-            line.flag_value("--bin", bin);
+            cmd.flag_value("--bin", bin);
         } else {
-            line.arg("--bin");
+            cmd.arg("--bin");
         }
         has_explicit_build_target = true;
     }
 
     if let Some(opt_example) = &args.example {
         if let Some(example) = opt_example {
-            line.flag_value("--example", example);
+            cmd.flag_value("--example", example);
         } else {
-            line.arg("--example");
+            cmd.arg("--example");
         }
         has_explicit_build_target = true;
     }
 
     if let Some(opt_test) = &args.test {
         if let Some(test) = opt_test {
-            line.flag_value("--test", test);
+            cmd.flag_value("--test", test);
         } else {
-            line.arg("--test");
+            cmd.arg("--test");
         }
         has_explicit_build_target = true;
     }
 
     if let Some(opt_bench) = &args.bench {
         if let Some(bench) = opt_bench {
-            line.flag_value("--bench", bench);
+            cmd.flag_value("--bench", bench);
         } else {
-            line.arg("--bench");
+            cmd.arg("--bench");
         }
         has_explicit_build_target = true;
     }
@@ -400,77 +399,76 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         if let Ok(cargo_manifest) = manifest::parse(args.manifest_path.as_deref()) {
             if let Some(root_package) = cargo_manifest.package {
                 if let Some(default_run) = &root_package.default_run {
-                    line.flag_value("--bin", default_run);
+                    cmd.flag_value("--bin", default_run);
                 }
             }
         }
     }
 
     if let Some(features) = &args.features {
-        line.flag_value("--features", features);
+        cmd.flag_value("--features", features);
     }
 
     if args.all_features {
-        line.arg("--all-features");
+        cmd.arg("--all-features");
     }
 
     if args.no_default_features {
-        line.arg("--no-default-features");
+        cmd.arg("--no-default-features");
     }
 
     if let Some(jobs) = args.jobs {
-        line.flag_value("--jobs", jobs.to_string());
+        cmd.flag_value("--jobs", jobs.to_string());
     }
 
     if let Some(profile) = &args.profile {
-        line.flag_value("--profile", profile);
+        cmd.flag_value("--profile", profile);
     } else if args.tests && args.test.is_none() {
         if args.release {
-            line.flag_value("--profile", "bench");
+            cmd.flag_value("--profile", "bench");
         } else {
-            line.flag_value("--profile", "test");
+            cmd.flag_value("--profile", "test");
         }
     } else if args.release {
-        line.flag_value("--profile", "release");
+        cmd.flag_value("--profile", "release");
     } else {
-        line.flag_value("--profile", "check");
+        cmd.flag_value("--profile", "check");
     }
 
     if let Some(target) = &args.target {
-        line.flag_value("--target", target);
+        cmd.flag_value("--target", target);
     }
 
     if let Some(target_dir) = &args.target_dir {
-        line.flag_value("--target-dir", target_dir);
+        cmd.flag_value("--target-dir", target_dir);
     }
 
     if let Some(manifest_path) = &args.manifest_path {
-        line.flag_value("--manifest-path", manifest_path);
+        cmd.flag_value("--manifest-path", manifest_path);
     }
 
     if args.frozen {
-        line.arg("--frozen");
+        cmd.arg("--frozen");
     }
 
     if args.locked {
-        line.arg("--locked");
+        cmd.arg("--locked");
     }
 
     if args.offline {
-        line.arg("--offline");
+        cmd.arg("--offline");
     }
 
-    line.arg("--");
+    cmd.arg("--");
 
-    line.arg("-o");
-    line.arg(outfile);
-    line.arg(ARG_Z_UNPRETTY_EXPANDED);
+    cmd.arg("-o");
+    cmd.arg(outfile);
+    cmd.arg(ARG_Z_UNPRETTY_EXPANDED);
 
     if args.verbose {
-        print_command(&line, color)?;
+        print_command(cmd, color)?;
     }
 
-    cmd.args(line);
     Ok(())
 }
 
@@ -520,10 +518,10 @@ fn needs_rustc_bootstrap() -> bool {
     !status.success()
 }
 
-fn print_command(args: &CommandArgs, color: &Coloring) -> Result<()> {
+fn print_command(cmd: &Command, color: &Coloring) -> Result<()> {
     let mut shell_words = String::new();
     let quoter = shlex::Quoter::new().allow_nul(true);
-    for arg in args {
+    for arg in cmd.get_args() {
         let arg_lossy = arg.to_string_lossy();
         shell_words.push(' ');
         match arg_lossy.split_once('=') {

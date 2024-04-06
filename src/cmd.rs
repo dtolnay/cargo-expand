@@ -1,24 +1,15 @@
-use std::ffi::{OsStr, OsString};
-use std::slice;
-use std::vec;
+use std::ffi::OsStr;
+use std::process::Command;
 
-pub struct CommandArgs {
-    args: Vec<OsString>,
+pub trait CommandExt {
+    fn flag_value<K, V>(&mut self, k: K, v: V)
+    where
+        K: AsRef<OsStr>,
+        V: AsRef<OsStr>;
 }
 
-impl CommandArgs {
-    pub fn new() -> Self {
-        CommandArgs { args: Vec::new() }
-    }
-
-    pub fn arg<S>(&mut self, arg: S)
-    where
-        S: AsRef<OsStr>,
-    {
-        self.args.push(arg.as_ref().to_owned());
-    }
-
-    pub fn flag_value<K, V>(&mut self, k: K, v: V)
+impl CommandExt for Command {
+    fn flag_value<K, V>(&mut self, k: K, v: V)
     where
         K: AsRef<OsStr>,
         V: AsRef<OsStr>,
@@ -33,32 +24,5 @@ impl CommandArgs {
         }
         self.arg(k);
         self.arg(v);
-    }
-
-    pub fn args<I, S>(&mut self, args: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<OsStr>,
-    {
-        self.args
-            .extend(args.into_iter().map(|arg| arg.as_ref().to_owned()));
-    }
-}
-
-impl IntoIterator for CommandArgs {
-    type Item = OsString;
-    type IntoIter = vec::IntoIter<OsString>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.args.into_iter()
-    }
-}
-
-impl<'a> IntoIterator for &'a CommandArgs {
-    type Item = &'a OsString;
-    type IntoIter = slice::Iter<'a, OsString>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.args.iter()
     }
 }
