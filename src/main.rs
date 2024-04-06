@@ -170,7 +170,10 @@ fn do_cargo_expand() -> Result<i32> {
 
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
-    apply_args(&mut cmd, &args, color, &outfile_path)?;
+    apply_args(&mut cmd, &args, color, &outfile_path);
+    if args.verbose {
+        print_command(&cmd, color)?;
+    }
 
     if needs_rustc_bootstrap() {
         if let Ok(current_exe) = env::current_exe() {
@@ -319,7 +322,7 @@ fn which_rustfmt() -> Option<PathBuf> {
     }
 }
 
-fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path) -> Result<()> {
+fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path) {
     cmd.arg("rustc");
 
     if args.verbose {
@@ -464,12 +467,6 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
     cmd.arg("-o");
     cmd.arg(outfile);
     cmd.arg(ARG_Z_UNPRETTY_EXPANDED);
-
-    if args.verbose {
-        print_command(cmd, color)?;
-    }
-
-    Ok(())
 }
 
 fn needs_rustc_bootstrap() -> bool {
