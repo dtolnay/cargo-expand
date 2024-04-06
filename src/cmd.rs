@@ -2,14 +2,14 @@ use std::ffi::OsStr;
 use std::process::Command;
 
 pub trait CommandExt {
-    fn flag_value<K, V>(&mut self, k: K, v: V)
+    fn flag_value<K, V>(&mut self, k: K, v: V) -> &mut Self
     where
         K: AsRef<OsStr>,
         V: AsRef<OsStr>;
 }
 
 impl CommandExt for Command {
-    fn flag_value<K, V>(&mut self, k: K, v: V)
+    fn flag_value<K, V>(&mut self, k: K, v: V) -> &mut Self
     where
         K: AsRef<OsStr>,
         V: AsRef<OsStr>,
@@ -19,10 +19,11 @@ impl CommandExt for Command {
         if let Some(k) = k.to_str() {
             if let Some(v) = v.to_str() {
                 self.arg(format!("{}={}", k, v));
-                return;
+                return self;
             }
         }
         self.arg(k);
         self.arg(v);
+        self
     }
 }

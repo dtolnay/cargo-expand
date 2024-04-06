@@ -253,8 +253,7 @@ fn do_cargo_expand() -> Result<i32> {
 
                 for edition in &["2021", "2018", "2015"] {
                     let output = Command::new(&rustfmt)
-                        .arg("--edition")
-                        .arg(edition)
+                        .flag_value("--edition", edition)
                         .arg(&outfile_path)
                         .stderr(Stdio::null())
                         .output();
@@ -337,7 +336,9 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
                 cmd.flag_value("--color", "never");
             }
         }
-        color => cmd.flag_value("--color", color.to_possible_value().unwrap().get_name()),
+        color => {
+            cmd.flag_value("--color", color.to_possible_value().unwrap().get_name());
+        }
     }
 
     for kv in &args.config {
