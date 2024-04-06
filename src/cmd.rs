@@ -1,6 +1,7 @@
 use std::ffi::{OsStr, OsString};
+use std::slice;
+use std::vec;
 
-#[derive(Clone)]
 pub struct CommandArgs {
     args: Vec<OsString>,
 }
@@ -22,17 +23,22 @@ impl CommandArgs {
         self.args
             .extend(args.into_iter().map(|arg| arg.as_ref().to_owned()));
     }
-
-    pub fn insert<S: AsRef<OsStr>>(&mut self, index: usize, arg: S) {
-        self.args.insert(index, arg.as_ref().to_owned());
-    }
 }
 
 impl IntoIterator for CommandArgs {
     type Item = OsString;
-    type IntoIter = <Vec<OsString> as IntoIterator>::IntoIter;
+    type IntoIter = vec::IntoIter<OsString>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.args.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a CommandArgs {
+    type Item = &'a OsString;
+    type IntoIter = slice::Iter<'a, OsString>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.args.iter()
     }
 }
