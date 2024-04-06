@@ -8,6 +8,7 @@
     clippy::module_name_repetitions,
     clippy::needless_pass_by_value,
     clippy::needless_return,
+    clippy::new_without_default,
     clippy::option_option,
     clippy::struct_excessive_bools,
     clippy::too_many_lines,
