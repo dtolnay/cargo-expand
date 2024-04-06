@@ -480,7 +480,7 @@ fn needs_rustc_bootstrap() -> bool {
         let mut cmd = Command::new(cargo_binary());
         cmd.arg("rustc");
         cmd.arg("-Zunstable-options");
-        cmd.arg("--print=sysroot");
+        cmd.flag_value("--print", "sysroot");
         cmd.env("RUSTC_BOOTSTRAP", "1");
         cmd.stdin(Stdio::null());
         cmd.stderr(Stdio::null());
