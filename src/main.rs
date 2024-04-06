@@ -77,7 +77,7 @@ const CARGO_EXPAND_RUSTC_WRAPPER: &str = "CARGO_EXPAND_RUSTC_WRAPPER";
 const ARG_Z_UNPRETTY_EXPANDED: &str = "-Zunpretty=expanded";
 
 fn cargo_binary() -> OsString {
-    env::var_os("CARGO").unwrap_or_else(|| "cargo".to_owned().into())
+    env::var_os("CARGO").unwrap_or_else(|| OsString::from("cargo"))
 }
 
 fn do_rustc_wrapper(wrapper: &OsStr) -> Result<i32> {
