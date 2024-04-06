@@ -460,9 +460,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     line.arg(ARG_Z_UNPRETTY_EXPANDED);
 
     if args.verbose {
-        let mut display = line.clone();
-        display.insert(0, "+nightly");
-        print_command(display, color)?;
+        print_command(&line, color)?;
     }
 
     cmd.args(line);
@@ -515,7 +513,7 @@ fn needs_rustc_bootstrap() -> bool {
     !status.success()
 }
 
-fn print_command(args: CommandArgs, color: &Coloring) -> Result<()> {
+fn print_command(args: &CommandArgs, color: &Coloring) -> Result<()> {
     let mut shell_words = String::new();
     let quoter = shlex::Quoter::new().allow_nul(true);
     for arg in args {
@@ -543,7 +541,7 @@ fn print_command(args: CommandArgs, color: &Coloring) -> Result<()> {
     let _ = stream.set_color(ColorSpec::new().set_bold(true).set_fg(Some(Green)));
     let _ = write!(stream, "{:>12}", "Running");
     let _ = stream.reset();
-    let _ = writeln!(stream, " `cargo{}`", shell_words);
+    let _ = writeln!(stream, " `cargo +nightly{}`", shell_words);
     Ok(())
 }
 
