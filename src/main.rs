@@ -170,7 +170,7 @@ fn do_cargo_expand() -> Result<i32> {
 
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
-    apply_args(&mut cmd, &args, &color, &outfile_path)?;
+    apply_args(&mut cmd, &args, color, &outfile_path)?;
 
     if needs_rustc_bootstrap() {
         if let Ok(current_exe) = env::current_exe() {
@@ -319,7 +319,7 @@ fn which_rustfmt() -> Option<PathBuf> {
     }
 }
 
-fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path) -> Result<()> {
+fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path) -> Result<()> {
     cmd.arg("rustc");
 
     if args.verbose {
@@ -518,7 +518,7 @@ fn needs_rustc_bootstrap() -> bool {
     !status.success()
 }
 
-fn print_command(cmd: &Command, color: &Coloring) -> Result<()> {
+fn print_command(cmd: &Command, color: Coloring) -> Result<()> {
     let mut shell_words = String::new();
     let quoter = shlex::Quoter::new().allow_nul(true);
     for arg in cmd.get_args() {
