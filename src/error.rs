@@ -7,6 +7,7 @@ pub enum Error {
     Io(io::Error),
     TomlSer(toml::ser::Error),
     TomlDe(toml::de::Error),
+    Quote(shlex::QuoteError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -29,12 +30,19 @@ impl From<toml::de::Error> for Error {
     }
 }
 
+impl From<shlex::QuoteError> for Error {
+    fn from(error: shlex::QuoteError) -> Self {
+        Error::Quote(error)
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::Io(e) => e.fmt(formatter),
             Error::TomlSer(e) => e.fmt(formatter),
             Error::TomlDe(e) => e.fmt(formatter),
+            Error::Quote(e) => e.fmt(formatter),
         }
     }
 }
@@ -45,6 +53,7 @@ impl StdError for Error {
             Error::Io(e) => e.source(),
             Error::TomlSer(e) => e.source(),
             Error::TomlDe(e) => e.source(),
+            Error::Quote(e) => e.source(),
         }
     }
 }

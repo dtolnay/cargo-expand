@@ -1,18 +1,13 @@
 use std::ffi::{OsStr, OsString};
-use std::fmt::{self, Display};
 
 #[derive(Clone)]
-pub struct Line {
-    bin: OsString,
+pub struct CommandArgs {
     args: Vec<OsString>,
 }
 
-impl Line {
-    pub fn new<S: AsRef<OsStr>>(bin: S) -> Self {
-        Line {
-            bin: bin.as_ref().to_owned(),
-            args: Vec::new(),
-        }
+impl CommandArgs {
+    pub fn new() -> Self {
+        CommandArgs { args: Vec::new() }
     }
 
     pub fn arg<S: AsRef<OsStr>>(&mut self, arg: S) {
@@ -33,17 +28,7 @@ impl Line {
     }
 }
 
-impl Display for Line {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", self.bin.to_string_lossy())?;
-        for arg in &self.args {
-            write!(formatter, " {}", arg.to_string_lossy())?;
-        }
-        Ok(())
-    }
-}
-
-impl IntoIterator for Line {
+impl IntoIterator for CommandArgs {
     type Item = OsString;
     type IntoIter = <Vec<OsString> as IntoIterator>::IntoIter;
 

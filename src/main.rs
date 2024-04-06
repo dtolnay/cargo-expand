@@ -26,7 +26,7 @@ mod opts;
 mod unparse;
 mod version;
 
-use crate::cmd::Line;
+use crate::cmd::CommandArgs;
 use crate::config::Config;
 use crate::error::Result;
 use crate::opts::{Coloring, Expand, Subcommand};
@@ -35,6 +35,7 @@ use crate::version::Version;
 use bat::{PagingMode, PrettyPrinter};
 use clap::{CommandFactory as _, Parser, ValueEnum};
 use quote::quote;
+use std::borrow::Cow;
 use std::env;
 use std::error::Error as StdError;
 use std::ffi::{OsStr, OsString};
@@ -169,7 +170,7 @@ fn do_cargo_expand() -> Result<i32> {
 
     // Run cargo
     let mut cmd = Command::new(cargo_binary());
-    apply_args(&mut cmd, &args, &color, &outfile_path);
+    apply_args(&mut cmd, &args, &color, &outfile_path)?;
 
     if needs_rustc_bootstrap() {
         if let Ok(current_exe) = env::current_exe() {
@@ -318,9 +319,8 @@ fn which_rustfmt() -> Option<PathBuf> {
     }
 }
 
-fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path) {
-    let mut line = Line::new("cargo");
-
+fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path) -> Result<()> {
+    let mut line = CommandArgs::new();
     line.arg("rustc");
 
     if args.verbose {
@@ -462,10 +462,11 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     if args.verbose {
         let mut display = line.clone();
         display.insert(0, "+nightly");
-        print_command(display, color);
+        print_command(display, color)?;
     }
 
     cmd.args(line);
+    Ok(())
 }
 
 fn needs_rustc_bootstrap() -> bool {
@@ -514,7 +515,21 @@ fn needs_rustc_bootstrap() -> bool {
     !status.success()
 }
 
-fn print_command(line: Line, color: &Coloring) {
+fn print_command(args: CommandArgs, color: &Coloring) -> Result<()> {
+    let cmd: Vec<Cow<OsStr>> = iter::once(Cow::Borrowed(OsStr::new("cargo")))
+        .chain(args.into_iter().map(Cow::Owned))
+        .collect();
+
+    let cmd_lossy: Vec<Cow<str>> = cmd
+        .iter()
+        .map(Cow::as_ref)
+        .map(OsStr::to_string_lossy)
+        .collect();
+
+    let shell_words = shlex::Quoter::new()
+        .allow_nul(true)
+        .join(cmd_lossy.iter().map(Cow::as_ref))?;
+
     let color_choice = match color {
         Coloring::Auto => ColorChoice::Auto,
         Coloring::Always => ColorChoice::Always,
@@ -525,7 +540,8 @@ fn print_command(line: Line, color: &Coloring) {
     let _ = stream.set_color(ColorSpec::new().set_bold(true).set_fg(Some(Green)));
     let _ = write!(stream, "{:>12}", "Running");
     let _ = stream.reset();
-    let _ = writeln!(stream, " `{}`", line);
+    let _ = writeln!(stream, " `{}`", shell_words);
+    Ok(())
 }
 
 fn filter_err(cmd: &mut Command) -> io::Result<i32> {

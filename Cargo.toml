@@ -25,6 +25,7 @@ prettyplease = { version = "0.2.17", features = ["verbatim"] }
 proc-macro2 = "1.0.74"
 quote = { version = "1.0.35", default-features = false }
 serde = { version = "1.0.183", features = ["derive"] }
+shlex = "1.3"
 syn = { version = "2.0.46", default-features = false, features = ["clone-impls", "fold", "full", "parsing", "printing", "visit-mut"] }
 syn-select = "0.3"
 tempfile = "3.0"
