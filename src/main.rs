@@ -520,7 +520,7 @@ fn print_command(args: &CommandArgs, color: &Coloring) -> Result<()> {
         let arg_lossy = arg.to_string_lossy();
         shell_words.push(' ');
         match arg_lossy.split_once('=') {
-            Some((flag, value)) if flag == quoter.quote(flag)? => {
+            Some((flag, value)) if flag.starts_with('-') && flag == quoter.quote(flag)? => {
                 shell_words.push_str(flag);
                 shell_words.push('=');
                 if !value.is_empty() {
