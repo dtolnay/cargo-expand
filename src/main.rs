@@ -35,7 +35,6 @@ use crate::version::Version;
 use bat::{PagingMode, PrettyPrinter};
 use clap::{CommandFactory as _, Parser, ValueEnum};
 use quote::quote;
-use std::borrow::Cow;
 use std::env;
 use std::error::Error as StdError;
 use std::ffi::{OsStr, OsString};
@@ -516,19 +515,22 @@ fn needs_rustc_bootstrap() -> bool {
 }
 
 fn print_command(args: CommandArgs, color: &Coloring) -> Result<()> {
-    let cmd: Vec<Cow<OsStr>> = iter::once(Cow::Borrowed(OsStr::new("cargo")))
-        .chain(args.into_iter().map(Cow::Owned))
-        .collect();
-
-    let cmd_lossy: Vec<Cow<str>> = cmd
-        .iter()
-        .map(Cow::as_ref)
-        .map(OsStr::to_string_lossy)
-        .collect();
-
-    let shell_words = shlex::Quoter::new()
-        .allow_nul(true)
-        .join(cmd_lossy.iter().map(Cow::as_ref))?;
+    let mut shell_words = String::new();
+    let quoter = shlex::Quoter::new().allow_nul(true);
+    for arg in args {
+        let arg_lossy = arg.to_string_lossy();
+        shell_words.push(' ');
+        match arg_lossy.split_once('=') {
+            Some((flag, value)) if flag == quoter.quote(flag)? => {
+                shell_words.push_str(flag);
+                shell_words.push('=');
+                if !value.is_empty() {
+                    shell_words.push_str(&quoter.quote(value)?);
+                }
+            }
+            _ => shell_words.push_str(&quoter.quote(&arg_lossy)?),
+        }
+    }
 
     let color_choice = match color {
         Coloring::Auto => ColorChoice::Auto,
@@ -540,7 +542,7 @@ fn print_command(args: CommandArgs, color: &Coloring) -> Result<()> {
     let _ = stream.set_color(ColorSpec::new().set_bold(true).set_fg(Some(Green)));
     let _ = write!(stream, "{:>12}", "Running");
     let _ = stream.reset();
-    let _ = writeln!(stream, " `{}`", shell_words);
+    let _ = writeln!(stream, " `cargo{}`", shell_words);
     Ok(())
 }
 
