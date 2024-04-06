@@ -327,29 +327,31 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         line.arg("--verbose");
     }
 
-    line.arg("--color");
     match color {
-        Coloring::Auto => line.arg(if cfg!(not(windows)) && io::stderr().is_terminal() {
-            "always"
-        } else {
-            "never"
-        }),
-        color => line.arg(color.to_possible_value().unwrap().get_name()),
+        Coloring::Auto => {
+            if cfg!(not(windows)) && io::stderr().is_terminal() {
+                line.flag_value("--color", "always");
+            } else {
+                line.flag_value("--color", "never");
+            }
+        }
+        color => line.flag_value("--color", color.to_possible_value().unwrap().get_name()),
     }
 
     for kv in &args.config {
-        line.arg("--config");
-        line.arg(kv);
+        line.flag_value("--config", kv);
     }
 
     for unstable_flag in &args.unstable_flags {
-        line.arg("-Z");
-        line.arg(unstable_flag);
+        line.arg(format!("-Z{}", unstable_flag));
     }
 
-    if let Some(package) = &args.package {
-        line.arg("--package");
-        line.args(package);
+    if let Some(opt_package) = &args.package {
+        if let Some(package) = opt_package {
+            line.flag_value("--package", package);
+        } else {
+            line.arg("--package");
+        }
     }
 
     let mut has_explicit_build_target = false;
@@ -358,27 +360,39 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         has_explicit_build_target = true;
     }
 
-    if let Some(bin) = &args.bin {
-        line.arg("--bin");
-        line.args(bin);
+    if let Some(opt_bin) = &args.bin {
+        if let Some(bin) = opt_bin {
+            line.flag_value("--bin", bin);
+        } else {
+            line.arg("--bin");
+        }
         has_explicit_build_target = true;
     }
 
-    if let Some(example) = &args.example {
-        line.arg("--example");
-        line.args(example);
+    if let Some(opt_example) = &args.example {
+        if let Some(example) = opt_example {
+            line.flag_value("--example", example);
+        } else {
+            line.arg("--example");
+        }
         has_explicit_build_target = true;
     }
 
-    if let Some(test) = &args.test {
-        line.arg("--test");
-        line.args(test);
+    if let Some(opt_test) = &args.test {
+        if let Some(test) = opt_test {
+            line.flag_value("--test", test);
+        } else {
+            line.arg("--test");
+        }
         has_explicit_build_target = true;
     }
 
-    if let Some(bench) = &args.bench {
-        line.arg("--bench");
-        line.args(bench);
+    if let Some(opt_bench) = &args.bench {
+        if let Some(bench) = opt_bench {
+            line.flag_value("--bench", bench);
+        } else {
+            line.arg("--bench");
+        }
         has_explicit_build_target = true;
     }
 
@@ -386,16 +400,14 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
         if let Ok(cargo_manifest) = manifest::parse(args.manifest_path.as_deref()) {
             if let Some(root_package) = cargo_manifest.package {
                 if let Some(default_run) = &root_package.default_run {
-                    line.arg("--bin");
-                    line.arg(default_run);
+                    line.flag_value("--bin", default_run);
                 }
             }
         }
     }
 
     if let Some(features) = &args.features {
-        line.arg("--features");
-        line.arg(features);
+        line.flag_value("--features", features);
     }
 
     if args.all_features {
@@ -407,38 +419,33 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: &Coloring, outfile: &Path
     }
 
     if let Some(jobs) = args.jobs {
-        line.arg("--jobs");
-        line.arg(jobs.to_string());
+        line.flag_value("--jobs", jobs.to_string());
     }
 
-    line.arg("--profile");
     if let Some(profile) = &args.profile {
-        line.arg(profile);
+        line.flag_value("--profile", profile);
     } else if args.tests && args.test.is_none() {
         if args.release {
-            line.arg("bench");
+            line.flag_value("--profile", "bench");
         } else {
-            line.arg("test");
+            line.flag_value("--profile", "test");
         }
     } else if args.release {
-        line.arg("release");
+        line.flag_value("--profile", "release");
     } else {
-        line.arg("check");
+        line.flag_value("--profile", "check");
     }
 
     if let Some(target) = &args.target {
-        line.arg("--target");
-        line.arg(target);
+        line.flag_value("--target", target);
     }
 
     if let Some(target_dir) = &args.target_dir {
-        line.arg("--target-dir");
-        line.arg(target_dir);
+        line.flag_value("--target-dir", target_dir);
     }
 
     if let Some(manifest_path) = &args.manifest_path {
-        line.arg("--manifest-path");
-        line.arg(manifest_path);
+        line.flag_value("--manifest-path", manifest_path);
     }
 
     if args.frozen {
