@@ -177,7 +177,8 @@ fn do_cargo_expand() -> Result<i32> {
 
     if needs_rustc_bootstrap() {
         if let Ok(current_exe) = env::current_exe() {
-            let original_wrapper = env::var_os("RUSTC_WRAPPER");
+            let original_wrapper =
+                env::var_os("RUSTC_WRAPPER").filter(|wrapper| !wrapper.is_empty());
             let wrapper = original_wrapper.as_deref().unwrap_or(OsStr::new("/"));
             cmd.env(CARGO_EXPAND_RUSTC_WRAPPER, wrapper);
             cmd.env("RUSTC_WRAPPER", current_exe);
