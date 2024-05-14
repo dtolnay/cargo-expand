@@ -1,8 +1,14 @@
 use std::fmt::{self, Display};
 
 const CARGO_EXPAND_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[cfg(not(host_os = "windows"))]
 const PRETTYPLEASE_VERSION: Option<&str> =
     include!(concat!(env!("OUT_DIR"), "/prettyplease.version"));
+
+#[cfg(host_os = "windows")]
+const PRETTYPLEASE_VERSION: Option<&str> =
+    include!(concat!(env!("OUT_DIR"), "\\prettyplease.version"));
 
 pub(crate) struct Version {
     pub verbose: bool,
