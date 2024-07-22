@@ -41,13 +41,16 @@ use std::error::Error as StdError;
 use std::ffi::{OsStr, OsString};
 use std::io::{self, BufRead, IsTerminal, Write};
 use std::iter;
-use std::panic::{self, PanicInfo, UnwindSafe};
+use std::panic::{self, UnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{self, Command, Stdio};
 use std::ptr;
 use std::str;
 use std::thread::Result as ThreadResult;
 use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor};
+
+#[allow(deprecated)] // https://github.com/dtolnay/cargo-expand/issues/229
+use std::panic::PanicInfo;
 
 cargo_subcommand_metadata::description!("Show result of macro expansion");
 
@@ -597,6 +600,7 @@ fn ignore_panic<F, T>(f: F) -> ThreadResult<T>
 where
     F: UnwindSafe + FnOnce() -> T,
 {
+    #[allow(deprecated)] // https://github.com/dtolnay/cargo-expand/issues/229
     type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
 
     let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
