@@ -21,7 +21,7 @@ bat = { version = "0.24", default-features = false, features = ["paging", "regex
 cargo-subcommand-metadata = "0.1"
 clap = { version = "4", features = ["deprecated", "derive"] }
 fs-err = "2"
-prettyplease = { version = "0.2.19", features = ["verbatim"] }
+prettyplease = { version = "0.2.22", features = ["verbatim"] }
 proc-macro2 = "1.0.80"
 quote = { version = "1.0.35", default-features = false }
 serde = { version = "1.0.183", features = ["derive"] }
