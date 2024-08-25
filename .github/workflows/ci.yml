@@ -53,7 +53,7 @@ jobs:
       - run: cargo run -- expand --manifest-path tests/Cargo.toml > expand.rs && diff tests/lib.expand.rs expand.rs
         if: startsWith(matrix.rust, 'nightly')
       - uses: actions/upload-artifact@v4
-        if: matrix.os == 'ubunut' && matrix.rust == 'nightly' && always()
+        if: matrix.os == 'ubuntu' && matrix.rust == 'nightly' && always()
         with:
           name: Cargo.lock
           path: Cargo.lock
