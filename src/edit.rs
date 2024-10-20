@@ -3,9 +3,9 @@ use syn::{
     Attribute, Block, Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
     ExprBreak, ExprCall, ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop,
     ExprGroup, ExprIf, ExprIndex, ExprInfer, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch,
-    ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn,
-    ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe, ExprWhile, ExprYield,
-    File, Item, ItemMod, Stmt,
+    ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprRawAddr, ExprReference, ExprRepeat,
+    ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe, ExprWhile,
+    ExprYield, File, Item, ItemMod, Stmt,
 };
 
 pub fn sanitize(syntax_tree: &mut File) {
@@ -89,6 +89,7 @@ fn attrs_mut(e: &mut Expr) -> Option<&mut Vec<Attribute>> {
         | Expr::Paren(ExprParen { attrs, .. })
         | Expr::Path(ExprPath { attrs, .. })
         | Expr::Range(ExprRange { attrs, .. })
+        | Expr::RawAddr(ExprRawAddr { attrs, .. })
         | Expr::Reference(ExprReference { attrs, .. })
         | Expr::Repeat(ExprRepeat { attrs, .. })
         | Expr::Return(ExprReturn { attrs, .. })
