@@ -15,7 +15,6 @@
     clippy::trivially_copy_pass_by_ref,
     clippy::uninlined_format_args,
 )]
-#![cfg_attr(all(test, exhaustive), feature(non_exhaustive_omitted_patterns_lint))]
 
 mod cmd;
 mod config;
