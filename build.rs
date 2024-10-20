@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rustc-check-cfg=cfg(exhaustive)");
     println!("cargo:rustc-check-cfg=cfg(host_os, values(\"windows\"))");
 
     let prettyplease_version = match env::var("DEP_PRETTYPLEASE02_VERSION") {
