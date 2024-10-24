@@ -16,6 +16,7 @@
     clippy::uninlined_format_args,
 )]
 
+mod assets;
 mod cmd;
 mod config;
 mod edit;
@@ -33,6 +34,7 @@ use crate::opts::{Coloring, Expand, Subcommand};
 use crate::unparse::unparse_maximal;
 use crate::version::Version;
 use bat::assets::HighlightingAssets;
+use bat::assets_metadata::AssetsMetadata;
 use bat::config::VisibleLines;
 use bat::line_range::{HighlightedLineRanges, LineRanges};
 use bat::style::StyleComponents;
@@ -138,9 +140,7 @@ fn do_cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in HighlightingAssets::from_binary().themes() {
-            let _ = writeln!(io::stdout(), "{}", theme);
-        }
+        print_themes()?;
         return Ok(0);
     }
 
@@ -290,6 +290,20 @@ fn do_cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
+        let mut assets = HighlightingAssets::from_binary();
+        if let Some(requested_theme) = &theme {
+            if !assets
+                .themes()
+                .any(|supported_theme| supported_theme == requested_theme)
+            {
+                let cache_dir = assets::cache_dir()?;
+                if let Some(metadata) = AssetsMetadata::load_from_folder(&cache_dir)? {
+                    if metadata.is_compatible_with(assets::BAT_VERSION) {
+                        assets = HighlightingAssets::from_cache(&cache_dir)?;
+                    }
+                }
+            }
+        }
         let config = bat::config::Config {
             language: Some("rust"),
             show_nonprintable: false,
@@ -310,10 +324,8 @@ fn do_cargo_expand() -> Result<i32> {
             pager: None,
             use_italic_text: false,
             highlighted_lines: HighlightedLineRanges(LineRanges::none()),
-            use_custom_assets: false,
             ..Default::default()
         };
-        let assets = HighlightingAssets::from_binary();
         let controller = bat::controller::Controller::new(&config, &assets);
         let inputs = vec![bat::input::Input::from_reader(Box::new(content.as_bytes()))];
         // Ignore any errors.
@@ -656,4 +668,41 @@ fn get_color(args: &Expand, config: &Config) -> Coloring {
     }
 
     Coloring::Auto // default
+}
+
+fn print_themes() -> Result<()> {
+    let mut cache_dir = assets::cache_dir()?;
+    let metadata = AssetsMetadata::load_from_folder(&cache_dir)?;
+    let compatible = metadata
+        .as_ref()
+        .map_or(false, |m| m.is_compatible_with(assets::BAT_VERSION));
+    let assets = if compatible {
+        HighlightingAssets::from_cache(&cache_dir)?
+    } else {
+        HighlightingAssets::from_binary()
+    };
+
+    for theme in assets.themes() {
+        let _ = writeln!(io::stdout(), "{}", theme);
+    }
+
+    if metadata.is_some() && !compatible {
+        if let Some(home_dir) = home::home_dir() {
+            if let Ok(relative) = cache_dir.strip_prefix(home_dir) {
+                cache_dir = Path::new("~").join(relative);
+            }
+        }
+        let bat_version = semver::Version::parse(assets::BAT_VERSION).unwrap();
+        let _ = writeln!(
+            io::stderr(),
+            "\nThere may be other themes in {cache_dir} but they are not \
+             compatible with the version of bat built into cargo-expand. Run \
+             `bat cache --build` with bat v{major}.{minor} to update the cache.",
+            cache_dir = cache_dir.display(),
+            major = bat_version.major,
+            minor = bat_version.minor,
+        );
+    }
+
+    Ok(())
 }
