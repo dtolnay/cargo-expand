@@ -183,6 +183,7 @@ dependencies = [
  "bat",
  "cargo-subcommand-metadata",
  "clap",
+ "console",
  "fs-err",
  "prettyplease",
  "proc-macro2",

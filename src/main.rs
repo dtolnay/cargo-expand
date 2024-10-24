@@ -32,7 +32,11 @@ use crate::error::Result;
 use crate::opts::{Coloring, Expand, Subcommand};
 use crate::unparse::unparse_maximal;
 use crate::version::Version;
-use bat::{PagingMode, PrettyPrinter};
+use bat::assets::HighlightingAssets;
+use bat::config::VisibleLines;
+use bat::line_range::{HighlightedLineRanges, LineRanges};
+use bat::style::StyleComponents;
+use bat::{PagingMode, SyntaxMapping, WrappingMode};
 use clap::{CommandFactory as _, Parser, ValueEnum};
 use quote::quote;
 use std::env;
@@ -134,7 +138,7 @@ fn do_cargo_expand() -> Result<i32> {
     let config = config::deserialize();
 
     if args.themes {
-        for theme in PrettyPrinter::new().themes() {
+        for theme in HighlightingAssets::from_binary().themes() {
             let _ = writeln!(io::stdout(), "{}", theme);
         }
         return Ok(0);
@@ -286,24 +290,34 @@ fn do_cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
-        let mut pretty_printer = PrettyPrinter::new();
-        pretty_printer
-            .input_from_bytes(content.as_bytes())
-            .language("rust")
-            .tab_width(Some(4))
-            .true_color(false)
-            .header(false)
-            .line_numbers(false)
-            .grid(false);
-        if let Some(theme) = theme {
-            pretty_printer.theme(theme);
-        }
-        if config.pager {
-            pretty_printer.paging_mode(PagingMode::QuitIfOneScreen);
-        }
-
+        let config = bat::config::Config {
+            language: Some("rust"),
+            show_nonprintable: false,
+            term_width: console::Term::stdout().size().1 as usize,
+            tab_width: 4,
+            colored_output: true,
+            true_color: false,
+            style_components: StyleComponents::new(&[]),
+            wrapping_mode: WrappingMode::default(),
+            paging_mode: if config.pager {
+                PagingMode::QuitIfOneScreen
+            } else {
+                PagingMode::Never
+            },
+            visible_lines: VisibleLines::Ranges(LineRanges::all()),
+            theme: theme.unwrap_or_else(String::new),
+            syntax_mapping: SyntaxMapping::empty(),
+            pager: None,
+            use_italic_text: false,
+            highlighted_lines: HighlightedLineRanges(LineRanges::none()),
+            use_custom_assets: false,
+            ..Default::default()
+        };
+        let assets = HighlightingAssets::from_binary();
+        let controller = bat::controller::Controller::new(&config, &assets);
+        let inputs = vec![bat::input::Input::from_reader(Box::new(content.as_bytes()))];
         // Ignore any errors.
-        let _ = pretty_printer.print();
+        let _ = controller.run(inputs, None);
     } else {
         let _ = write!(io::stdout(), "{}", content);
     }
