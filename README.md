@@ -117,8 +117,8 @@ Set the default syntax highlighting theme with the `theme` setting:
 theme = "TwoDark"
 ```
 
-Run `cargo expand --themes` to print a list of available themes. Use `theme =
-"none"` to disable coloring.
+Run `cargo expand --themes` or `bat --list-themes` to print a list of available
+themes. Use `theme = "none"` to disable coloring.
 
 Change the default coloring disposition (normally `auto`) with the `color`
 setting:
