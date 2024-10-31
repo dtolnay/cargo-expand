@@ -183,6 +183,7 @@ dependencies = [
  "bat",
  "cargo-subcommand-metadata",
  "clap",
+ "clap-cargo",
  "console",
  "etcetera",
  "fs-err",
@@ -225,6 +226,16 @@ checksum = "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8"
 dependencies = [
  "clap_builder",
  "clap_derive",
+]
+
+[[package]]
+name = "clap-cargo"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b2ea69cefa96b848b73ad516ad1d59a195cdf9263087d977f648a818c8b43e"
+dependencies = [
+ "anstyle",
+ "clap",
 ]
 
 [[package]]
