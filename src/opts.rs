@@ -11,7 +11,13 @@ const COMPILATION_OPTIONS: &str = "Compilation Options";
 const MANIFEST_OPTIONS: &str = "Manifest Options";
 
 #[derive(Parser)]
-#[command(bin_name = "cargo", version, author, disable_help_subcommand = true)]
+#[command(
+    bin_name = "cargo",
+    version,
+    author,
+    disable_help_subcommand = true,
+    styles = clap_cargo::style::CLAP_STYLING,
+)]
 pub enum Subcommand {
     /// Show the result of macro expansion.
     #[command(name = "expand", version, author, disable_version_flag = true)]

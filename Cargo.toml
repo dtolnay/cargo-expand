@@ -20,6 +20,7 @@ prettyplease = []
 bat = { version = "0.24", default-features = false, features = ["paging", "regex-fancy"] }
 cargo-subcommand-metadata = "0.1"
 clap = { version = "4", features = ["deprecated", "derive"] }
+clap-cargo = "0.14"
 console = "0.15"
 etcetera = "0.8"
 fs-err = "3"
