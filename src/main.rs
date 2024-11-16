@@ -675,7 +675,7 @@ fn print_themes() -> Result<()> {
     let metadata = AssetsMetadata::load_from_folder(&cache_dir)?;
     let compatible = metadata
         .as_ref()
-        .map_or(false, |m| m.is_compatible_with(assets::BAT_VERSION));
+        .is_some_and(|m| m.is_compatible_with(assets::BAT_VERSION));
     let assets = if compatible {
         HighlightingAssets::from_cache(&cache_dir)?
     } else {
