@@ -10,7 +10,7 @@ edition = "2021"
 keywords = ["cargo", "subcommand", "macros"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/cargo-expand"
-rust-version = "1.70"
+rust-version = "1.81"
 
 [features]
 default = ["prettyplease"]
