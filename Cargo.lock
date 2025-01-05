@@ -230,14 +230,12 @@ dependencies = [
 
 [[package]]
 name = "clap-cargo"
-version = "0.15.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c2ba3908a873a4f3ae90fc2e59d9d27da06f3dec04614ab657c87580090f55b"
+checksum = "5e3340d63f960ad376843dd750fb2aa4ac1b79e10775a070882bd135edfce303"
 dependencies = [
  "anstyle",
  "clap",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -1140,9 +1138,9 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.6.21"
+version = "0.6.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6f5bb5257f2407a5425c6e749bfd9692192a73e70a6060516ac04f889087d68"
+checksum = "39281189af81c07ec09db316b302a3e67bf9bd7cbf6c820b50e35fee9c2fa980"
 dependencies = [
  "memchr",
 ]
