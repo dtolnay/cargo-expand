@@ -320,7 +320,7 @@ fn do_cargo_expand() -> Result<i32> {
             },
             visible_lines: VisibleLines::Ranges(LineRanges::all()),
             theme: theme.unwrap_or_else(String::new),
-            syntax_mapping: SyntaxMapping::empty(),
+            syntax_mapping: SyntaxMapping::new(),
             pager: None,
             use_italic_text: false,
             highlighted_lines: HighlightedLineRanges(LineRanges::none()),
