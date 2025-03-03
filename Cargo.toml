@@ -22,7 +22,6 @@ cargo-subcommand-metadata = "0.1"
 clap = { version = "4", features = ["deprecated", "derive"] }
 clap-cargo = "0.15"
 console = "0.15"
-etcetera = "0.8"
 fs-err = "3"
 home = "0.5"
 prettyplease = { version = "0.2.29", features = ["verbatim"] }
@@ -37,6 +36,9 @@ tempfile = "3.0"
 termcolor = "1.0"
 toml = "0.8"
 toolchain_find = "0.4"
+
+[target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
