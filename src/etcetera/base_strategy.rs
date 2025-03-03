@@ -1,4 +1,4 @@
-use crate::etcetera::HomeDirError;
+use crate::error::Result;
 use std::path::PathBuf;
 
 pub trait BaseStrategy {
@@ -7,7 +7,7 @@ pub trait BaseStrategy {
 
 macro_rules! create_strategies {
     ($base: ty) => {
-        pub fn choose_base_strategy() -> Result<$base, HomeDirError> {
+        pub fn choose_base_strategy() -> Result<$base> {
             <$base>::new()
         }
     };

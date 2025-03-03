@@ -1,4 +1,3 @@
-use crate::etcetera;
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;
@@ -9,7 +8,7 @@ pub enum Error {
     TomlSer(toml::ser::Error),
     TomlDe(toml::de::Error),
     Quote(shlex::QuoteError),
-    HomeDir(etcetera::HomeDirError),
+    HomeDir,
     Bat(bat::error::Error),
 }
 
@@ -39,12 +38,6 @@ impl From<shlex::QuoteError> for Error {
     }
 }
 
-impl From<etcetera::HomeDirError> for Error {
-    fn from(error: etcetera::HomeDirError) -> Self {
-        Error::HomeDir(error)
-    }
-}
-
 impl From<bat::error::Error> for Error {
     fn from(error: bat::error::Error) -> Self {
         Error::Bat(error)
@@ -58,7 +51,7 @@ impl Display for Error {
             Error::TomlSer(e) => e.fmt(formatter),
             Error::TomlDe(e) => e.fmt(formatter),
             Error::Quote(e) => e.fmt(formatter),
-            Error::HomeDir(e) => e.fmt(formatter),
+            Error::HomeDir => formatter.write_str("could not locate home directory"),
             Error::Bat(e) => e.fmt(formatter),
         }
     }
@@ -71,7 +64,7 @@ impl StdError for Error {
             Error::TomlSer(e) => e.source(),
             Error::TomlDe(e) => e.source(),
             Error::Quote(e) => e.source(),
-            Error::HomeDir(e) => e.source(),
+            Error::HomeDir => None,
             Error::Bat(e) => e.source(),
         }
     }

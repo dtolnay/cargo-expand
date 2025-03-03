@@ -1,13 +1,12 @@
+use crate::error::Result;
 use std::path::PathBuf;
-
-use crate::etcetera::HomeDirError;
 
 pub struct Windows {
     home_dir: PathBuf,
 }
 
 impl Windows {
-    pub fn new() -> Result<Self, HomeDirError> {
+    pub fn new() -> Result<Self> {
         Ok(Self {
             home_dir: crate::etcetera::home_dir()?,
         })
