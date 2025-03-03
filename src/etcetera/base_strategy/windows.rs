@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::HomeDirError;
+use crate::etcetera::HomeDirError;
 
 /// This strategy follows Windows’ conventions. It seems that all Windows GUI apps, and some command-line ones follow this pattern. The specification is available [here](https://docs.microsoft.com/en-us/windows/win32/shell/knownfolderid).
 ///
@@ -112,7 +112,7 @@ impl Windows {
     /// Create a new Windows BaseStrategy
     pub fn new() -> Result<Self, HomeDirError> {
         Ok(Self {
-            home_dir: crate::home_dir()?,
+            home_dir: crate::etcetera::home_dir()?,
         })
     }
 

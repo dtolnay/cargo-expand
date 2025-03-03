@@ -1,6 +1,6 @@
 //! These strategies simply provide the user’s configuration, data, and cache directories, without knowing about the application specifically.
 
-use crate::HomeDirError;
+use crate::etcetera::HomeDirError;
 use std::path::{Path, PathBuf};
 
 /// Provides configuration, data, and cache directories of the current user.

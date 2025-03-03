@@ -4,7 +4,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::HomeDirError;
+use crate::etcetera::HomeDirError;
 
 /// The arguments to the creator method of an [`AppStrategy`](trait.AppStrategy.html).
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]

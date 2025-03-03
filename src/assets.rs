@@ -1,5 +1,5 @@
 use crate::error::Result;
-use etcetera::BaseStrategy as _;
+use crate::etcetera::{self, BaseStrategy as _};
 use std::env;
 use std::path::PathBuf;
 use std::str;

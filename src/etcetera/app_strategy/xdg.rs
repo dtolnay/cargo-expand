@@ -1,5 +1,5 @@
-use crate::base_strategy::BaseStrategy;
-use crate::{base_strategy, HomeDirError};
+use crate::etcetera::base_strategy::BaseStrategy;
+use crate::etcetera::{base_strategy, HomeDirError};
 use std::path::{Path, PathBuf};
 
 /// This strategy implements the [XDG Base Directories Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html). It is the most common on Linux, but is increasingly being adopted elsewhere.

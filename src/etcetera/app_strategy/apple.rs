@@ -1,5 +1,5 @@
-use crate::base_strategy::BaseStrategy;
-use crate::{base_strategy, HomeDirError};
+use crate::etcetera::base_strategy::BaseStrategy;
+use crate::etcetera::{base_strategy, HomeDirError};
 use std::path::{Path, PathBuf};
 
 /// This is the strategy created by Apple for use on macOS and iOS devices. It is always used by GUI apps on macOS, and is sometimes used by command-line applications there too. iOS only has GUIs, so all iOS applications follow this strategy. The specification is available [here](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html#//apple_ref/doc/uid/TP40010672-CH2-SW1).
