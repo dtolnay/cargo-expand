@@ -37,7 +37,7 @@ termcolor = "1.0"
 toml = "0.8"
 toolchain_find = "0.4"
 
-[target.'cfg(windows)'.dependencies]
+[target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell"] }
 
 [package.metadata.docs.rs]
