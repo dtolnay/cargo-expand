@@ -1,115 +1,12 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::etcetera::HomeDirError;
 
-/// This strategy follows Windows’ conventions. It seems that all Windows GUI apps, and some command-line ones follow this pattern. The specification is available [here](https://docs.microsoft.com/en-us/windows/win32/shell/knownfolderid).
-///
-/// This initial example removes all the relevant environment variables to show the strategy’s use of the:
-/// - (on Windows) SHGetKnownFolderPath API.
-/// - (on non-Windows) Windows default directories.
-///
-/// ```
-/// use etcetera::base_strategy::BaseStrategy;
-/// use etcetera::base_strategy::Windows;
-/// use std::path::Path;
-///
-/// // Remove the environment variables that the strategy reads from.
-/// std::env::remove_var("USERPROFILE");
-/// std::env::remove_var("APPDATA");
-/// std::env::remove_var("LOCALAPPDATA");
-///
-/// let base_strategy = Windows::new().unwrap();
-///
-/// let home_dir = etcetera::home_dir().unwrap();
-///
-/// assert_eq!(
-///     base_strategy.home_dir(),
-///     &home_dir
-/// );
-/// assert_eq!(
-///     base_strategy.config_dir().strip_prefix(&home_dir),
-///     Ok(Path::new("AppData/Roaming/"))
-/// );
-/// assert_eq!(
-///     base_strategy.data_dir().strip_prefix(&home_dir),
-///     Ok(Path::new("AppData/Roaming/"))
-/// );
-/// assert_eq!(
-///     base_strategy.cache_dir().strip_prefix(&home_dir),
-///     Ok(Path::new("AppData/Local/"))
-/// );
-/// assert_eq!(
-///     base_strategy.state_dir(),
-///     None
-/// );
-/// assert_eq!(
-///     base_strategy.runtime_dir(),
-///     None
-/// );
-/// ```
-///
-/// This next example gives the environment variables values:
-///
-/// ```
-/// use etcetera::base_strategy::BaseStrategy;
-/// use etcetera::base_strategy::Windows;
-/// use std::path::Path;
-///
-/// let home_path = if cfg!(windows) {
-///     "C:\\foo\\".to_string()
-/// } else {
-///     etcetera::home_dir().unwrap().to_string_lossy().to_string()
-/// };
-/// let data_path = if cfg!(windows) {
-///     "C:\\bar\\"
-/// } else {
-///     "/bar/"
-/// };
-/// let cache_path = if cfg!(windows) {
-///     "C:\\baz\\"
-/// } else {
-///     "/baz/"
-/// };
-///
-/// std::env::set_var("USERPROFILE", &home_path);
-/// std::env::set_var("APPDATA", data_path);
-/// std::env::set_var("LOCALAPPDATA", cache_path);
-///
-/// let base_strategy = Windows::new().unwrap();
-///
-/// assert_eq!(
-///     base_strategy.home_dir(),
-///     Path::new(&home_path)
-/// );
-/// assert_eq!(
-///     base_strategy.config_dir(),
-///     Path::new(data_path)
-/// );
-/// assert_eq!(
-///     base_strategy.data_dir(),
-///     Path::new(data_path)
-/// );
-/// assert_eq!(
-///     base_strategy.cache_dir(),
-///     Path::new(cache_path)
-/// );
-/// assert_eq!(
-///     base_strategy.state_dir(),
-///     None
-/// );
-/// assert_eq!(
-///     base_strategy.runtime_dir(),
-///     None
-/// );
-/// ```
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Windows {
     home_dir: PathBuf,
 }
 
 impl Windows {
-    /// Create a new Windows BaseStrategy
     pub fn new() -> Result<Self, HomeDirError> {
         Ok(Self {
             home_dir: crate::etcetera::home_dir()?,
@@ -179,28 +76,8 @@ impl Windows {
 }
 
 impl super::BaseStrategy for Windows {
-    fn home_dir(&self) -> &Path {
-        &self.home_dir
-    }
-
-    fn config_dir(&self) -> PathBuf {
-        self.data_dir()
-    }
-
-    fn data_dir(&self) -> PathBuf {
-        Self::dir_inner("APPDATA").unwrap_or_else(|| self.home_dir.join("AppData").join("Roaming"))
-    }
-
     fn cache_dir(&self) -> PathBuf {
         Self::dir_inner("LOCALAPPDATA")
             .unwrap_or_else(|| self.home_dir.join("AppData").join("Local"))
-    }
-
-    fn state_dir(&self) -> Option<PathBuf> {
-        None
-    }
-
-    fn runtime_dir(&self) -> Option<PathBuf> {
-        None
     }
 }
