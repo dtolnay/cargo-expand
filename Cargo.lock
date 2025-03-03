@@ -197,7 +197,6 @@ version = "1.0.100"
 dependencies = [
  "bat",
  "cargo-subcommand-metadata",
- "cfg-if",
  "clap",
  "clap-cargo",
  "console",

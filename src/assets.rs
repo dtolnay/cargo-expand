@@ -1,5 +1,5 @@
 use crate::error::Result;
-use crate::etcetera::{self, BaseStrategy as _};
+use crate::etcetera;
 use std::env;
 use std::path::PathBuf;
 use std::str;
@@ -21,6 +21,6 @@ pub fn cache_dir() -> Result<PathBuf> {
         return Ok(PathBuf::from(cache_dir));
     }
 
-    let basedirs = etcetera::choose_base_strategy()?;
-    Ok(basedirs.cache_dir().join("bat"))
+    let cache_dir = etcetera::cache_dir()?;
+    Ok(cache_dir.join("bat"))
 }
