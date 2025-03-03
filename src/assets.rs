@@ -30,6 +30,7 @@ pub fn cache_dir() -> Result<PathBuf> {
     Ok(cache_dir.join("bat"))
 }
 
+// Based on etcetera v0.9.0
 #[cfg(windows)]
 mod windows {
     use std::env;
@@ -87,6 +88,7 @@ mod windows {
     }
 }
 
+// Based on etcetera v0.9.0
 #[cfg(not(windows))]
 mod xdg {
     use std::env;
