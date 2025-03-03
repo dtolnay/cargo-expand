@@ -21,7 +21,6 @@ mod cmd;
 mod config;
 mod edit;
 mod error;
-mod etcetera;
 mod fmt;
 mod manifest;
 mod opts;
