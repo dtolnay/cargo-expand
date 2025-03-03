@@ -22,15 +22,15 @@ pub fn cache_dir() -> Result<PathBuf> {
 
     let home_dir = home::home_dir().ok_or(Error::HomeDir)?;
 
-    let cache_dir = if cfg!(windows) {
-        windows::cache_dir(&home_dir)
-    } else {
-        xdg::cache_dir(&home_dir)
-    };
+    #[cfg(windows)]
+    let cache_dir = windows::cache_dir(&home_dir);
+    #[cfg(not(windows))]
+    let cache_dir = xdg::cache_dir(&home_dir);
 
     Ok(cache_dir.join("bat"))
 }
 
+#[cfg(windows)]
 mod windows {
     use std::path::{Path, PathBuf};
 
@@ -43,7 +43,7 @@ mod windows {
 
     // Ref: https://github.com/rust-lang/cargo/blob/home-0.5.11/crates/home/src/windows.rs
     // We should keep this code in sync with the above.
-    #[cfg(all(windows, not(target_vendor = "uwp")))]
+    #[cfg(not(target_vendor = "uwp"))]
     fn dir_crt(env: &'static str) -> Option<PathBuf> {
         use std::ffi::OsString;
         use std::os::windows::ffi::OsStringExt;
@@ -90,7 +90,7 @@ mod windows {
         }
     }
 
-    #[cfg(not(all(windows, not(target_vendor = "uwp"))))]
+    #[cfg(target_vendor = "uwp")]
     fn dir_crt(_env: &'static str) -> Option<PathBuf> {
         None
     }
@@ -100,6 +100,7 @@ mod windows {
     }
 }
 
+#[cfg(not(windows))]
 mod xdg {
     use std::path::{Path, PathBuf};
 
