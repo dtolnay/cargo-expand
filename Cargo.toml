@@ -40,6 +40,9 @@ toolchain_find = "0.4"
 [target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell"] }
 
+[target.'cfg(target_os = "macos")'.dependencies]
+deranged = "=0.4.0" # https://github.com/jhpratt/deranged/issues/18
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
