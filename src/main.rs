@@ -334,7 +334,7 @@ fn do_cargo_expand() -> Result<i32> {
         let _ = write!(io::stdout(), "{}", content);
     }
 
-    Ok(0)
+    Ok(code)
 }
 
 fn which_rustfmt() -> Option<PathBuf> {
