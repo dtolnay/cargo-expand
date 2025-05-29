@@ -293,10 +293,15 @@ fn do_cargo_expand() -> Result<i32> {
     if do_color {
         let theme_result = bat::theme::theme(ThemeOptions {
             theme: theme
-                .as_ref()
+                .clone()
+                .or_else(|| env::var(bat::theme::env::BAT_THEME).ok())
                 .map_or_else(ThemePreference::default, ThemePreference::new),
-            theme_dark: None,
-            theme_light: None,
+            theme_dark: env::var(bat::theme::env::BAT_THEME_DARK)
+                .ok()
+                .map(ThemeName::new),
+            theme_light: env::var(bat::theme::env::BAT_THEME_LIGHT)
+                .ok()
+                .map(ThemeName::new),
         });
         match theme_result.theme {
             ThemeName::Named(named) => theme = Some(named),
