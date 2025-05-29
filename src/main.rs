@@ -38,6 +38,7 @@ use bat::assets_metadata::AssetsMetadata;
 use bat::config::VisibleLines;
 use bat::line_range::{HighlightedLineRanges, LineRanges};
 use bat::style::StyleComponents;
+use bat::theme::DetectColorScheme;
 use bat::{PagingMode, SyntaxMapping, WrappingMode};
 use clap::{CommandFactory as _, Parser, ValueEnum};
 use quote::quote;
@@ -281,7 +282,7 @@ fn do_cargo_expand() -> Result<i32> {
     }
 
     // Run pretty printer
-    let theme = args.theme.or(config.theme);
+    let mut theme = args.theme.or(config.theme);
     let none_theme = theme.as_deref() == Some("none");
     let do_color = match color {
         Coloring::Always => true,
@@ -290,6 +291,12 @@ fn do_cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
+        if theme.is_none() {
+            if let Some(color_scheme) = bat::theme::color_scheme(DetectColorScheme::Auto) {
+                let default_theme = bat::theme::default_theme(color_scheme);
+                theme = Some(default_theme.to_owned());
+            }
+        }
         let mut assets = HighlightingAssets::from_binary();
         if let Some(requested_theme) = &theme {
             if !assets
