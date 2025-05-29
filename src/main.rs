@@ -38,7 +38,7 @@ use bat::assets_metadata::AssetsMetadata;
 use bat::config::VisibleLines;
 use bat::line_range::{HighlightedLineRanges, LineRanges};
 use bat::style::StyleComponents;
-use bat::theme::DetectColorScheme;
+use bat::theme::{ThemeName, ThemeOptions, ThemePreference};
 use bat::{PagingMode, SyntaxMapping, WrappingMode};
 use clap::{CommandFactory as _, Parser, ValueEnum};
 use quote::quote;
@@ -291,10 +291,20 @@ fn do_cargo_expand() -> Result<i32> {
     };
     let _ = writeln!(io::stderr());
     if do_color {
-        if theme.is_none() {
-            if let Some(color_scheme) = bat::theme::color_scheme(DetectColorScheme::Auto) {
-                let default_theme = bat::theme::default_theme(color_scheme);
-                theme = Some(default_theme.to_owned());
+        let theme_result = bat::theme::theme(ThemeOptions {
+            theme: theme
+                .as_ref()
+                .map_or_else(ThemePreference::default, ThemePreference::new),
+            theme_dark: None,
+            theme_light: None,
+        });
+        match theme_result.theme {
+            ThemeName::Named(named) => theme = Some(named),
+            ThemeName::Default => {
+                if let Some(color_scheme) = theme_result.color_scheme {
+                    let default_theme = bat::theme::default_theme(color_scheme);
+                    theme = Some(default_theme.to_owned());
+                }
             }
         }
         let mut assets = HighlightingAssets::from_binary();
