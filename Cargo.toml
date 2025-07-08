@@ -34,7 +34,7 @@ syn = { version = "2.0.104", default-features = false, features = ["clone-impls"
 syn-select = "0.3"
 tempfile = "3.0"
 termcolor = "1.0"
-toml = "0.8"
+toml = "0.9"
 toolchain_find = "0.4"
 
 [target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
