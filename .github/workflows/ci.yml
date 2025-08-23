@@ -38,7 +38,7 @@ jobs:
             rust: nightly-x86_64-pc-windows-msvc
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
@@ -70,7 +70,7 @@ jobs:
     if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@clippy
       - run: cargo clippy --tests -- -Dclippy::all -Dclippy::pedantic
 
@@ -80,7 +80,7 @@ jobs:
     if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: dtolnay/install@cargo-outdated
       - run: cargo tree --package bat --depth 0 | grep "^bat v$(cat src/bat.version)$"
