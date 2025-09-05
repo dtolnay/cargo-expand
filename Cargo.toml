@@ -38,7 +38,7 @@ toml = "0.9"
 toolchain_find = "0.4"
 
 [target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
-windows-sys = { version = "0.60", features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
