@@ -194,7 +194,7 @@ checksum = "2e93abca9e28e0a1b9877922aacb20576e05d4679ffa78c3d6dc22a26a216659"
 
 [[package]]
 name = "cargo-expand"
-version = "1.0.115"
+version = "1.0.116"
 dependencies = [
  "bat",
  "cargo-subcommand-metadata",
