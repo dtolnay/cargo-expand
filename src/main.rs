@@ -206,6 +206,14 @@ fn do_cargo_expand() -> Result<i32> {
         return Ok(if code == 0 { 1 } else { code });
     }
 
+    // Remove automatically derived impls from the source, if the user requests it.
+    if args.skip_auto_derived {
+        if let Ok(mut syntax_tree) = syn::parse_file(&content) {
+            edit::skip_auto_derived(&mut syntax_tree);
+            content = quote!(#syntax_tree).to_string();
+        }
+    }
+
     // Format the expanded code
     if !args.ugly {
         let questionably_formatted = content;

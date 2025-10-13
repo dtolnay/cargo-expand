@@ -33,3 +33,45 @@ fn remove_macro_rules_from_vec_item(items: &mut Vec<Item>) {
         _ => true,
     });
 }
+
+// - Remove all impl items with an #[automatically_derived] attribute
+pub fn skip_auto_derived(syntax_tree: &mut File) {
+    skip_auto_derived_from_vec_item(&mut syntax_tree.items);
+    SkipAutoDerived.visit_file_mut(syntax_tree);
+}
+
+struct SkipAutoDerived;
+
+impl VisitMut for SkipAutoDerived {
+    fn visit_item_mod_mut(&mut self, i: &mut syn::ItemMod) {
+        if let Some((_, items)) = &mut i.content {
+            skip_auto_derived_from_vec_item(items);
+        }
+        visit_mut::visit_item_mod_mut(self, i);
+    }
+}
+
+fn skip_auto_derived_from_vec_item(items: &mut Vec<Item>) {
+    items.retain(|item| {
+        if let Item::Impl(item_impl) = item {
+            for attr in &item_impl.attrs {
+                if is_automatically_derived_attr(attr) {
+                    return false;
+                }
+            }
+        }
+        true
+    });
+}
+
+fn is_automatically_derived_attr(attr: &syn::Attribute) -> bool {
+    if let syn::Meta::Path(syn::Path {
+            leading_colon: None,
+            ref segments,
+        }) = attr.meta {
+        if let Some(seg) = segments.first() {
+            return seg.arguments.is_empty() && seg.ident == "automatically_derived";
+        }
+    }
+    false
+}

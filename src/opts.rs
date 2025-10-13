@@ -46,6 +46,10 @@ pub struct Expand {
     #[arg(long, value_name = "WHEN", hide_possible_values = true)]
     pub color: Option<Coloring>,
 
+    /// Skip automatically derived implementations
+    #[arg(long)]
+    pub skip_auto_derived: bool,
+
     /// Override a configuration value
     #[arg(long, value_name = "KEY=VALUE")]
     pub config: Vec<String>,
