@@ -130,7 +130,7 @@ impl Fold for UnparseMaximal {
             return expr;
         }
 
-        item_const.expr = Box::new(fold::fold_expr(self, expr));
+        *item_const.expr = fold::fold_expr(self, expr);
         file.items.push(Item::Const(item_const));
         let ok = panic::catch_unwind(|| prettyplease::unparse(&file)).is_ok();
         if ok {
