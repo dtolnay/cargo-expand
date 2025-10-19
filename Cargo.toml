@@ -17,7 +17,7 @@ default = ["prettyplease"]
 prettyplease = []
 
 [dependencies]
-bat = { version = "0.25", default-features = false, features = ["paging", "regex-fancy"] }
+bat = { version = "0.26", default-features = false, features = ["paging", "regex-fancy"] }
 cargo-subcommand-metadata = "0.1"
 clap = { version = "4", features = ["deprecated", "derive"] }
 clap-cargo = "0.18"
