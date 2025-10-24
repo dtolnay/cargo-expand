@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.86.0]
+        rust: [nightly, beta, stable, 1.88.0]
         os: [ubuntu]
         include:
           - name: macOS
