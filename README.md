@@ -26,12 +26,6 @@ resulting code is typically much more readable than what you get from the
 compiler. If rustfmt is not available, the expanded code is not formatted.
 Install rustfmt with **`rustup component add rustfmt`**.
 
-Cargo expand relies on unstable compiler flags so it requires a nightly
-toolchain to be installed, though does not require nightly to be the default
-toolchain or the one with which cargo expand itself is executed. If the default
-toolchain is one other than nightly, running `cargo expand` will find and use
-nightly anyway.
-
 [rustfmt]: https://github.com/rust-lang/rustfmt
 
 ## Example
