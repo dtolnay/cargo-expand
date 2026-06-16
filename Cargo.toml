@@ -35,7 +35,7 @@ syn-select = "0.3"
 tempfile = "3.0"
 termcolor = "1.0"
 toml = "1"
-toolchain_find = "0.4"
+toolchain_find = "0.5"
 
 [target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell"] }

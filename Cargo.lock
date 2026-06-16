@@ -1317,12 +1317,11 @@ checksum = "756daf9b1013ebe47a8776667b466417e2d4c5679d441c26230efd9ef78692db"
 
 [[package]]
 name = "toolchain_find"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebc8c9a7f0a2966e1acdaf0461023d0b01471eeead645370cf4c3f5cff153f2a"
+checksum = "3478a0b78c9a800492293b077aac4a1d6164b393d92759ab0a1efb3104a1ea0a"
 dependencies = [
  "home",
- "once_cell",
  "regex",
  "semver",
  "walkdir",
