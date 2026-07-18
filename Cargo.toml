@@ -24,14 +24,14 @@ clap-cargo = "0.18"
 console = "0.16"
 fs-err = "3"
 home = "0.5"
-prettyplease = { version = "0.2.36", features = ["verbatim"] }
+prettyplease = { version = "0.3", features = ["verbatim"] }
 proc-macro2 = "1.0.80"
 quote = { version = "1.0.35", default-features = false }
 semver = "1"
 serde = { version = "1.0.183", features = ["derive"] }
 shlex = "2"
-syn = { version = "2.0.104", default-features = false, features = ["clone-impls", "fold", "full", "parsing", "printing", "visit-mut"] }
-syn-select = "0.3"
+syn = { version = "3", default-features = false, features = ["clone-impls", "fold", "full", "parsing", "printing", "visit-mut"] }
+syn-select-next = "=0.4.0-alpha.1"
 tempfile = "3.0"
 termcolor = "1.0"
 toml = "1"
