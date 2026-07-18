@@ -4,9 +4,9 @@ use std::panic;
 use syn::fold::{self, Fold};
 use syn::punctuated::Punctuated;
 use syn::{
-    token, Abi, Block, Expr, File, ForeignItem, Generics, ImplItem, Item, ItemConst, ItemFn,
-    ItemForeignMod, ItemImpl, ItemTrait, ReturnType, Signature, Stmt, Token, TraitItem, Type,
-    TypeInfer, Visibility,
+    token, Abi, Block, ConstModifiers, Expr, File, FnModifiers, ForeignItem, Generics, ImplItem,
+    ImplModifiers, Item, ItemConst, ItemFn, ItemForeignMod, ItemImpl, ItemTrait, ReturnType,
+    Safety, Signature, Stmt, Token, TraitItem, TraitModifiers, Type, TypeInfer, Visibility,
 };
 
 pub(crate) fn unparse_maximal(syntax_tree: &File) -> String {
@@ -24,6 +24,7 @@ impl Fold for UnparseMaximal {
     fn fold_item(&mut self, item: Item) -> Item {
         let mut file = File {
             shebang: None,
+            frontmatter: None,
             attrs: Vec::new(),
             items: vec![item],
         };
@@ -47,14 +48,16 @@ impl Fold for UnparseMaximal {
         // `fn main() { $stmt }`
         let mut file = File {
             shebang: None,
+            frontmatter: None,
             attrs: Vec::new(),
             items: vec![Item::Fn(ItemFn {
                 attrs: Vec::new(),
                 vis: Visibility::Inherited,
+                modifiers: FnModifiers::default(),
                 sig: Signature {
                     constness: None,
                     asyncness: None,
-                    unsafety: None,
+                    safety: Safety::Default,
                     abi: None,
                     fn_token: token::Fn(Span::call_site()),
                     ident: Ident::new("main", Span::call_site()),
@@ -99,15 +102,18 @@ impl Fold for UnparseMaximal {
         // `const _: _ = $expr;`
         let mut file = File {
             shebang: None,
+            frontmatter: None,
             attrs: Vec::new(),
             items: vec![Item::Const(ItemConst {
                 attrs: Vec::new(),
                 vis: Visibility::Inherited,
+                modifiers: ConstModifiers::default(),
                 const_token: Token![const](Span::call_site()),
                 ident: Ident::from(Token![_](Span::call_site())),
                 generics: Generics::default(),
                 colon_token: Token![:](Span::call_site()),
                 ty: Box::new(Type::Infer(TypeInfer {
+                    attrs: Vec::new(),
                     underscore_token: Token![_](Span::call_site()),
                 })),
                 eq_token: Token![=](Span::call_site()),
@@ -145,6 +151,7 @@ impl Fold for UnparseMaximal {
         // `extern { $foreign_item }`
         let mut file = File {
             shebang: None,
+            frontmatter: None,
             attrs: Vec::new(),
             items: vec![Item::ForeignMod(ItemForeignMod {
                 attrs: Vec::new(),
@@ -188,13 +195,13 @@ impl Fold for UnparseMaximal {
         // `trait Trait { $trait_item }`
         let mut file = File {
             shebang: None,
+            frontmatter: None,
             attrs: Vec::new(),
             items: vec![Item::Trait(ItemTrait {
                 attrs: Vec::new(),
                 vis: Visibility::Inherited,
+                modifiers: TraitModifiers::default(),
                 unsafety: None,
-                auto_token: None,
-                restriction: None,
                 trait_token: Token![trait](Span::call_site()),
                 ident: Ident::new("Trait", Span::call_site()),
                 generics: Generics::default(),
@@ -235,15 +242,17 @@ impl Fold for UnparseMaximal {
         // `impl _ { $impl_item }`
         let mut file = File {
             shebang: None,
+            frontmatter: None,
             attrs: Vec::new(),
             items: vec![Item::Impl(ItemImpl {
                 attrs: Vec::new(),
-                defaultness: None,
+                modifiers: ImplModifiers::default(),
                 unsafety: None,
                 impl_token: Token![impl](Span::call_site()),
                 generics: Generics::default(),
                 trait_: None,
                 self_ty: Box::new(Type::Infer(TypeInfer {
+                    attrs: Vec::new(),
                     underscore_token: Token![_](Span::call_site()),
                 })),
                 brace_token: token::Brace(Span::call_site()),

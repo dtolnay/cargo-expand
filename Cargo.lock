@@ -118,7 +118,7 @@ dependencies = [
  "once_cell",
  "path_abs",
  "plist",
- "prettyplease",
+ "prettyplease 0.2.37",
  "proc-macro2",
  "quote",
  "regex",
@@ -202,14 +202,14 @@ dependencies = [
  "console",
  "fs-err",
  "home",
- "prettyplease",
+ "prettyplease 0.3.0",
  "proc-macro2",
  "quote",
  "semver",
  "serde",
  "shlex",
- "syn 2.0.119",
- "syn-select",
+ "syn 3.0.0",
+ "syn-select-next",
  "tempfile",
  "termcolor",
  "toml 1.1.3+spec-1.1.0",
@@ -792,6 +792,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prettyplease"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bfe0f4c752e450fc2faf62654f1c134747922825d5b04ca717b8874f41a40c0"
+dependencies = [
+ "proc-macro2",
+ "syn 3.0.0",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1084,12 +1094,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "syn-select"
-version = "0.3.0"
+name = "syn-select-next"
+version = "0.4.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea24402791e2625a28bcaf662046e09a48a7610f806688cf35901d78ba938bb4"
+checksum = "41193b08a6300da6dce9f1c9b3bf128dbac0a47c2e0fb98d4a3c3296b08c3b5b"
 dependencies = [
- "syn 2.0.119",
+ "syn 3.0.0",
 ]
 
 [[package]]
