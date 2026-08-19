@@ -377,6 +377,10 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
         cmd.arg("--verbose");
     }
 
+    if args.quiet {
+        cmd.arg("--quiet");
+    }
+
     match color {
         Coloring::Auto => {
             if cfg!(not(windows)) && io::stderr().is_terminal() {
@@ -458,7 +462,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
         }
     }
 
-    if let Some(features) = &args.features {
+    for features in &args.features {
         cmd.flag_value("--features", features);
     }
 
@@ -472,6 +476,10 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
 
     if let Some(jobs) = args.jobs {
         cmd.flag_value("--jobs", jobs.to_string());
+    }
+
+    if args.keep_going {
+        cmd.arg("--keep-going");
     }
 
     if let Some(profile) = &args.profile {
@@ -500,16 +508,16 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
         cmd.flag_value("--manifest-path", manifest_path);
     }
 
-    if args.frozen {
-        cmd.arg("--frozen");
-    }
-
     if args.locked {
         cmd.arg("--locked");
     }
 
     if args.offline {
         cmd.arg("--offline");
+    }
+
+    if args.frozen {
+        cmd.arg("--frozen");
     }
 
     cmd.arg("--");

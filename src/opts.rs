@@ -42,6 +42,10 @@ pub struct Expand {
     #[arg(long)]
     pub verbose: bool,
 
+    /// Do not print cargo log messages
+    #[arg(short, long)]
+    pub quiet: bool,
+
     /// Syntax highlighting and colored Cargo output (auto, always, never)
     #[arg(long, value_name = "WHEN", hide_possible_values = true)]
     pub color: Option<Coloring>,
@@ -88,7 +92,7 @@ pub struct Expand {
 
     /// Space or comma separated list of features to activate
     #[arg(short = 'F', long, value_name = "FEATURES", help_heading = FEATURE_SELECTION)]
-    pub features: Option<String>,
+    pub features: Vec<String>,
 
     /// Activate all available features
     #[arg(long, help_heading = FEATURE_SELECTION)]
@@ -101,6 +105,10 @@ pub struct Expand {
     /// Number of parallel jobs, defaults to # of CPUs
     #[arg(short, long, value_name = "N", help_heading = COMPILATION_OPTIONS)]
     pub jobs: Option<u64>,
+
+    /// Do not abort the build as soon as there is an error
+    #[arg(long, help_heading = COMPILATION_OPTIONS)]
+    pub keep_going: bool,
 
     /// Build artifacts in release mode, with optimizations
     #[arg(long, help_heading = COMPILATION_OPTIONS)]
@@ -122,17 +130,17 @@ pub struct Expand {
     #[arg(short, long, value_name = "PATH", help_heading = MANIFEST_OPTIONS)]
     pub manifest_path: Option<PathBuf>,
 
-    /// Require Cargo.lock and cache are up to date
-    #[arg(long, help_heading = MANIFEST_OPTIONS)]
-    pub frozen: bool,
-
-    /// Require Cargo.lock is up to date
+    /// Assert that `Cargo.lock` will remain unchanged
     #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub locked: bool,
 
     /// Run without accessing the network
     #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub offline: bool,
+
+    /// Equivalent to specifying both --locked and --offline
+    #[arg(long, help_heading = MANIFEST_OPTIONS)]
+    pub frozen: bool,
 
     /// Local path to module or other named item to expand, e.g. os::unix::ffi
     #[arg(value_name = "ITEM", value_parser = parse_selector)]
