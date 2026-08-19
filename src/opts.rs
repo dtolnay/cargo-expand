@@ -119,7 +119,7 @@ pub struct Expand {
     pub target_dir: Option<PathBuf>,
 
     /// Path to Cargo.toml
-    #[arg(long, value_name = "PATH", help_heading = MANIFEST_OPTIONS)]
+    #[arg(short, long, value_name = "PATH", help_heading = MANIFEST_OPTIONS)]
     pub manifest_path: Option<PathBuf>,
 
     /// Require Cargo.lock and cache are up to date
