@@ -508,6 +508,10 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
         cmd.flag_value("--manifest-path", manifest_path);
     }
 
+    if args.ignore_rust_version {
+        cmd.arg("--ignore-rust-version");
+    }
+
     if args.locked {
         cmd.arg("--locked");
     }

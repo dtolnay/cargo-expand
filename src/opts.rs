@@ -130,6 +130,10 @@ pub struct Expand {
     #[arg(short, long, value_name = "PATH", help_heading = MANIFEST_OPTIONS)]
     pub manifest_path: Option<PathBuf>,
 
+    /// Ignore `rust-version` specification in packages
+    #[arg(long, help_heading = MANIFEST_OPTIONS)]
+    pub ignore_rust_version: bool,
+
     /// Assert that `Cargo.lock` will remain unchanged
     #[arg(long, help_heading = MANIFEST_OPTIONS)]
     pub locked: bool,
