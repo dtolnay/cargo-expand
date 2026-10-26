@@ -17,6 +17,7 @@
 )]
 
 mod assets;
+mod build_script;
 mod cmd;
 mod config;
 mod edit;
@@ -59,7 +60,11 @@ use termcolor::{Color::Green, ColorChoice, ColorSpec, StandardStream, WriteColor
 cargo_subcommand_metadata::description!("Show result of macro expansion");
 
 fn main() {
-    let result = if let Some(wrapper) = env::var_os(CARGO_EXPAND_RUSTC_WRAPPER) {
+    let result = if let Some(path) = env::var_os(build_script::DISCOVER) {
+        build_script::discover_wrapper(Path::new(&path))
+    } else if env::var_os(build_script::SCRIPT).is_some() {
+        build_script::rustc_wrapper()
+    } else if let Some(wrapper) = env::var_os(CARGO_EXPAND_RUSTC_WRAPPER) {
         do_rustc_wrapper(&wrapper)
     } else {
         do_cargo_expand()
@@ -180,7 +185,10 @@ fn do_cargo_expand() -> Result<i32> {
         print_command(&cmd, color)?;
     }
 
-    if needs_rustc_bootstrap() {
+    let build_status = outdir.path().join("build-status");
+    if args.build {
+        build_script::configure(&mut cmd, &args, &outfile_path, &build_status)?;
+    } else if needs_rustc_bootstrap() {
         if let Ok(current_exe) = env::current_exe() {
             let original_wrapper =
                 env::var_os("RUSTC_WRAPPER").filter(|wrapper| !wrapper.is_empty());
@@ -192,7 +200,7 @@ fn do_cargo_expand() -> Result<i32> {
         }
     }
 
-    let code = filter_err(&mut cmd)?;
+    let code = filter_err(&mut cmd, args.build.then_some(build_status.as_path()))?;
 
     if !outfile_path.exists() {
         return Ok(1);
@@ -371,7 +379,7 @@ fn which_rustfmt() -> Option<PathBuf> {
 }
 
 fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path) {
-    cmd.arg("rustc");
+    cmd.arg(if args.build { "check" } else { "rustc" });
 
     if args.verbose {
         cmd.arg("--verbose");
@@ -452,7 +460,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
         has_explicit_build_target = true;
     }
 
-    if !has_explicit_build_target {
+    if !has_explicit_build_target && !args.build {
         if let Ok(cargo_manifest) = manifest::parse(args.manifest_path.as_deref()) {
             if let Some(root_package) = cargo_manifest.package {
                 if let Some(default_run) = &root_package.default_run {
@@ -483,7 +491,14 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
     }
 
     if let Some(profile) = &args.profile {
-        cmd.flag_value("--profile", profile);
+        cmd.flag_value(
+            "--profile",
+            if args.build && profile == "check" {
+                "dev"
+            } else {
+                profile
+            },
+        );
     } else if args.tests && args.test.is_none() {
         if args.release {
             cmd.flag_value("--profile", "bench");
@@ -492,7 +507,7 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
         }
     } else if args.release {
         cmd.flag_value("--profile", "release");
-    } else {
+    } else if !args.build {
         cmd.flag_value("--profile", "check");
     }
 
@@ -522,6 +537,10 @@ fn apply_args(cmd: &mut Command, args: &Expand, color: Coloring, outfile: &Path)
 
     if args.frozen {
         cmd.arg("--frozen");
+    }
+
+    if args.build {
+        return;
     }
 
     cmd.arg("--");
@@ -609,21 +628,37 @@ fn print_command(cmd: &Command, color: Coloring) -> Result<()> {
     Ok(())
 }
 
-fn filter_err(cmd: &mut Command) -> io::Result<i32> {
+fn filter_err(cmd: &mut Command, build_status: Option<&Path>) -> io::Result<i32> {
     let mut child = cmd.stderr(Stdio::piped()).spawn()?;
     let mut stderr = io::BufReader::new(child.stderr.take().unwrap());
     let mut line = String::new();
+    let mut build_summary = false;
     while let Ok(n) = stderr.read_line(&mut line) {
         if n == 0 {
             break;
         }
-        if !ignore_cargo_err(&line) {
+        // The build-script wrapper stops Cargo after expansion. Suppress Cargo's
+        // failure summary once the wrapper has recorded the compiler's result.
+        if build_status.is_some_and(Path::exists) && is_build_failure_summary(&line) {
+            build_summary = true;
+        }
+        if !build_summary && !ignore_cargo_err(&line) {
             let _ = write!(io::stderr(), "{}", line);
         }
         line.clear();
     }
     let code = child.wait()?.code().unwrap_or(1);
+    if let Some(path) = build_status.filter(|path| path.exists()) {
+        let status = fs_err::read_to_string(path)?;
+        return status
+            .parse()
+            .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err));
+    }
     Ok(code)
+}
+
+fn is_build_failure_summary(line: &str) -> bool {
+    console::strip_ansi_codes(line).starts_with("error: could not compile `")
 }
 
 fn ignore_cargo_err(line: &str) -> bool {

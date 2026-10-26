@@ -80,6 +80,18 @@ fn main() {
 consistent with other Cargo subcommands. Here are a few that are common in the
 context of cargo expand.*
 
+To expand the current package's build script:
+
+`$ cargo expand --build`
+
+To select a workspace package's build script:
+
+`$ cargo expand --build --package my-package`
+
+Cargo builds the script's dependencies. Cargo expand prints the expanded script
+without executing it. This supports custom build-script paths from `package.build`.
+The `--build` option conflicts with other target selectors.
+
 To expand a particular test target:
 
 `$ cargo expand --test test_something`

@@ -66,6 +66,10 @@ pub struct Expand {
     #[arg(short, long, value_name = "SPEC", num_args = 0..=1, help_heading = PACKAGE_SELECTION)]
     pub package: Option<Option<String>>,
 
+    /// Expand only this package's build script
+    #[arg(long, conflicts_with_all = ["lib", "bin", "example", "test", "tests", "bench"], help_heading = TARGET_SELECTION)]
+    pub build: bool,
+
     /// Expand only this package's library
     #[arg(long, help_heading = TARGET_SELECTION)]
     pub lib: bool,
