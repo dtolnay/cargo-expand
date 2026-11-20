@@ -100,7 +100,7 @@ fn do_rustc_wrapper(wrapper: &OsStr) -> Result<i32> {
 
     let mut is_unpretty_expanded = false;
     for arg in rustc_command {
-        is_unpretty_expanded |= arg == ARG_Z_UNPRETTY_EXPANDED;
+        is_unpretty_expanded |= is_unpretty_expanded_arg(&arg);
         cmd.arg(arg);
     }
 
@@ -123,6 +123,24 @@ fn do_rustc_wrapper(wrapper: &OsStr) -> Result<i32> {
         let code = exit_status.code().unwrap_or(1);
         return Ok(code);
     }
+}
+
+fn is_unpretty_expanded_arg(arg: &OsStr) -> bool {
+    if arg == ARG_Z_UNPRETTY_EXPANDED {
+        return true;
+    }
+
+    // Once the rustc command line exceeds the platform limit (in practice on
+    // Windows), cargo retries the invocation with all arguments in a response
+    // file, so `-Zunpretty=expanded` is only visible inside that file.
+    let Some(path) = arg.to_str().and_then(|arg| arg.strip_prefix('@')) else {
+        return false;
+    };
+    fs_err::read(path).is_ok_and(|argfile| {
+        argfile
+            .split(|&byte| byte == b'\n')
+            .any(|line| line.trim_ascii() == ARG_Z_UNPRETTY_EXPANDED.as_bytes())
+    })
 }
 
 fn do_cargo_expand() -> Result<i32> {
